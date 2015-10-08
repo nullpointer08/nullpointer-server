@@ -1,0 +1,15 @@
+apt-get install:
+git
+pgadmin3
+postgresql
+postgresql-client-9.4
+postgresql-contrib-9.4
+postgresql-server-dev-9.4
+python-dev
+python-django
+python-pip
+python-psycopg2
+
+recommended:
+pip install virtualenv 
+check virtualenv site for details on usage before installing other pip packages.
