@@ -1,0 +1,58 @@
+A prototype of the HISRA web api.
+First see the HISRA data model UML
+
+Media:
+---------------------------
+GET /api/user/:userid/media
+Returns all media belonging to the user
+
+GET /api/user/:userid/media/:id
+Returns the media with the given id
+
+POST /api/user/:userid/media
+Creates a new media for the user
+
+DELETE /api/user/:userid/media/:id
+Deletes an existing media
+
+User playlists:
+------------------------------
+GET /api/user/:userid/playlist
+Returns all the playlists of the user
+
+GET /api/user/:userid/playlist/:id
+Returns the playlist with the given id
+
+POST /api/user/:userid/playlist
+Creates a new playlist for the user
+
+PUT /api/user/:userid/playlist/:id
+Updates an existing playlist for the user
+
+Device playlists:
+---------------------------------
+GET /api/device/:deviceid/playlist
+Returns the playlist used by the given device
+
+PUT /api/device/:deviceid/playlist
+Updates or creates a playlist for the device
+
+Devices:
+---------------------------------
+GET /api/user/:userid/device
+Returns all devices owned by the user
+
+POST /api/user/:userid/device/:id
+Adds a device for the user
+
+Users:
+---------------------
+GET /api/user/:userid
+Returns some details for the user
+
+POST /api/user
+Creates an new user
+
+Optional (nice to have, not a requirement):
+------------------------------------
+GET /api/device/:deviceid/statistics

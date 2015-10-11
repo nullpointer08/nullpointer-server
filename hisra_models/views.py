@@ -43,7 +43,7 @@ def media_detail(request, pk):
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = MediaSerializer(Media)
+        serializer = MediaSerializer(media)
         return JSONResponse(serializer.data)
 
     elif request.method == 'PUT':
