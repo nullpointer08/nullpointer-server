@@ -35,7 +35,7 @@ GET /api/device/:deviceid/playlist
 Returns the playlist used by the given device
 
 PUT /api/device/:deviceid/playlist
-Updates or creates a playlist for the device
+Updates a playlist for the device
 
 Devices:
 ---------------------------------

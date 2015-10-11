@@ -19,6 +19,37 @@ from hisra_models import views
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^hisra_models/$', views.media_list),
-    url(r'^hisra_models/(?P<pk>[0-9]+)/$', views.media_detail),
+
+    # GET /api/user/:username/media
+    # POST /api/user/:username/media
+    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/media$',
+        views.MediaList.as_view()),
+
+    # GET /api/user/:username/media/:id
+    # DELETE /api/user/:username/media/:id
+    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/media/(?P<id>[0-9]*)$',
+        views.MediaDetail.as_view()),
+
+    # GET /api/user/:username/playlist
+    # POST /api/user/:username/playlist
+    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/playlist$',
+        views.UserPlaylistList.as_view()),
+
+    # GET /api/user/:username/playlist/:id
+    # PUT /api/user/:username/playlist/:id
+    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/playlist/(?P<id>[0-9]*)$',
+        views.UserPlaylistDetail.as_view()),
+
+    # GET /api/device/:deviceid/playlist
+    # PUT /api/device/:deviceid/playlist
+    url(r'^api/device/(?P<deviceid>[a-zA-Z0-9]*)/playlist$',
+        views.DevicePlaylistDetail.as_view()),
+
+    # GET /api/user/:username/device
+    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/device$',
+        views.DeviceList.as_view()),
+
+    # POST /api/user/:username/device/:id
+    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/device/(?P<id>[a-zA-Z0-9]*)$',
+        views.DeviceDetail.as_view()),
 ]

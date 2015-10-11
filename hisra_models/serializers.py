@@ -1,23 +1,27 @@
 from rest_framework import serializers
-from hisra_models.models import Media,Playlist,RotationPair,Device
+from hisra_models.models import User, Media, Playlist, Device
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username')
+
 
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
-        fields = ('id', 'uri', 'mediatype')
+        fields = ('id', 'owner', 'url', 'mediatype', 'name', 'description',
+                  'md5_checksum')
+
 
 class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
-        fields = ('id', 'name', 'rotation')
+        fields = ('owner', 'name', 'description', 'media_schedule_json')
 
-class RotationPairSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RotationPair
-        fields = ('id', 'media', 'rotationTime')
 
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
-        fields = ('id', 'media', 'playlist')
-
+        fields = ('owner', 'unique_device_id', 'playlist')
