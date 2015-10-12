@@ -23,6 +23,9 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
 
 class DeviceSerializer(serializers.ModelSerializer):
+
+    owner = serializers.ReadOnlyField(source='owner.id')
+
     class Meta:
         model = Device
-        fields = ('owner', 'unique_device_id', 'playlist')
+        fields = ('unique_device_id', 'playlist', 'owner')

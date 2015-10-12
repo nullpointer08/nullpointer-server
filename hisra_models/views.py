@@ -166,17 +166,22 @@ class DeviceList(APIView):
         serializer = DeviceSerializer(devices, many=True)
         return Response(serializer.data)
 
-    def post(sefl, request, username):
+    def post(self, request, username):
         '''
         POST /api/user/:username/device
         Adds a device for the user
         '''
         # TODO: authentication
-        owner = User.objects.get(pk=username)
+        owners = User.objects.all().filter(username=username)
+        if len(owners) == 0:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        assert len(owners) == 1
+        owner = owners[0]
         serializer = DeviceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(owner=owner)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DeviceDetail(APIView):
@@ -186,7 +191,10 @@ class DeviceDetail(APIView):
         GET /api/user/:username/device/:id
         Returns details of a device
         '''
-        device = Device.objects.get(pk=id)
+        try:
+            device = Device.objects.get(pk=id)
+        except Device.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = DeviceSerializer(device)
         return Response(serializer.data)
 
@@ -214,6 +222,11 @@ class UserDetail(APIView):
     Returns some details for the user
     '''
     def get(self, request, username):
-        user = User.objects.all().filter(username=username)[0]
+        users = User.objects.all().filter(username=username)
+        if len(users) == 0:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        assert len(users) == 1
+
+        user = users[0]
         serializer = UserSerializer(user)
         return Response(serializer.data)

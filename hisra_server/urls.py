@@ -50,8 +50,8 @@ urlpatterns = [
     url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/device$',
         views.DeviceList.as_view()),
 
-    # GET /api/user/:username/device:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/device/(?P<id>[a-zA-Z0-9]*)$',
+    # GET /api/user/:username/device/:id
+    url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/device/(?P<id>[a-zA-Z0-9_]*)$',
         views.DeviceDetail.as_view()),
 
     # POST /api/user
