@@ -10,6 +10,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MediaSerializer(serializers.ModelSerializer):
+
+    owner = serializers.ReadOnlyField(source='owner.id')
+
     class Meta:
         model = Media
         fields = ('id', 'owner', 'url', 'mediatype', 'name', 'description',
@@ -17,9 +20,12 @@ class MediaSerializer(serializers.ModelSerializer):
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
+
+    owner = serializers.ReadOnlyField(source='owner.id')
+
     class Meta:
         model = Playlist
-        fields = ('owner', 'name', 'description', 'media_schedule_json')
+        fields = ('id', 'owner', 'name', 'description', 'media_schedule_json')
 
 
 class DeviceSerializer(serializers.ModelSerializer):

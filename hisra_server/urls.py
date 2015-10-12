@@ -34,12 +34,12 @@ urlpatterns = [
     # GET /api/user/:username/playlist
     # POST /api/user/:username/playlist
     url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/playlist$',
-        views.UserPlaylistList.as_view()),
+        views.PlaylistList.as_view()),
 
     # GET /api/user/:username/playlist/:id
     # PUT /api/user/:username/playlist/:id
     url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/playlist/(?P<id>[0-9]*)$',
-        views.UserPlaylistDetail.as_view()),
+        views.PlaylistDetail.as_view()),
 
     # GET /api/user/:username/device
     url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/device$',

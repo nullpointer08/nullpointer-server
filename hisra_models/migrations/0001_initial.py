@@ -2,19 +2,21 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
             name='Device',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('unique_device_id', models.CharField(max_length=256)),
+                ('unique_device_id', models.CharField(max_length=256, unique=True, serialize=False, primary_key=True)),
+                ('owner', models.ForeignKey(default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
         ),
         migrations.CreateModel(
@@ -26,6 +28,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=256)),
                 ('description', models.CharField(max_length=256)),
                 ('md5_checksum', models.CharField(max_length=32)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -35,29 +38,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=256)),
                 ('description', models.CharField(max_length=256)),
                 ('media_schedule_json', models.TextField()),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
-        ),
-        migrations.CreateModel(
-            name='User',
-            fields=[
-                ('username', models.CharField(max_length=50, serialize=False, primary_key=True)),
-                ('password_hash', models.CharField(max_length=256)),
-            ],
-        ),
-        migrations.AddField(
-            model_name='playlist',
-            name='owner',
-            field=models.ForeignKey(to='hisra_models.User'),
-        ),
-        migrations.AddField(
-            model_name='media',
-            name='owner',
-            field=models.ForeignKey(to='hisra_models.User'),
-        ),
-        migrations.AddField(
-            model_name='device',
-            name='owner',
-            field=models.ForeignKey(to='hisra_models.User', null=True),
         ),
         migrations.AddField(
             model_name='device',

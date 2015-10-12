@@ -2,8 +2,19 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from django.contrib.auth import hashers
-from models import Playlist, Device
-from serializers import DeviceSerializer
+from models import Playlist, Device, Media
+from serializers import DeviceSerializer, MediaSerializer, PlaylistSerializer
+
+
+def resp_equals(expected, got):
+    for key in expected:
+        if key not in got:
+            raise Exception('The key: ' + unicode(key) + ' is not in ' +
+                            unicode(got))
+        if unicode(got[key]) != unicode(expected[key]):
+            raise Exception('Expected: ' + unicode(expected[key]) +
+                            ', got: ' + unicode(got[key]))
+    return True
 
 
 class UserTests(APITestCase):
@@ -119,7 +130,8 @@ class DeviceTest(APITestCase):
               db_device.unique_device_id
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
-        self.assertEquals(response.data, DeviceSerializer(db_device).data)
+        expected_data = DeviceSerializer(db_device).data
+        self.assertTrue(resp_equals(expected_data, response.data))
 
     def test_get_missing_device(self):
         url = '/api/user/' + self.username + '/device/' + 'missing_device'
@@ -130,67 +142,268 @@ class DeviceTest(APITestCase):
 class PlaylistTest(APITestCase):
 
     def setUp(self):
-        pass
+        self.username = 'testuser'
+        self.password = 'testpass'
+        self.owner = User.objects.create_user(username=self.username,
+                                              password=self.password)
 
     def test_create_playlist(self):
-        pass
+        url = '/api/user/' + self.username + '/playlist'
+        playlist = {
+            'name': 'Cool playlist',
+            'description': 'All the best stuff',
+            'media_schedule_json': '{"fake_playlist" : "true"}'
+        }
+        response = self.client.post(url, playlist, format='json')
+
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(resp_equals(playlist, response.data))
+        db_playlist = Playlist.objects.get(pk=response.data['id'])
+        expected_data = PlaylistSerializer(db_playlist).data
+        self.assertTrue(resp_equals(expected_data, response.data))
 
     def test_create_playlist_bad_data(self):
-        pass
+        url = '/api/user/' + self.username + '/playlist'
+        playlist = {
+            'this': 'should',
+            'not': 'work'
+        }
+        response = self.client.post(url, playlist, format='json')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_playlist_for_missing_user(self):
-        pass
+        url = '/api/user/doesnotexist/playlist'
+        playlist = {
+            'name': 'Cool playlist',
+            'description': 'All the best stuff',
+            'media_schedule_json': '{"fake_playlist" : "true"}'
+        }
+        response = self.client.post(url, playlist, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_all_playlists(self):
-        pass
+        playlist_count = 10
+        playlists = []
+        for i in range(0, playlist_count):
+            playlist = {
+                'name': 'Cool playlist',
+                'description': 'All the best stuff',
+                'media_schedule_json': '{"fake_playlist_json" : "true"}'
+            }
+            playlists.append(playlist)
+
+        url = '/api/user/' + self.username + '/playlist'
+
+        for playlist in playlists:
+            response = self.client.post(url, playlist, format='json')
+            self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertEquals(Playlist.objects.count(), playlist_count)
+
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEquals(len(response.data), 10)
+
+        for i in range(0, len(response.data)):
+            for key in playlists[i]:
+                self.assertTrue(key in response.data[i])
 
     def test_get_all_playlists_for_missing_user(self):
-        pass
+        url = '/api/user/doesnotexist/playlist'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_playlist(self):
-        pass
+        playlist = Playlist.objects.create(
+            owner=self.owner,
+            name='Cool playlist',
+            description='All the best stuff',
+            media_schedule_json='{"fake_playlist_json": "true"}'
+        )
+
+        self.assertEquals(Playlist.objects.count(), 1)
+        url = '/api/user/' + self.username + '/playlist/' + str(playlist.id)
+
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        expected_data = PlaylistSerializer(playlist).data
+        self.assertTrue(resp_equals(expected_data, response.data))
 
     def test_get_missing_playlist(self):
-        pass
+        url = '/api/user/' + self.username + '/playlist/13371337'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_put_playlist_update(self):
-        pass
+        playlist = Playlist.objects.create(
+            owner=self.owner,
+            name='Cool playlist',
+            description='All the best stuff',
+            media_schedule_json='{"fake_playlist_json": "true"}'
+        )
+        self.assertEquals(Playlist.objects.count(), 1)
+
+        url = '/api/user/' + self.username + '/playlist/' + str(playlist.id)
+        new_name = 'New name'
+        new_description = 'New description'
+        new_json = '{"new_playlist":"true"}'
+        data = {
+            'name': new_name,
+            'description': new_description,
+            'media_schedule_json': new_json
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        received = response.data
+        self.assertEquals(received['name'], new_name)
+        self.assertEquals(received['description'], new_description)
+        self.assertEquals(received['media_schedule_json'], new_json)
 
     def test_put_playlist_update_bad_data(self):
-        pass
+        playlist = Playlist.objects.create(
+            owner=self.owner,
+            name='Cool playlist',
+            description='All the best stuff',
+            media_schedule_json='{"fake_playlist_json": "true"}'
+        )
+        self.assertEquals(Playlist.objects.count(), 1)
+        url = '/api/user/' + self.username + '/playlist/' + str(playlist.id)
+        data = {
+            'this': 'should',
+            'not': 'work'
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_put_playlist_update_for_missing_playlist(self):
-        pass
+        new_name = 'New name'
+        new_description = 'New description'
+        new_json = '{"new_playlist":"true"}'
+        url = '/api/user/' + self.username + '/13371337'
+        data = {
+            'name': new_name,
+            'description': new_description,
+            'media_schedule_json': new_json
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class MediaTest(APITestCase):
 
     def setUp(self):
-        pass
+        self.username = 'testuser'
+        self.password = 'testpassword'
+        self.owner = User.objects.create_user(username=self.username,
+                                              password=self.password)
+        self.assertEquals(User.objects.count(), 1)
 
     def test_post_new_media(self):
-        pass
+        url = '/api/user/' + self.username + '/media'
+        media = {
+            'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
+            'mediatype': 'P',
+            'name': 'sad face',
+            'description': 'A big blue sad face',
+            'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+        }
+        response = self.client.post(url, media, format='json')
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(resp_equals(media, response.data))
+
+        db_media = Media.objects.get(pk=response.data['id'])
+        expected_db_data = MediaSerializer(db_media).data
+        self.assertTrue(resp_equals(expected_db_data, response.data))
 
     def test_post_new_media_bad_data(self):
-        pass
+        url = '/api/user/' + self.username + '/media'
+        media = {
+            'this': 'should',
+            'not': 'work'
+        }
+        response = self.client.post(url, media, format='json')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_new_media_for_missing_user(self):
-        pass
+        url = '/api/user/notarealuser/media'
+        media = {
+            'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
+            'mediatype': 'P',
+            'name': 'sad face',
+            'description': 'A big blue sad face',
+            'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+        }
+        response = self.client.post(url, media, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_media(self):
-        pass
+        url = '/api/user/' + self.username + '/media'
+        media = {
+            'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
+            'mediatype': 'P',
+            'name': 'sad face',
+            'description': 'A big blue sad face',
+            'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+        }
+        response = self.client.post(url, media, format='json')
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        id = response.data['id']
+        url = '/api/user/' + self.username + '/media/' + str(id)
+        response = self.client.delete(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEquals(Media.objects.count(), 0)
 
     def test_delete_missing_media(self):
-        pass
+        url = '/api/user/' + self.username + '/media/1337'
+        response = self.client.delete(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_all_media(self):
-        pass
+        media = []
+        for i in range(0, 10):
+            media_item = {
+                'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
+                'mediatype': 'P',
+                'name': 'sad face',
+                'description': 'A big blue sad face',
+                'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+            }
+            media.append(media_item)
+
+        url = '/api/user/' + self.username + '/media'
+        for media_item in media:
+            self.client.post(url, media_item, format='json')
+
+        self.assertEquals(Media.objects.count(), 10)
+
+        response = self.client.get(url, format='json')
+        for i in range(0, 10):
+            self.assertTrue(resp_equals(media[i], response.data[i]))
 
     def test_get_all_media_for_missing_user(self):
-        pass
+        url = '/api/user/doesnotexist/media'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_media(self):
-        pass
+        media = Media.objects.create(
+            owner=self.owner,
+            url='http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
+            mediatype='P',
+            name='sad face',
+            description='A big blue sad face',
+            md5_checksum='ac59c6b42a025514e5de073d697b2afb')
+
+        self.assertEquals(Media.objects.count(), 1)
+
+        url = '/api/user/' + self.username + '/media/' + str(media.id)
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected_data = MediaSerializer(media).data
+        self.assertTrue(resp_equals(expected_data, response.data))
 
     def test_get_missing_media(self):
-        pass
+        url = '/api/user/' + self.username + '/media/13371337'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)

@@ -16,7 +16,12 @@ class MediaList(APIView):
         Returns all media belonging to the user
         '''
         # TODO: authentication
-        media = Media.objects.all().filter(owner=username)
+        owners = User.objects.all().filter(username=username)
+        if len(owners) == 0:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        assert len(owners) == 1
+        owner = owners[0]
+        media = Media.objects.all().filter(owner=owner)
         serializer = MediaSerializer(media, many=True)
         return Response(serializer.data)
 
@@ -26,9 +31,15 @@ class MediaList(APIView):
         Creates a new media for the user
         '''
         # TODO: authentication
+        owners = User.objects.all().filter(username=username)
+        if len(owners) == 0:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        assert len(owners) == 1
+        owner = owners[0]
         serializer = MediaSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(owner=username)
+            serializer.save(owner=owner)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -58,12 +69,12 @@ class MediaDetail(APIView):
         try:
             media = Media.objects.get(pk=id)
         except Media.DoesNotExist:
-            return HttpResponse(status=404)
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         media.delete()
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
 
-class UserPlaylistList(APIView):
+class PlaylistList(APIView):
 
     def get(self, request, username):
         '''
@@ -71,7 +82,12 @@ class UserPlaylistList(APIView):
         Returns all the playlists of the user
         '''
         # TODO: authentication
-        playlists = Playlist.objects.all().filter(owner=username)
+        owners = User.objects.all().filter(username=username)
+        if len(owners) == 0:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        assert len(owners) == 1
+        owner = owners[0]
+        playlists = Playlist.objects.all().filter(owner=owner.id)
         serializer = PlaylistSerializer(playlists, many=True)
         return Response(serializer.data)
 
@@ -81,14 +97,19 @@ class UserPlaylistList(APIView):
         Creates a new playlist for the user
         '''
         # TODO: authentication
-        serializer = MediaSerializer(data=request.data)
+        owners = User.objects.all().filter(username=username)
+        if len(owners) == 0:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        assert len(owners) == 1
+        owner = owners[0]
+        serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(owner=username)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            serializer.save(owner=owner)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserPlaylistDetail(APIView):
+class PlaylistDetail(APIView):
 
     def get(self, request, username, id):
         '''
