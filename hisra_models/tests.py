@@ -40,6 +40,7 @@ class UserTests(APITestCase):
         url = '/api/user'
         user = {'username': 'test_user', 'password': 'password123'}
         response = self.client.post(url, user, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEquals(response.data['username'], user['username'])
         self.assertFalse('password' in response.data)
@@ -66,8 +67,6 @@ class UserTests(APITestCase):
         '''
         url = '/api/user/user0'
         response = self.client.get(url, format='json')
-        print "RESPONSE: ", response.data
-
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(response.data['username'], 'user0')
         self.assertFalse('password' in response.data)
@@ -173,7 +172,6 @@ class PlaylistTest(APITestCase):
             'media_schedule_json': '{"fake_playlist" : "true"}'
         }
         response = self.client.post(url, playlist, format='json')
-
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(resp_equals(playlist, response.data))
         db_playlist = Playlist.objects.get(pk=response.data['id'])
@@ -328,7 +326,6 @@ class MediaTest(APITestCase):
         response = self.client.post(url, media, format='json')
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(resp_equals(media, response.data))
-
         db_media = Media.objects.get(pk=response.data['id'])
         expected_db_data = MediaSerializer(db_media).data
         self.assertTrue(resp_equals(expected_db_data, response.data))

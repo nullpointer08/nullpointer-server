@@ -143,14 +143,16 @@ class PlaylistDetail(APIView):
 
 
 class DeviceList(APIView):
-
+    '''
+    Provides GET and POST for new device.
+    '''
     def get(self, request, username):
         '''
         GET /api/user/:username/device
         Returns all devices owned by the user
         '''
         # TODO: authentication
-        owners =  User.objects.all().filter(username=username)
+        owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_404_NOT_FOUND)
         assert len(owners) == 1
