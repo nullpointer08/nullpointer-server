@@ -41,11 +41,6 @@ urlpatterns = [
     url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/playlist/(?P<id>[0-9]*)$',
         views.UserPlaylistDetail.as_view()),
 
-    # GET /api/device/:deviceid/playlist
-    # PUT /api/device/:deviceid/playlist
-    url(r'^api/device/(?P<deviceid>[a-zA-Z0-9]*)/playlist$',
-        views.DevicePlaylistDetail.as_view()),
-
     # GET /api/user/:username/device
     url(r'^api/user/(?P<username>[a-zA-Z0-9]*)/device$',
         views.DeviceList.as_view()),

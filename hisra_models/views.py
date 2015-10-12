@@ -121,39 +121,6 @@ class UserPlaylistDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DevicePlaylistDetail(APIView):
-
-    def get(self, request, deviceid):
-        '''
-        GET /api/device/:deviceid/playlist
-        Returns the playlist used by the given device
-        '''
-        # TODO: authentication
-        device = Device.objects.get(pk=deviceid)
-        playlist_pk = device.playlist
-        try:
-            playlist = Playlist.objects.get(pk=playlist_pk)
-        except Playlist.DoesNotExist:
-            return HttpResponse(status=404)
-
-        serializer = PlaylistSerializer(playlist)
-        return Response(serializer.data)
-
-    def put(self, request, deviceid):
-        '''
-        PUT /api/device/:deviceid/playlist
-        Updates a playlist for the device
-        '''
-        # TODO: authentication
-        device = Device.objects.get(pk=deviceid)
-        playlist = Playlist.objects.get(pk=device.playlist)
-        serializer = PlaylistSerializer(playlist, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors)
-
-
 class DeviceList(APIView):
 
     def get(self, request, username):
@@ -197,6 +164,21 @@ class DeviceDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = DeviceSerializer(device)
         return Response(serializer.data)
+
+    def put(self, request, username, id):
+        '''
+        GET /api/user/:username/device/:id
+        Updates the device playlist
+        '''
+        try:
+            device = Device.objects.get(pk=id)
+        except Device.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = DeviceSerializer(device, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserList(APIView):

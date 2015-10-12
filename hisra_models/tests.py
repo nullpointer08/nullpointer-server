@@ -125,3 +125,39 @@ class DeviceTest(APITestCase):
         url = '/api/user/' + self.username + '/device/' + 'missing_device'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class PlaylistTest(APITestCase):
+
+    def setUp(self):
+        pass
+
+    def test_create_playlist(self):
+        pass
+
+    def test_get_all_playlists(self):
+        pass
+
+    def test_get_playlist(self):
+        pass
+
+    def test_put_playlist_update(self):
+        pass
+
+
+class MediaTest(APITestCase):
+
+    def setUp(self):
+        pass
+
+    def test_post_new_media(self):
+        pass
+
+    def test_delete_media(self):
+        pass
+
+    def test_get_all_media(self):
+        pass
+
+    def test_get_media(self):
+        pass

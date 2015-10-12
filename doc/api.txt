@@ -29,13 +29,6 @@ Creates a new playlist for the user
 PUT /api/user/:username/playlist/:id
 Updates an existing playlist for the user
 
-Device playlists:
----------------------------------
-GET /api/device/:deviceid/playlist
-Returns the playlist used by the given device
-
-PUT /api/device/:deviceid/playlist
-Updates a playlist for the device
 
 Devices:
 ---------------------------------
@@ -46,7 +39,10 @@ GET /api/user/:username/device/:id
 Returns details of a device
 
 POST /api/user/:username/device
-Adds a device for the user	
+Adds a device for the user
+
+PUT /api/user/:username/device/:id
+Updates the device playlist	
 
 Users:
 ---------------------
