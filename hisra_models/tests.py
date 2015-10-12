@@ -135,13 +135,31 @@ class PlaylistTest(APITestCase):
     def test_create_playlist(self):
         pass
 
+    def test_create_playlist_bad_data(self):
+        pass
+
+    def test_create_playlist_for_missing_user(self):
+        pass
+
     def test_get_all_playlists(self):
+        pass
+
+    def test_get_all_playlists_for_missing_user(self):
         pass
 
     def test_get_playlist(self):
         pass
 
+    def test_get_missing_playlist(self):
+        pass
+
     def test_put_playlist_update(self):
+        pass
+
+    def test_put_playlist_update_bad_data(self):
+        pass
+
+    def test_put_playlist_update_for_missing_playlist(self):
         pass
 
 
@@ -153,11 +171,26 @@ class MediaTest(APITestCase):
     def test_post_new_media(self):
         pass
 
+    def test_post_new_media_bad_data(self):
+        pass
+
+    def test_post_new_media_for_missing_user(self):
+        pass
+
     def test_delete_media(self):
+        pass
+
+    def test_delete_missing_media(self):
         pass
 
     def test_get_all_media(self):
         pass
 
+    def test_get_all_media_for_missing_user(self):
+        pass
+
     def test_get_media(self):
+        pass
+
+    def test_get_missing_media(self):
         pass
