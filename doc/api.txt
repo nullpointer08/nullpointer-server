@@ -3,30 +3,30 @@ First see the HISRA data model UML
 
 Media:
 ---------------------------
-GET /api/user/:userid/media
+GET /api/user/:username/media
 Returns all media belonging to the user
 
-GET /api/user/:userid/media/:id
+GET /api/user/:username/media/:id
 Returns the media with the given id
 
-POST /api/user/:userid/media
+POST /api/user/:username/media
 Creates a new media for the user
 
-DELETE /api/user/:userid/media/:id
+DELETE /api/user/:username/media/:id
 Deletes an existing media
 
 User playlists:
 ------------------------------
-GET /api/user/:userid/playlist
+GET /api/user/:username/playlist
 Returns all the playlists of the user
 
-GET /api/user/:userid/playlist/:id
+GET /api/user/:username/playlist/:id
 Returns the playlist with the given id
 
-POST /api/user/:userid/playlist
+POST /api/user/:username/playlist
 Creates a new playlist for the user
 
-PUT /api/user/:userid/playlist/:id
+PUT /api/user/:username/playlist/:id
 Updates an existing playlist for the user
 
 Device playlists:
@@ -39,15 +39,18 @@ Updates a playlist for the device
 
 Devices:
 ---------------------------------
-GET /api/user/:userid/device
+GET /api/user/:username/device
 Returns all devices owned by the user
 
-POST /api/user/:userid/device/:id
-Adds a device for the user
+GET /api/user/:username/device/:id
+Returns details of a device
+
+POST /api/user/:username/device
+Adds a device for the user	
 
 Users:
 ---------------------
-GET /api/user/:userid
+GET /api/user/:username
 Returns some details for the user
 
 POST /api/user

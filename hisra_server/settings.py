@@ -80,10 +80,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'hisra_db',
-	'USER': 'django_user',
-	'HOST':'localhost',
-	'PASSWORD': 'k3k3KUUSI',
+        'USER': 'django_user',
+        'HOST': 'localhost',
+        'PASSWORD': 'k3k3KUUSI',
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    )
 }
 
 

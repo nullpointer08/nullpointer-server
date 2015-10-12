@@ -5,7 +5,7 @@ from hisra_models.models import User, Media, Playlist, Device
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username')
+        fields = ('username',)
 
 
 class MediaSerializer(serializers.ModelSerializer):

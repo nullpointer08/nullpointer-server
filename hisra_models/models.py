@@ -40,8 +40,9 @@ class Playlist(models.Model):
 
 
 class Device(models.Model):
+    unique_device_id = models.CharField(primary_key=True, max_length=256,
+                                        unique=True)
     owner = models.ForeignKey(User, null=True, blank=True, default=None)
-    unique_device_id = models.CharField(max_length=256)
     playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None)
 
     def __unicode__(self):
