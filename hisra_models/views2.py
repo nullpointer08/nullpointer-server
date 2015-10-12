@@ -1,11 +1,10 @@
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from hisra_models.models import Media, Playlist, Device
+from hisra_models.models import User, Media, Playlist, Device
 from hisra_models.serializers import UserSerializer, MediaSerializer
 from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
 from rest_framework import status
-from django.contrib.auth.models import User
 
 
 class MediaList(APIView):
@@ -200,11 +199,18 @@ class UserList(APIView):
         '''
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            user.set_password(request.data['password'])
-            user.save()
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, format=None):
+        '''
+        !!!! For devs, not part of the API !!!
+        GET /api/user
+        '''
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 
 class UserDetail(APIView):
@@ -214,6 +220,6 @@ class UserDetail(APIView):
     Returns some details for the user
     '''
     def get(self, request, username):
-        user = User.objects.all().filter(username=username)[0]
+        user = User.objects.get(pk=username)
         serializer = UserSerializer(user)
         return Response(serializer.data)

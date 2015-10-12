@@ -1,11 +1,12 @@
 from rest_framework import serializers
-from hisra_models.models import User, Media, Playlist, Device
+from hisra_models.models import Media, Playlist, Device
+from django.contrib.auth.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username',)
+        fields = ('id', 'username')
 
 
 class MediaSerializer(serializers.ModelSerializer):

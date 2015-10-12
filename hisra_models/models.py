@@ -1,12 +1,5 @@
 from django.db import models
-
-
-class User(models.Model):
-    username = models.CharField(max_length=50, primary_key=True)
-    password_hash = models.CharField(max_length=256)
-
-    def __unicode__(self):
-        return 'User:[' + str(self.username) + ']'
+from django.contrib.auth.models import User
 
 
 class Media(models.Model):
