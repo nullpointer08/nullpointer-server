@@ -65,7 +65,8 @@ class UserTests(APITestCase):
         Test we can find a user
         '''
         url = '/api/user/user0'
-        response = self.client.get(url)
+        response = self.client.get(url, format='json')
+        print "RESPONSE: ", response.data
 
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(response.data['username'], 'user0')
@@ -137,6 +138,23 @@ class DeviceTest(APITestCase):
         url = '/api/user/' + self.username + '/device/' + 'missing_device'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_all_devices_for_user(self):
+        devices = []
+        for i in range(0, 10):
+            device = {
+                'unique_device_id': 'device_' + str(i),
+                'playlist': self.playlist.id
+            }
+            devices.append(device)
+
+        url = '/api/user/' + self.username + '/device'
+        for device in devices:
+            self.client.post(url, device, format='json')
+
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEquals(len(response.data), 10)
 
 
 class PlaylistTest(APITestCase):

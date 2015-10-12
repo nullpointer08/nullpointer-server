@@ -150,7 +150,12 @@ class DeviceList(APIView):
         Returns all devices owned by the user
         '''
         # TODO: authentication
-        devices = Device.objects.all().filter(owner=username)
+        owners =  User.objects.all().filter(username=username)
+        if len(owners) == 0:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        assert len(owners) == 1
+        owner = owners[0]
+        devices = Device.objects.all().filter(owner=owner)
         serializer = DeviceSerializer(devices, many=True)
         return Response(serializer.data)
 
