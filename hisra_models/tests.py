@@ -449,12 +449,12 @@ class DevicePlaylist(APITestCase):
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
-        expected = {
-            'id': self.playlist.id,
-            'name': 'test name',
-            'description': 'test description',
-            'media_schedule_json': '{"fake_json": "true"}'
-        }
+        expected = PlaylistSerializer(self.playlist).data
         serializer = PlaylistSerializer(data=response.data)
         self.assertTrue(serializer.is_valid())
         self.assertTrue(resp_equals(expected, response.data))
+
+    def test_get_missing_device_playlist(self):
+        url = '/api/device/doesnotexist/playlist'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
