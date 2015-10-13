@@ -23,12 +23,12 @@ urlpatterns = [
 
     # GET /api/user/:username/media
     # POST /api/user/:username/media
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/media$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/media/?$',
         views.MediaList.as_view()),
 
     # GET /api/user/:username/media/:id
     # DELETE /api/user/:username/media/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/media/(?P<id>[0-9]+)$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/media/(?P<id>[0-9]+)/?$',
         views.MediaDetail.as_view()),
 
     # GET /api/user/:username/playlist
@@ -38,7 +38,7 @@ urlpatterns = [
 
     # GET /api/user/:username/playlist/:id
     # PUT /api/user/:username/playlist/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/playlist/(?P<id>[0-9]+)$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/playlist/(?P<id>[0-9]+)/?$',
         views.PlaylistDetail.as_view()),
 
     # GET /api/user/:username/device
@@ -46,17 +46,17 @@ urlpatterns = [
         views.DeviceList.as_view()),
 
     # GET /api/user/:username/device/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<id>[a-zA-Z0-9_]+)$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<id>[a-zA-Z0-9_]+)/?$',
         views.DeviceDetail.as_view()),
 
     # POST /api/user
-    url(r'^api/user$', views.UserList.as_view()),
+    url(r'^api/user/?$', views.UserList.as_view()),
 
     # GET /api/user/:username
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)$', views.UserDetail.as_view()),
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/?$', views.UserDetail.as_view()),
 
     # GET /api/device/:deviceid/playlist
-    url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist$',
+    url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
         views.DevicePlaylist.as_view())
 
 ]
