@@ -422,3 +422,39 @@ class MediaTest(APITestCase):
         url = '/api/user/' + self.username + '/media/13371337'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class DevicePlaylist(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpassword'
+        )
+        self.playlist = Playlist.objects.create(
+            owner=self.user,
+            name='test name',
+            description='test description',
+            media_schedule_json='{"fake_json": "true"}'
+        )
+        self.device = Device.objects.create(
+            owner=self.user,
+            unique_device_id='testdevice',
+            playlist=self.playlist
+        )
+
+    def test_get_device_playlist(self):
+        url = '/api/device/' + self.device.unique_device_id + '/playlist'
+
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected = {
+            'id': self.playlist.id,
+            'name': 'test name',
+            'description': 'test description',
+            'media_schedule_json': '{"fake_json": "true"}'
+        }
+        serializer = PlaylistSerializer(data=response.data)
+        self.assertTrue(serializer.is_valid())
+        self.assertTrue(resp_equals(expected, response.data))

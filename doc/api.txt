@@ -378,6 +378,32 @@ Returns JSON:
     'id': 56
   }
 
+----------------------------------
+GET /api/device/:deviceid/playlist
+----------------------------------
+Description:
+  Used by a device to fetch its own playlist.
+  This is a temporary solution before authentication is implemented
+Authorization:
+  Not implemented
+Status:
+  200 OK
+Errors:
+  404 NOT FOUND if the device does not exist or if the playlist is not set
+URL parameters:
+  deviceid: ([a-zA-Z0-9_]+)
+Accepts JSON:
+  N/A
+Returns JSON:
+  {
+    "id": 1,
+    "owner": 1,
+    "name": "Cool playlist",
+    "description": "All the best stuff",
+    "media_schedule_json": "{\"playlist\": \"goes_here\"}"
+  }
+
+
 Optional (nice to have, not a requirement):
 ------------------------------------
 GET /api/device/:deviceid/statistics

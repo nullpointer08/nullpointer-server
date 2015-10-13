@@ -202,6 +202,10 @@ class DeviceDetail(APIView):
             device = Device.objects.get(pk=id)
         except Device.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if 'unique_device_id' not in request.data:
+            request.data['unique_device_id'] = id
+
         serializer = DeviceSerializer(device, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -240,3 +244,19 @@ class UserDetail(APIView):
         user = users[0]
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+
+class DevicePlaylist(APIView):
+
+    def get(self, request, id):
+        try:
+            device = Device.objects.get(pk=id)
+        except Device.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            playlist = Playlist.objects.get(pk=device.playlist.id)
+        except Playlist.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PlaylistSerializer(playlist)
+        return Response(serializer.data, status=status.HTTP_200_OK)
