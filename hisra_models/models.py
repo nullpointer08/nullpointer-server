@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from chunked_upload.models import ChunkedUpload
 
+class HisraChunkedUpload(ChunkedUpload):
+    pass
+HisraChunkedUpload._meta.get_field('user').null = True
 
 class Media(models.Model):
     VIDEO = 'V'

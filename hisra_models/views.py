@@ -1,13 +1,47 @@
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from hisra_models.models import Media, Playlist, Device
+from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
 from hisra_models.serializers import UserSerializer, MediaSerializer
 from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
 from rest_framework import status
 from django.contrib.auth.models import User
+from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
+from django.views.generic.base import TemplateView
 
+# temporary for testing
+class ChunkedUploadDemo(TemplateView):
+    template_name = 'chunked_upload_demo.html'
+    
+class HisraChunkedUploadView(ChunkedUploadView):
 
+    model = HisraChunkedUpload
+    field_name = 'the_file'
+
+    def check_permissions(self, request):
+        # Allow non authenticated users to make uploads
+        pass
+
+class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
+
+    model = HisraChunkedUpload
+
+    def check_permissions(self, request):
+        # Allow non authenticated users to make uploads
+        pass
+    
+    def on_completion(self, uploaded_file, request):
+        # Do something with the uploaded file. E.g.:
+        # * Store the uploaded file on another model:
+        # SomeModel.objects.create(user=request.user, file=uploaded_file)
+        # * Pass it as an argument to a function:
+        # function_that_process_file(uploaded_file)
+        pass
+
+    def get_response_data(self, chunked_upload, request):
+        return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
+                            (chunked_upload.filename, chunked_upload.offset))}
+        
 class MediaList(APIView):
 
     def get(self, request, username):

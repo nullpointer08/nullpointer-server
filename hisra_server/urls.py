@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from hisra_models import views
+from hisra_models.views import HisraChunkedUploadView, HisraChunkedUploadCompleteView
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
@@ -33,7 +34,7 @@ urlpatterns = [
 
     # GET /api/user/:username/playlist
     # POST /api/user/:username/playlist
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/playlist$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/playlist/?$',
         views.PlaylistList.as_view()),
 
     # GET /api/user/:username/playlist/:id
@@ -42,7 +43,7 @@ urlpatterns = [
         views.PlaylistDetail.as_view()),
 
     # GET /api/user/:username/device
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/?$',
         views.DeviceList.as_view()),
 
     # GET /api/user/:username/device/:id
@@ -57,8 +58,17 @@ urlpatterns = [
 
     # GET /api/device/:deviceid/playlist
     url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
-        views.DevicePlaylist.as_view())
-
+        views.DevicePlaylist.as_view()),
+    
+    # /uploadfile/
+    url(r'^uploadfile/?$',
+        views.ChunkedUploadDemo.as_view(),name='chunked_upload'),
+               
+    url(r'^api/chunked_upload/?$',
+        HisraChunkedUploadView.as_view(), name='api_chunked_upload'),
+    url(r'^api/chunked_upload_complete/?$',
+        HisraChunkedUploadCompleteView.as_view(),
+        name='api_chunked_upload_complete'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
