@@ -10,44 +10,43 @@ from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from django.views.generic.base import TemplateView
 from django.contrib.auth import authenticate
 import logging
+
 logger = logging.getLogger('django')
+
 
 # temporary for testing
 class ChunkedUploadDemo(TemplateView):
     template_name = 'chunked_upload_demo.html'
-    
-class HisraChunkedUploadView(ChunkedUploadView):
 
+
+class HisraChunkedUploadView(ChunkedUploadView):
     model = HisraChunkedUpload
     field_name = 'the_file'
 
     def check_permissions(self, request):
         pass
 
-class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
 
+class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
     model = HisraChunkedUpload
 
     def check_permissions(self, request):
-            pass
-    
+        pass
+
     def on_completion(self, uploaded_file, request):
         try:
             user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
-            media = Media.objects.createMedia(uploaded_file, request, user)
-            logger.info("OLLAANKO TASSA")
-            media.save()
+            Media.objects.create_media(uploaded_file, request, user)
+            logger.info("Media saved")
         except Exception, e:
             logger.error(e)
-
-
 
     def get_response_data(self, chunked_upload, request):
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
                             (chunked_upload.filename, chunked_upload.offset))}
-        
-class MediaList(APIView):
 
+
+class MediaList(APIView):
     def get(self, request, username):
         '''
         GET /api/user/:username/media
@@ -83,7 +82,6 @@ class MediaList(APIView):
 
 
 class MediaDetail(APIView):
-
     def get(self, request, username, id):
         '''
         GET /api/user/:username/media/:id
@@ -113,7 +111,6 @@ class MediaDetail(APIView):
 
 
 class PlaylistList(APIView):
-
     def get(self, request, username):
         '''
         GET /api/user/:username/playlist
@@ -148,7 +145,6 @@ class PlaylistList(APIView):
 
 
 class PlaylistDetail(APIView):
-
     def get(self, request, username, id):
         '''
         GET /api/user/:username/playlist/:id
@@ -184,6 +180,7 @@ class DeviceList(APIView):
     '''
     Provides GET and POST for new device.
     '''
+
     def get(self, request, username):
         '''
         GET /api/user/:username/device
@@ -218,7 +215,6 @@ class DeviceList(APIView):
 
 
 class DeviceDetail(APIView):
-
     def get(self, request, username, id):
         '''
         GET /api/user/:username/device/:id
@@ -252,7 +248,6 @@ class DeviceDetail(APIView):
 
 
 class UserList(APIView):
-
     def post(self, request):
         '''
         POST /api/user
@@ -268,11 +263,11 @@ class UserList(APIView):
 
 
 class UserDetail(APIView):
-
     '''
     GET /api/user/:username
     Returns some details for the user
     '''
+
     def get(self, request, username):
         users = User.objects.all().filter(username=username)
         if len(users) == 0:
@@ -285,7 +280,6 @@ class UserDetail(APIView):
 
 
 class DevicePlaylist(APIView):
-
     def get(self, request, id):
         try:
             device = Device.objects.get(pk=id)

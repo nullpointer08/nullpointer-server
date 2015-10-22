@@ -109,6 +109,11 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
+        'hisra_models': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
+
     },
 }
 
@@ -135,4 +140,4 @@ os.path.join(BASE_DIR, 'static/'),
 )
 
 MEDIA_ROOT = 'media/'
-MEDIA_URL = '/media/'
+MEDIA_URL = 'http://192.168.1.60:8000/media/'

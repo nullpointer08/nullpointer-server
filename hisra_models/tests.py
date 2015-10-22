@@ -458,7 +458,7 @@ class DevicePlaylist(APITestCase):
         url = '/api/device/doesnotexist/playlist'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
-
+'''
 class MediaUploadTestCase(APITestCase):
     from hisra_server.settings import MEDIA_ROOT
     def setUp(self):
@@ -483,3 +483,4 @@ class MediaUploadTestCase(APITestCase):
         url = '/api/device/doesnotexist/playlist'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        '''
