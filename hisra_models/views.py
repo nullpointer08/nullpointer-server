@@ -31,7 +31,7 @@ class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
         pass
     
     def on_completion(self, uploaded_file, request):
-        Media.createMedia(upload_file,request)
+        Media.createMedia(uploaded_file,request)
 
     def get_response_data(self, chunked_upload, request):
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
