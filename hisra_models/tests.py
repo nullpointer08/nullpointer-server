@@ -458,3 +458,28 @@ class DevicePlaylist(APITestCase):
         url = '/api/device/doesnotexist/playlist'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+
+class MediaUploadTestCase(APITestCase):
+    from hisra_server.settings import MEDIA_ROOT
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpassword'
+        )
+        self.testFile = open(MEDIA_ROOT, )
+
+    def test_get_device_playlist(self):
+        url = '/api/device/' + self.device.unique_device_id + '/playlist'
+
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected = PlaylistSerializer(self.playlist).data
+        serializer = PlaylistSerializer(data=response.data)
+        self.assertTrue(serializer.is_valid())
+        self.assertTrue(resp_equals(expected, response.data))
+
+    def test_get_missing_device_playlist(self):
+        url = '/api/device/doesnotexist/playlist'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)

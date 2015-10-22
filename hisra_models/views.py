@@ -8,6 +8,9 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from django.views.generic.base import TemplateView
+from django.contrib.auth import authenticate
+import logging
+logger = logging.getLogger('django')
 
 # temporary for testing
 class ChunkedUploadDemo(TemplateView):
@@ -19,7 +22,6 @@ class HisraChunkedUploadView(ChunkedUploadView):
     field_name = 'the_file'
 
     def check_permissions(self, request):
-        # Allow non authenticated users to make uploads
         pass
 
 class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
@@ -27,11 +29,18 @@ class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
     model = HisraChunkedUpload
 
     def check_permissions(self, request):
-        # Allow non authenticated users to make uploads
-        pass
+            pass
     
     def on_completion(self, uploaded_file, request):
-        Media.createMedia(uploaded_file,request)
+        try:
+            user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
+            media = Media.objects.createMedia(uploaded_file, request, user)
+            logger.info("OLLAANKO TASSA")
+            media.save()
+        except Exception, e:
+            logger.error(e)
+
+
 
     def get_response_data(self, chunked_upload, request):
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %

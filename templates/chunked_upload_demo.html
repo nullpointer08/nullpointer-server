@@ -87,7 +87,9 @@
           data: {
             csrfmiddlewaretoken: csrf,
             upload_id: data.result.upload_id,
-            md5: md5
+            md5: md5,
+            username: "apina",
+            password: "gorilla"
           },
           dataType: "json",
           success: function(data) {
