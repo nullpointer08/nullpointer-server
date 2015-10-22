@@ -31,12 +31,7 @@ class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
         pass
     
     def on_completion(self, uploaded_file, request):
-        # Do something with the uploaded file. E.g.:
-        # * Store the uploaded file on another model:
-        # SomeModel.objects.create(user=request.user, file=uploaded_file)
-        # * Pass it as an argument to a function:
-        # function_that_process_file(uploaded_file)
-        pass
+        Media.createMedia(upload_file,request)
 
     def get_response_data(self, chunked_upload, request):
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %

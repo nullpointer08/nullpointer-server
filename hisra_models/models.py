@@ -17,8 +17,6 @@ def determineMediaType(file):
         mime = magic.from_file(file,mime=True)
         fileType = mime.split('/',1)[0]
         return fileType
-
-
         
 class Media(models.Model):
     VIDEO = 'V'
@@ -35,13 +33,13 @@ class Media(models.Model):
     media_type = models.CharField(max_length=1, choices=MEDIA_CHOICES)
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
-    md5_checksum = models.CharField(max_length=32)
 
-    def createMedia(self, uploaded_file, name, description):
+    def createMedia(self, uploaded_file, request):
         media_type = determineMediaType(uploaded_file)
         if media_type not in Media.MEDIA_CHOICES:
             raise TypeError(media_type)
-        return Media(file=uploaded_file, owner=User, media_type=media_type, name=name, description=description, md5_checksum=uploaded_file.md5)
+        m = Media(file=uploaded_file, owner=User, media_type=media_type, name=request.name, description=request.description)
+        m.save()
         
     def __unicode__(self):
         return 'Media:[' + str(self.name) + ']'

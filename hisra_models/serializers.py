@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 class MediaSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.id')
+    md5_checksum = serializers.ReadOnlyField(source='file.md5')
 
     class Meta:
         model = Media
