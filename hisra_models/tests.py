@@ -318,10 +318,9 @@ class MediaTest(APITestCase):
         url = '/api/user/' + self.username + '/media'
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            'mediatype': 'P',
-            'name': 'sad face',
-            'description': 'A big blue sad face',
-            'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+            #'name': 'sad face',
+            #'description': 'A big blue sad face',
+            #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
         }
         response = self.client.post(url, media, format='json')
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
@@ -343,10 +342,10 @@ class MediaTest(APITestCase):
         url = '/api/user/notarealuser/media'
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            'mediatype': 'P',
-            'name': 'sad face',
-            'description': 'A big blue sad face',
-            'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+            'mediatype': 'I',
+            #'name': 'sad face',
+            #'description': 'A big blue sad face',
+            #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
         }
         response = self.client.post(url, media, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -355,10 +354,10 @@ class MediaTest(APITestCase):
         url = '/api/user/' + self.username + '/media'
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            'mediatype': 'P',
-            'name': 'sad face',
-            'description': 'A big blue sad face',
-            'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+            'mediatype': 'I',
+            #'name': 'sad face',
+            #'description': 'A big blue sad face',
+            #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
         }
         response = self.client.post(url, media, format='json')
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
@@ -378,10 +377,10 @@ class MediaTest(APITestCase):
         for i in range(0, 10):
             media_item = {
                 'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-                'mediatype': 'P',
-                'name': 'sad face',
-                'description': 'A big blue sad face',
-                'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+                'mediatype': 'I',
+                #'name': 'sad face',
+                #'description': 'A big blue sad face',
+                #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
             }
             media.append(media_item)
 
@@ -404,10 +403,11 @@ class MediaTest(APITestCase):
         media = Media.objects.create(
             owner=self.owner,
             url='http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            mediatype='P',
-            name='sad face',
-            description='A big blue sad face',
-            md5_checksum='ac59c6b42a025514e5de073d697b2afb')
+            mediatype='I',
+            #name='sad face',
+            #description='A big blue sad face',
+            #md5_checksum='ac59c6b42a025514e5de073d697b2afb'
+            )
 
         self.assertEquals(Media.objects.count(), 1)
 

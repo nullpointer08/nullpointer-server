@@ -10,8 +10,8 @@ from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from django.views.generic.base import TemplateView
 from django.contrib.auth import authenticate
 import logging
-
-logger = logging.getLogger('django')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 # temporary for testing

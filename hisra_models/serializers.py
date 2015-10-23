@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
         fields = ('id', 'username')
@@ -12,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
 class MediaSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.id')
+    media_type = serializers.ReadOnlyField(source='media_type')
 
     class Meta:
         model = Media
