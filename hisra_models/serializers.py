@@ -13,8 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
 class MediaSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.id')
-    media_type = serializers.ReadOnlyField(source='media_type')
-
+    #media_type = serializers.ReadOnlyField(source='media_type')
     class Meta:
         model = Media
         fields = ('id', 'owner', 'url', 'media_type')

@@ -318,6 +318,7 @@ class MediaTest(APITestCase):
         url = '/api/user/' + self.username + '/media'
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
+            'media_type' : 'I',
             #'name': 'sad face',
             #'description': 'A big blue sad face',
             #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
@@ -342,7 +343,7 @@ class MediaTest(APITestCase):
         url = '/api/user/notarealuser/media'
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            'mediatype': 'I',
+            'media_type': 'I',
             #'name': 'sad face',
             #'description': 'A big blue sad face',
             #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
@@ -354,7 +355,7 @@ class MediaTest(APITestCase):
         url = '/api/user/' + self.username + '/media'
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            'mediatype': 'I',
+            'media_type': 'I',
             #'name': 'sad face',
             #'description': 'A big blue sad face',
             #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
@@ -377,7 +378,7 @@ class MediaTest(APITestCase):
         for i in range(0, 10):
             media_item = {
                 'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-                'mediatype': 'I',
+                'media_type': 'I',
                 #'name': 'sad face',
                 #'description': 'A big blue sad face',
                 #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
@@ -403,7 +404,7 @@ class MediaTest(APITestCase):
         media = Media.objects.create(
             owner=self.owner,
             url='http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            mediatype='I',
+            media_type='I',
             #name='sad face',
             #description='A big blue sad face',
             #md5_checksum='ac59c6b42a025514e5de073d697b2afb'
