@@ -13,3 +13,6 @@ python-psycopg2
 recommended:
 pip install virtualenv 
 check virtualenv site for details on usage before installing other pip packages.
+test upload uses "apina":"gorilla" user so add that with:
+python manage.py shell < createTestUser.py
+

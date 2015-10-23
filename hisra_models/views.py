@@ -36,7 +36,7 @@ class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
     def on_completion(self, uploaded_file, request):
         try:
             user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
-            Media.objects.create_media(uploaded_file, request, user)
+            Media.objects.create_media(uploaded_file, user)
             logger.info("Media saved")
         except Exception, e:
             logger.error(e)
