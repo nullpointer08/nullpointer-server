@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from chunked_upload.models import ChunkedUpload
 from hisra_server.settings import MEDIA_ROOT, MEDIA_URL
 import os
@@ -35,7 +36,7 @@ class MediaManager(models.Manager):
         try:
             media = Media.objects.get(media_file=file_path)
             logger.debug("Old file")
-        except models.Model.DoesNotExist:
+        except ObjectDoesNotExist:
             logger.debug("New file")
             media = Media(owner=user)
         media.media_file.save(name=uploaded_file.name, content=uploaded_file)
