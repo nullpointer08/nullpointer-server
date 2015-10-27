@@ -9,6 +9,9 @@ from django.contrib.auth.models import User
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from django.views.generic.base import TemplateView
 from django.contrib.auth import authenticate
+from rest_framework import generics
+from permissions import IsOwnerPermission
+from rest_framework.permissions import IsAuthenticated
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -46,102 +49,28 @@ class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
                             (chunked_upload.filename, chunked_upload.offset))}
 
 
-class MediaList(APIView):
-    def get(self, request, username):
-        '''
-        GET /api/user/:username/media
-        Returns all media belonging to the user
-        '''
-        # TODO: authentication
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        assert len(owners) == 1
-        owner = owners[0]
-        media = Media.objects.all().filter(owner=owner)
-        serializer = MediaSerializer(media, many=True)
-        return Response(serializer.data)
+class MediaList(generics.ListCreateAPIView):
+    queryset = Media.objects.all()
+    serializer_class = MediaSerializer
+    permission_classes = (IsOwnerPermission,)
 
-    def post(self, request, username):
-        '''
-        POST /api/user/:username/media
-        Creates a new media for the user
-        '''
-        # TODO: authentication
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        assert len(owners) == 1
-        owner = owners[0]
-        serializer = MediaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner=owner)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-class MediaDetail(APIView):
-    def get(self, request, username, id):
-        '''
-        GET /api/user/:username/media/:id
-        Returns the media with the given id
-        '''
-        # TODO: authentication
-        try:
-            media = Media.objects.get(pk=id)
-        except Media.DoesNotExist:
-            return HttpResponse(status=404)
-
-        serializer = MediaSerializer(media)
-        return Response(serializer.data)
-
-    def delete(self, request, username, id):
-        '''
-        DELETE /api/user/:username/media/:id
-        Deletes an existing media
-        '''
-        # TODO: authentication
-        try:
-            media = Media.objects.get(pk=id)
-        except Media.DoesNotExist:
-            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-        media.delete()
-        return Response(status=status.HTTP_200_OK)
+class MediaDetail(generics.RetrieveDestroyAPIView):
+    queryset = Media.objects.all()
+    serializer_class = MediaSerializer
+    permission_classes = (IsOwnerPermission,)
 
 
-class PlaylistList(APIView):
-    def get(self, request, username):
-        '''
-        GET /api/user/:username/playlist
-        Returns all the playlists of the user
-        '''
-        # TODO: authentication
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        assert len(owners) == 1
-        owner = owners[0]
-        playlists = Playlist.objects.all().filter(owner=owner.id)
-        serializer = PlaylistSerializer(playlists, many=True)
-        return Response(serializer.data)
+class PlaylistList(generics.ListCreateAPIView):
+    queryset = Playlist.objects.all()
+    serializer_class = PlaylistSerializer
+    permission_classes = (IsOwnerPermission,)
 
-    def post(self, request, username):
-        '''
-        POST /api/user/:username/playlist
-        Creates a new playlist for the user
-        '''
-        # TODO: authentication
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        assert len(owners) == 1
-        owner = owners[0]
-        serializer = PlaylistSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner=owner)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class PlaylistDetail(APIView):

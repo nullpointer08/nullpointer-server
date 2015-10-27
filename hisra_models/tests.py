@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import hashers
 from models import Playlist, Device, Media
 from serializers import DeviceSerializer, MediaSerializer, PlaylistSerializer
+import base64
 
 
 def resp_equals(expected, got):
@@ -15,6 +16,11 @@ def resp_equals(expected, got):
             raise Exception('Expected: ' + unicode(expected[key]) +
                             ', got: ' + unicode(got[key]))
     return True
+
+
+def set_basic_auth_header(client, username, password):
+    credentials = base64.encodestring(username + ':' + password).strip()
+    client.credentials(HTTP_AUTHORIZATION='Basic ' + credentials)
 
 
 class UserTests(APITestCase):
@@ -163,6 +169,7 @@ class PlaylistTest(APITestCase):
         self.password = 'testpass'
         self.owner = User.objects.create_user(username=self.username,
                                               password=self.password)
+        set_basic_auth_header(self.client, self.username, self.password)
 
     def test_create_playlist(self):
         url = '/api/user/' + self.username + '/playlist'
@@ -195,7 +202,7 @@ class PlaylistTest(APITestCase):
             'media_schedule_json': '{"fake_playlist" : "true"}'
         }
         response = self.client.post(url, playlist, format='json')
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_all_playlists(self):
         playlist_count = 10
@@ -226,7 +233,7 @@ class PlaylistTest(APITestCase):
     def test_get_all_playlists_for_missing_user(self):
         url = '/api/user/doesnotexist/playlist'
         response = self.client.get(url, format='json')
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_playlist(self):
         playlist = Playlist.objects.create(
@@ -305,7 +312,7 @@ class PlaylistTest(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class MediaTest(APITestCase):
+class MediaTestBase(APITestCase):
 
     def setUp(self):
         self.username = 'testuser'
@@ -313,6 +320,7 @@ class MediaTest(APITestCase):
         self.owner = User.objects.create_user(username=self.username,
                                               password=self.password)
         self.assertEquals(User.objects.count(), 1)
+        set_basic_auth_header(self.client, self.username, self.password)
 
     def test_post_new_media(self):
         url = '/api/user/' + self.username + '/media'
@@ -349,7 +357,7 @@ class MediaTest(APITestCase):
             #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
         }
         response = self.client.post(url, media, format='json')
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_media(self):
         url = '/api/user/' + self.username + '/media'
@@ -365,7 +373,7 @@ class MediaTest(APITestCase):
         id = response.data['id']
         url = '/api/user/' + self.username + '/media/' + str(id)
         response = self.client.delete(url, format='json')
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEquals(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEquals(Media.objects.count(), 0)
 
     def test_delete_missing_media(self):
@@ -398,7 +406,7 @@ class MediaTest(APITestCase):
     def test_get_all_media_for_missing_user(self):
         url = '/api/user/doesnotexist/media'
         response = self.client.get(url, format='json')
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_media(self):
         media = Media.objects.create(
@@ -408,7 +416,7 @@ class MediaTest(APITestCase):
             #name='sad face',
             #description='A big blue sad face',
             #md5_checksum='ac59c6b42a025514e5de073d697b2afb'
-            )
+        )
 
         self.assertEquals(Media.objects.count(), 1)
 

@@ -27,9 +27,9 @@ urlpatterns = [
     url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/media/?$',
         views.MediaList.as_view()),
 
-    # GET /api/user/:username/media/:id
-    # DELETE /api/user/:username/media/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/media/(?P<id>[0-9]+)/?$',
+    # GET /api/user/:username/media/:pk
+    # DELETE /api/user/:username/media/:pk
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/media/(?P<pk>[0-9]+)/?$',
         views.MediaDetail.as_view()),
 
     # GET /api/user/:username/playlist
@@ -59,11 +59,11 @@ urlpatterns = [
     # GET /api/device/:deviceid/playlist
     url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
         views.DevicePlaylist.as_view()),
-    
+
     # /uploadfile/
     url(r'^uploadfile/?$',
         views.ChunkedUploadDemo.as_view(),name='chunked_upload'),
-               
+
     url(r'^api/chunked_upload/?$',
         HisraChunkedUploadView.as_view(), name='api_chunked_upload'),
     url(r'^api/chunked_upload_complete/?$',
