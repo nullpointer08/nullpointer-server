@@ -29,6 +29,7 @@ class HisraChunkedUploadView(ChunkedUploadView):
     model = HisraChunkedUpload
     field_name = 'the_file'
 
+
 class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
     model = HisraChunkedUpload
 
@@ -69,12 +70,15 @@ class PlaylistList(generics.ListCreateAPIView):
 
 
 class PlaylistDetail(APIView):
+    queryset = Playlist.objects.all()
+    serializer_class = PlaylistSerializer
+    permission_classes = (IsOwnerPermission,)
+
     def get(self, request, username, id):
         '''
         GET /api/user/:username/playlist/:id
         Returns the playlist with the given id
         '''
-        # TODO: authentication
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -87,7 +91,6 @@ class PlaylistDetail(APIView):
         PUT /api/user/:username/playlist/:id
         Updates an existing playlist for the user
         '''
-        # TODO: authentication
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -101,6 +104,9 @@ class PlaylistDetail(APIView):
 
 
 class DeviceList(APIView):
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
+    permission_classes = (IsOwnerPermission,)
     '''
     Provides GET and POST for new device.
     '''
@@ -110,7 +116,6 @@ class DeviceList(APIView):
         GET /api/user/:username/device
         Returns all devices owned by the user
         '''
-        # TODO: authentication
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -125,7 +130,6 @@ class DeviceList(APIView):
         POST /api/user/:username/device
         Adds a device for the user
         '''
-        # TODO: authentication
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -139,6 +143,10 @@ class DeviceList(APIView):
 
 
 class DeviceDetail(APIView):
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
+    permission_classes = (IsOwnerPermission,)
+
     def get(self, request, username, id):
         '''
         GET /api/user/:username/device/:id
@@ -172,6 +180,11 @@ class DeviceDetail(APIView):
 
 
 class UserList(APIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # TODO We should limit who can create users or make some registration form
+    #permission_classes = (IsOwnerPermission,)
+
     def post(self, request):
         '''
         POST /api/user
@@ -187,6 +200,9 @@ class UserList(APIView):
 
 
 class UserDetail(APIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsOwnerPermission,)
     '''
     GET /api/user/:username
     Returns some details for the user

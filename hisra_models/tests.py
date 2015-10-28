@@ -71,6 +71,7 @@ class UserTests(APITestCase):
         '''
         Test we can find a user
         '''
+        set_basic_auth_header(self.client, 'user0', 'password0')
         url = '/api/user/user0'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
@@ -79,11 +80,13 @@ class UserTests(APITestCase):
 
     def test_find_missing_user(self):
         '''
-        Tests that finding a missing user returns 404
+        Tests that finding a missing user returns 403
         '''
+        #TODO should we return 404 or 403?
+        set_basic_auth_header(self.client, 'user0', 'password0')
         url = '/api/user/user_that_does_not_exist'
         response = self.client.get(url)
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class DeviceTest(APITestCase):
@@ -91,6 +94,7 @@ class DeviceTest(APITestCase):
     def setUp(self):
         self.username = 'testuser'
         self.password = 'testpass'
+        set_basic_auth_header(self.client, self.username, self.password)
         self.owner = User.objects.create_user(username=self.username,
                                               password=self.password)
         self.playlist = Playlist.objects.create(owner=self.owner,
