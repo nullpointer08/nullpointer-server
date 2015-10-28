@@ -1,4 +1,5 @@
-from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
@@ -8,10 +9,8 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from django.views.generic.base import TemplateView
-from django.contrib.auth import authenticate
 from rest_framework import generics
 from permissions import IsOwnerPermission
-from rest_framework.permissions import IsAuthenticated
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -21,25 +20,21 @@ logger.setLevel(logging.DEBUG)
 class ChunkedUploadDemo(TemplateView):
     template_name = 'chunked_upload_demo.html'
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ChunkedUploadDemo, self).dispatch(*args, **kwargs)
+
 
 class HisraChunkedUploadView(ChunkedUploadView):
     model = HisraChunkedUpload
     field_name = 'the_file'
 
-    def check_permissions(self, request):
-        pass
-
-
 class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
     model = HisraChunkedUpload
 
-    def check_permissions(self, request):
-        pass
-
     def on_completion(self, uploaded_file, request):
         try:
-            user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
-            Media.objects.create_media(uploaded_file, user)
+            Media.objects.create_media(uploaded_file, request.user)
             logger.info("Media saved")
         except Exception, e:
             logger.error(e)

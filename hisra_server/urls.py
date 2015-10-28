@@ -60,7 +60,13 @@ urlpatterns = [
     url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
         views.DevicePlaylist.as_view()),
 
+    # LOGIN
+    url(r'^login/?$', 'django.contrib.auth.views.login', {'template_name':'login.html'}),
+    # LOGOUT
+    url(r'^logout/?$', 'django.contrib.auth.views.logout', {'template_name':'logout.html'} ),
+
     # /uploadfile/
+
     url(r'^uploadfile/?$',
         views.ChunkedUploadDemo.as_view(),name='chunked_upload'),
 
@@ -69,6 +75,7 @@ urlpatterns = [
     url(r'^api/chunked_upload_complete/?$',
         HisraChunkedUploadCompleteView.as_view(),
         name='api_chunked_upload_complete'),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

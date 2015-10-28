@@ -27,6 +27,8 @@
   {% csrf_token %}
   <input id="chunked_upload" type="file" name="the_file">
 
+  <form id="login" type="
+
   <p id="progress"></p>
   <div id="messages"></div>
 
@@ -88,8 +90,6 @@
             csrfmiddlewaretoken: csrf,
             upload_id: data.result.upload_id,
             md5: md5,
-            username: "apina",
-            password: "gorilla"
           },
           dataType: "json",
           success: function(data) {
