@@ -1,21 +1,25 @@
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from django.core.servers.basehttp import FileWrapper
 
 import os
 
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
+from chunked_upload.exceptions import ChunkedUploadError
+from chunked_upload.constants import http_status
 
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
 
 from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
-
 from hisra_models.permissions import IsOwnerPermission
 from hisra_models.serializers import UserSerializer, MediaSerializer
 from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
@@ -56,17 +60,27 @@ def download_document(request, path):
 class ChunkedUploadDemo(TemplateView):
     template_name = 'chunked_upload_demo.html'
 
-    @method_decorator(login_required)
+    @permission_required(login_required)
     def dispatch(self, *args, **kwargs):
         return super(ChunkedUploadDemo, self).dispatch(*args, **kwargs)
 
 
-class HisraChunkedUploadView(ChunkedUploadView):
+class HisraChunkedUploadView(APIView, ChunkedUploadView):
     model = HisraChunkedUpload
     field_name = 'the_file'
-    permission_classes = (IsOwnerPermission,)
+    authentication_classes = (BasicAuthentication,)
 
-    # def check_permissions(self, request):
+    # check_permissions is called from both super classes atm.
+    def check_permissions(self, request):
+    #     checkBasicAuthentication(self, request)
+        logger.debug("HisraChunkeDUploadView check_permissions user: %s", request.user)
+#        if request.user.id is None:
+#            raise ChunkedUploadError(
+#                status=http_status.HTTP_403_FORBIDDEN,
+#                detail='Authentication credentials were not provided'
+#            )
+
+    # def validate(self, request):
     #     filename = request.FILES.get(self.field_name).name
     #     path = os.path.join(MEDIA_ROOT + str(request.user.id), '/', filename)
     #     logger.debug("PATH %s", path)
@@ -77,9 +91,17 @@ class HisraChunkedUploadView(ChunkedUploadView):
     #         return HttpResponse(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
 
-class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
+class HisraChunkedUploadCompleteView(APIView, ChunkedUploadCompleteView):
     model = HisraChunkedUpload
-    permission_classes = (IsOwnerPermission,)
+    authentication_classes = (BasicAuthentication,)
+
+    def check_permissions(self, request):
+        logger.debug("HisraChunkeDUploadCompleteView check_permissions user: %s", request.user)
+        if request.user.id is None:
+            raise ChunkedUploadError(
+                status=http_status.HTTP_403_FORBIDDEN,
+                detail='Authentication credentials were not provided'
+            )
 
     def on_completion(self, uploaded_file, request):
         try:

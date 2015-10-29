@@ -22,7 +22,6 @@ def set_basic_auth_header(client, username, password):
     credentials = base64.encodestring(username + ':' + password).strip()
     client.credentials(HTTP_AUTHORIZATION='Basic ' + credentials)
 
-
 class UserTests(APITestCase):
     '''
     Tests posting users and fetching users
@@ -471,29 +470,70 @@ class DevicePlaylist(APITestCase):
         url = '/api/device/doesnotexist/playlist'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
-'''
+
+
+
+
+
+
+
+
+
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+import os
+import logging
+logger = logging.getLogger(__name__)
+from hashlib import md5
+import json
+import tempfile
+from hisra_server import settings
+
+def get_md5(filePath):
+    m = md5()
+    with open(filePath,'rb') as f:
+        while True:
+            chunk = f.read(128)
+            if not chunk:
+                break
+            m.update(chunk)
+    return m.hexdigest()
+
 class MediaUploadTestCase(APITestCase):
-    from hisra_server.settings import MEDIA_ROOT
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='testpassword'
-        )
-        self.testFile = open(MEDIA_ROOT, )
+        self.__real_media_dir = settings.MEDIA_ROOT
+        settings.MEDIA_ROOT = tempfile.mkdtemp(suffix='test')
 
-    def test_get_device_playlist(self):
-        url = '/api/device/' + self.device.unique_device_id + '/playlist'
+        self.username = 'testuser'
+        self.password = 'testpassword'
+        self.owner = User.objects.create_user(username=self.username,
+                                              password=self.password,id=2000000000)
+        self.assertEquals(User.objects.count(), 1)
+        set_basic_auth_header(self.client, self.username, self.password)
 
-        response = self.client.get(url, format='json')
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.test_file = settings.MEDIA_ROOT + 'kuva.jpg'
 
-        expected = PlaylistSerializer(self.playlist).data
-        serializer = PlaylistSerializer(data=response.data)
-        self.assertTrue(serializer.is_valid())
-        self.assertTrue(resp_equals(expected, response.data))
+    def test_post_file(self):
+        original = open(self.test_file, "rb")
+        upload_file = SimpleUploadedFile(name="kuva.jpg", content=original.read())
+        original.close()
+        response = self.client.post('/api/chunked_upload/', {'the_file':upload_file})
+        logger.info("RESPONSE: %s", response)
+        dictResp = json.loads(response.content)
+        upload_id = dictResp['upload_id']
+        logger.debug(upload_id)
+        md5_checksum = get_md5(self.test_file)
+        logger.debug(md5_checksum)
+        data = {
+            'upload_id': upload_id,
+            'md5': md5_checksum
+        }
+        response = self.client.post('/api/chunked_upload_complete/', data=data)
+        logger.info("RESPONSE: %s", response)
+        # for chunk in upload_file.chunks(100):
+        #     response = self.client.post('/api/chunked_upload/', {'the_file':chunk})
+        #     logger.info("RESPONSE: %s", response)
 
-    def test_get_missing_device_playlist(self):
-        url = '/api/device/doesnotexist/playlist'
-        response = self.client.get(url, format='json')
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
-        '''
+    def tearDown(self):
+        shutil.rmtree(settings.MEDIA_ROOT)
+        settings.MEDIA_ROOT = self.__real_media_dir
