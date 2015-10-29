@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'chunked_upload',
     'hisra_models',
+    #'mod_wsgi.server'
 )
 
 MIDDLEWARE_CLASSES = (

@@ -1,19 +1,55 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
-from rest_framework.views import APIView
+from django.views.generic.base import TemplateView
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.core.servers.basehttp import FileWrapper
+
+import os
+
+from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
+
+from rest_framework import status
+from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
+
+from hisra_models.permissions import IsOwnerPermission
 from hisra_models.serializers import UserSerializer, MediaSerializer
 from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
-from rest_framework import status
-from django.contrib.auth.models import User
-from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
-from django.views.generic.base import TemplateView
-from rest_framework import generics
-from permissions import IsOwnerPermission
+from hisra_server.settings import MEDIA_ROOT, MEDIA_URL, BASE_DIR
+from hisra_models.utils import determine_media_type_from_filename
+
+# when we deploy we might need these but not for now
+#from hisra_server.wsgi import application
+#from xsendfile import XSendfileApplication
+#DOCUMENT_SENDING_APP = XSendfileApplication(os.path.join(BASE_DIR,MEDIA_ROOT))
+
+from django.utils.encoding import smart_str
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+
+def download_document(request, path):
+    filename = path.split('/');
+    user_id_from_path = int(filename[0])
+    filename = filename[1]
+
+    if not request.user.is_authenticated:
+        logger.debug("Not authenticated")
+        return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
+    if request.user.id != user_id_from_path:
+        logger.debug("Different id")
+        return HttpResponse(status=status.HTTP_403_FORBIDDEN)
+    logger.debug("authentication ok!")
+    path = os.path.join(MEDIA_ROOT,path)
+    response = HttpResponse(content=FileWrapper(file(path)))
+    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
+    return response
 
 
 # temporary for testing
@@ -28,10 +64,22 @@ class ChunkedUploadDemo(TemplateView):
 class HisraChunkedUploadView(ChunkedUploadView):
     model = HisraChunkedUpload
     field_name = 'the_file'
+    permission_classes = (IsOwnerPermission,)
+
+    # def check_permissions(self, request):
+    #     filename = request.FILES.get(self.field_name).name
+    #     path = os.path.join(MEDIA_ROOT + str(request.user.id), '/', filename)
+    #     logger.debug("PATH %s", path)
+    #     if os.path.exists(path):
+    #         return HttpResponse(status=status.HTTP_409_CONFLICT)
+    #
+    #     if filename is not None and determine_media_type_from_filename(filename):
+    #         return HttpResponse(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
 
 class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
     model = HisraChunkedUpload
+    permission_classes = (IsOwnerPermission,)
 
     def on_completion(self, uploaded_file, request):
         try:

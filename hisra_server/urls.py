@@ -60,18 +60,19 @@ urlpatterns = [
     url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
         views.DevicePlaylist.as_view()),
 
-    # LOGIN
-    url(r'^login/?$', 'django.contrib.auth.views.login', {'template_name':'login.html'}),
-    # LOGOUT
-    url(r'^logout/?$', 'django.contrib.auth.views.logout', {'template_name':'logout.html'} ),
+    #
+    url(r'^media/(?P<path>.*)$', views.download_document),
 
+    #LOGIN LOGOUT PASWORD CHANGE/RESET
+    url('^', include('django.contrib.auth.urls')),
     # /uploadfile/
 
     url(r'^uploadfile/?$',
         views.ChunkedUploadDemo.as_view(),name='chunked_upload'),
 
     url(r'^api/chunked_upload/?$',
-        HisraChunkedUploadView.as_view(), name='api_chunked_upload'),
+        HisraChunkedUploadView.as_view(),
+        name='api_chunked_upload'),
     url(r'^api/chunked_upload_complete/?$',
         HisraChunkedUploadCompleteView.as_view(),
         name='api_chunked_upload_complete'),
