@@ -487,7 +487,9 @@ logger = logging.getLogger(__name__)
 from hashlib import md5
 import json
 import tempfile
+import shutil
 from hisra_server import settings
+
 
 def get_md5(filePath):
     m = md5()
@@ -498,6 +500,7 @@ def get_md5(filePath):
                 break
             m.update(chunk)
     return m.hexdigest()
+
 
 class MediaUploadTestCase(APITestCase):
     def setUp(self):
@@ -511,14 +514,15 @@ class MediaUploadTestCase(APITestCase):
         self.assertEquals(User.objects.count(), 1)
         set_basic_auth_header(self.client, self.username, self.password)
 
-        self.test_file = settings.MEDIA_ROOT + 'kuva.jpg'
+        self.test_file = 'test_media/kuva.jpg'
 
     def test_post_file(self):
         original = open(self.test_file, "rb")
         upload_file = SimpleUploadedFile(name="kuva.jpg", content=original.read())
         original.close()
+        logger.debug("MEDIA ROOT IS: %s", settings.MEDIA_ROOT)
         response = self.client.post('/api/chunked_upload/', {'the_file':upload_file})
-        logger.info("RESPONSE: %s", response)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
         dictResp = json.loads(response.content)
         upload_id = dictResp['upload_id']
         logger.debug(upload_id)
@@ -529,7 +533,7 @@ class MediaUploadTestCase(APITestCase):
             'md5': md5_checksum
         }
         response = self.client.post('/api/chunked_upload_complete/', data=data)
-        logger.info("RESPONSE: %s", response)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
         # for chunk in upload_file.chunks(100):
         #     response = self.client.post('/api/chunked_upload/', {'the_file':chunk})
         #     logger.info("RESPONSE: %s", response)
