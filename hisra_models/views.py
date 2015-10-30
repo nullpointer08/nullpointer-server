@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 
 from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
 from hisra_models.permissions import IsOwnerPermission
@@ -60,7 +60,7 @@ def download_document(request, path):
 class ChunkedUploadDemo(TemplateView):
     template_name = 'chunked_upload_demo.html'
 
-    @permission_required(login_required)
+    @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(ChunkedUploadDemo, self).dispatch(*args, **kwargs)
 
@@ -68,12 +68,13 @@ class ChunkedUploadDemo(TemplateView):
 class HisraChunkedUploadView(APIView, ChunkedUploadView):
     model = HisraChunkedUpload
     field_name = 'the_file'
-    authentication_classes = (BasicAuthentication,)
+    authentication_classes = (BasicAuthentication, SessionAuthentication)
 
     # check_permissions is called from both super classes atm.
     def check_permissions(self, request):
     #     checkBasicAuthentication(self, request)
         logger.debug("HisraChunkeDUploadView check_permissions user: %s", request.user)
+
 #        if request.user.id is None:
 #            raise ChunkedUploadError(
 #                status=http_status.HTTP_403_FORBIDDEN,
@@ -93,7 +94,7 @@ class HisraChunkedUploadView(APIView, ChunkedUploadView):
 
 class HisraChunkedUploadCompleteView(APIView, ChunkedUploadCompleteView):
     model = HisraChunkedUpload
-    authentication_classes = (BasicAuthentication,)
+    authentication_classes = (BasicAuthentication, SessionAuthentication)
 
     def check_permissions(self, request):
         logger.debug("HisraChunkeDUploadCompleteView check_permissions user: %s", request.user)
