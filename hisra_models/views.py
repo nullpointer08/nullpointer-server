@@ -38,19 +38,35 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+def authorize_download(request, user_id):
+
+    if request.user.is_authenticated and request.user.id == user_id:
+        return True
+    query_params = request.GET
+    if 'device_id' in query_params:
+        device_id = query_params['device_id']
+        try:
+            device = Device.objects.get(pk=device_id)
+        except Device.DoesNotExist:
+            logger.debug("No such device: %s" % device_id)
+            return False
+        device_owner = User.objects.get(pk=device.owner.id)
+        if device_owner.id == user_id:
+            return True
+    return False
+
+
 def download_document(request, path):
-    filename = path.split('/');
+    print 'calling download_document'
+    print request.GET
+    filename = path.split('/')
     user_id_from_path = int(filename[0])
     filename = filename[1]
-
-    if not request.user.is_authenticated:
-        logger.debug("Not authenticated")
-        return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
-    if request.user.id != user_id_from_path:
-        logger.debug("Different id")
-        return HttpResponse(status=status.HTTP_403_FORBIDDEN)
-    logger.debug("authentication ok!")
-    path = os.path.join(MEDIA_ROOT,path)
+    authorized = authorize_download(request, user_id_from_path)
+    if not authorized:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    logger.debug("authorization ok!")
+    path = os.path.join(MEDIA_ROOT, path)
     response = HttpResponse(content=FileWrapper(file(path)))
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
     return response
@@ -271,14 +287,10 @@ class UserList(APIView):
 
 
 class UserDetail(APIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsOwnerPermission,)
     '''
     GET /api/user/:username
     Returns some details for the user
     '''
-
     def get(self, request, username):
         users = User.objects.all().filter(username=username)
         if len(users) == 0:
@@ -296,10 +308,27 @@ class DevicePlaylist(APIView):
             device = Device.objects.get(pk=id)
         except Device.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if device.playlist is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         try:
             playlist = Playlist.objects.get(pk=device.playlist.id)
         except Playlist.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            device_owner = User.objects.get(pk=device.owner.id)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            playlist_owner = User.objects.get(pk=playlist.owner.id)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if playlist_owner != device_owner:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         serializer = PlaylistSerializer(playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)

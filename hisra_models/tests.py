@@ -85,7 +85,7 @@ class UserTests(APITestCase):
         set_basic_auth_header(self.client, 'user0', 'password0')
         url = '/api/user/user_that_does_not_exist'
         response = self.client.get(url)
-        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DeviceTest(APITestCase):
