@@ -38,38 +38,39 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def authorize_download(request, user_id):
+class MediaDownloadView(APIView):
+    authentication_classes = (BasicAuthentication, SessionAuthentication)
 
-    if request.user.is_authenticated and request.user.id == user_id:
-        return True
-    query_params = request.GET
-    if 'device_id' in query_params:
-        device_id = query_params['device_id']
-        try:
-            device = Device.objects.get(pk=device_id)
-        except Device.DoesNotExist:
-            logger.debug("No such device: %s" % device_id)
-            return False
-        device_owner = User.objects.get(pk=device.owner.id)
-        if device_owner.id == user_id:
+    def get(self, request, path):
+        logger.debug('calling download_document')
+        filename = path.split('/')
+        user_id_from_path = int(filename[0])
+        filename = filename[1]
+        authorized = self.check_authorization(request, user_id_from_path)
+        print 'IS %s AUTHORIZED: %s' % (request.user, authorized)
+        if not authorized:
+            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
+        logger.debug("authorization ok!")
+        path = os.path.join(MEDIA_ROOT, path)
+        response = HttpResponse(content=FileWrapper(file(path)))
+        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
+        return response
+
+    def check_authorization(self, request, user_id):
+        if request.user.is_authenticated and request.user.id == user_id:
             return True
-    return False
-
-
-def download_document(request, path):
-    print 'calling download_document'
-    print request.GET
-    filename = path.split('/')
-    user_id_from_path = int(filename[0])
-    filename = filename[1]
-    authorized = authorize_download(request, user_id_from_path)
-    if not authorized:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    logger.debug("authorization ok!")
-    path = os.path.join(MEDIA_ROOT, path)
-    response = HttpResponse(content=FileWrapper(file(path)))
-    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
-    return response
+        query_params = request.GET
+        if 'device_id' in query_params:
+            device_id = query_params['device_id']
+            try:
+                device = Device.objects.get(pk=device_id)
+            except Device.DoesNotExist:
+                logger.debug('No such device: %s' % device_id)
+                return False
+            device_owner = User.objects.get(pk=device.owner.id)
+            if device_owner.id == user_id:
+                return True
+        return False
 
 
 # temporary for testing
@@ -308,25 +309,20 @@ class DevicePlaylist(APIView):
             device = Device.objects.get(pk=id)
         except Device.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
         if device.playlist is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
         try:
             playlist = Playlist.objects.get(pk=device.playlist.id)
         except Playlist.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
         try:
             device_owner = User.objects.get(pk=device.owner.id)
         except User.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)
-
         try:
             playlist_owner = User.objects.get(pk=playlist.owner.id)
         except User.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)
-
         if playlist_owner != device_owner:
             return Response(status=status.HTTP_403_FORBIDDEN)
 

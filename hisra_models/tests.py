@@ -538,6 +538,34 @@ class MediaUploadTestCase(APITestCase):
         #     response = self.client.post('/api/chunked_upload/', {'the_file':chunk})
         #     logger.info("RESPONSE: %s", response)
 
+    def test_get_file_no_authorization(self):
+        # Post a file first
+        self.test_post_file()
+        url = '/media/1/kuva.jpg'
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_file_basic_auth(self):
+        # Post a file first
+        self.test_post_file()
+        set_basic_auth_header(self.client, self.username, self.password)
+        url = '/media/%s/kuva.jpg' % self.owner.id
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        orig_data = open(self.test_file, 'rb').read()
+        self.assertEquals(orig_data, response.content)
+
+    def test_get_file_owned_device(self):
+        Device.objects.create(unique_device_id='device_1', owner=self.owner)
+        # Post a file first
+        self.test_post_file()
+        set_basic_auth_header(self.client, self.username, self.password)
+        url = '/media/%s/kuva.jpg?device_id=device_1' % self.owner.id
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        orig_data = open(self.test_file, 'rb').read()
+        self.assertEquals(orig_data, response.content)
+
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
         settings.MEDIA_ROOT = self.__real_media_dir

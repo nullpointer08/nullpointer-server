@@ -61,7 +61,7 @@ urlpatterns = [
         views.DevicePlaylist.as_view()),
 
     #
-    url(r'^media/(?P<path>.*)$', views.download_document),
+    url(r'^media/(?P<path>.*)$', views.MediaDownloadView.as_view()),
 
     #LOGIN LOGOUT PASWORD CHANGE/RESET
     url('^', include('django.contrib.auth.urls')),
