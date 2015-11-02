@@ -274,6 +274,13 @@ class DeviceList(APIView):
         POST /api/user/:username/device
         Adds a device for the user
         '''
+        try:
+            playlist = Playlist.objects.get(pk=request.data['playlist'])
+        except Playlist.DoesNotExist:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if playlist.owner.id != request.user.id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_404_NOT_FOUND)
