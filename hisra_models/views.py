@@ -172,7 +172,7 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
     permission_classes = (IsOwnerPermission,)
 
 
-class PlaylistList(generics.ListCreateAPIView):
+class PlaylistList(APIView):
 
         def get(self, request, username):
             '''
