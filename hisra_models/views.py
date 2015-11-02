@@ -140,12 +140,12 @@ class MediaList(APIView):
         GET /api/user/:username/media
         Returns all devices owned by the user
         '''
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_403_FORBIDDEN)
         assert len(owners) == 1
+        if not request.user.username == username:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owner = owners[0]
         media = Media.objects.all().filter(owner=owner)
         serializer = MediaSerializer(media, many=True)
@@ -156,12 +156,12 @@ class MediaList(APIView):
         POST /api/user/:username/device
         Adds a device for the user
         '''
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_403_FORBIDDEN)
         assert len(owners) == 1
+        if not request.user.username == username:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owner = owners[0]
         serializer = MediaSerializer(data=request.data)
         if serializer.is_valid():
@@ -183,12 +183,12 @@ class PlaylistList(APIView):
         GET /api/user/:username/media
         Returns all devices owned by the user
         '''
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_403_FORBIDDEN)
         assert len(owners) == 1
+        if not request.user.username == username:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owner = owners[0]
         playlists = Playlist.objects.all().filter(owner=owner)
         serializer = PlaylistSerializer(playlists, many=True)
@@ -199,12 +199,12 @@ class PlaylistList(APIView):
         POST /api/user/:username/device
         Adds a device for the user
         '''
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_403_FORBIDDEN)
         assert len(owners) == 1
+        if not request.user.username == username:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owner = owners[0]
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
@@ -274,13 +274,14 @@ class DeviceList(APIView):
         POST /api/user/:username/device
         Adds a device for the user
         '''
-        try:
-            playlist = Playlist.objects.get(pk=request.data['playlist'])
-        except Playlist.DoesNotExist:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if 'playlist' in request.data:
+            try:
+                playlist = Playlist.objects.get(pk=request.data['playlist'])
+            except Playlist.DoesNotExist:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            if playlist.owner.id != request.user.id:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        if playlist.owner.id != request.user.id:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         owners = User.objects.all().filter(username=username)
         if len(owners) == 0:
             return Response(status=status.HTTP_404_NOT_FOUND)
