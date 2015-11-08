@@ -1,14 +1,16 @@
 'use strict';
 
+/* global angular*/
+
 angular.module('myApp.main', ['ngRoute'])
 
-.config(['$routeProvider', function($routeProvider) {
+.config(['$routeProvider', function ($routeProvider) {
   $routeProvider.when('/', {
     templateUrl: 'main/main.html',
     controller: 'MainViewCtrl'
   });
 }])
 
-.controller('MainViewCtrl', [function() {
+.controller('MainViewCtrl', ['$scope', function () {
 
 }]);

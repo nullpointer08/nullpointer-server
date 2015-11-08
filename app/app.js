@@ -1,4 +1,5 @@
 'use strict';
+/* global angular */
 
 // Declare app level module which depends on views, and components
 angular.module('myApp', [
@@ -7,7 +8,7 @@ angular.module('myApp', [
   'myApp.media',
   'myApp.stats',
   'myApp.main'
-]).
-config(['$routeProvider', function($routeProvider) {
+])
+.config(['$routeProvider', function ($routeProvider) {
   $routeProvider.otherwise({redirectTo: '/'});
 }]);
