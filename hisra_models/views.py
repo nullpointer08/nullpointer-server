@@ -321,7 +321,13 @@ class DeviceDetail(APIView):
         except Device.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if request.data['playlist'] != device.owner.id:
+        playlist_id = request.data['playlist']
+        try:
+            playlist = Playlist.objects.get(pk=playlist_id)
+        except Playlist.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        if playlist.owner.id != device.owner.id:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         if 'unique_device_id' not in request.data:
