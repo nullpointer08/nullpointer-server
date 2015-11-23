@@ -1,0 +1,15 @@
+# HISRA Web Application README
+
+1. Run
+```npm install && bower install``` to install dependencies
+
+2. Run
+```gulp serve``` to run the development server
+
+3. Enjoy development. Follow Angular best practices :)
+
+ * [Google][1]
+ * [John Papa][2]
+
+[1]: https://docs.google.com/document/d/1XXMvReO8-Awi1EZXAXS4PzDzdNvV6pGcuaF4Q9821Es/pub
+[2]: https://github.com/johnpapa/angular-styleguide
