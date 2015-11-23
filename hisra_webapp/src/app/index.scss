@@ -45,6 +45,13 @@
   &.large {
    font-size: 48px;
   }
+
+  &.round-bg {
+    // border: 1px solid black;
+    padding: 0.2em;
+    background-color: #ccc;
+    border-radius: 100%;
+  }
 }
 
 html {

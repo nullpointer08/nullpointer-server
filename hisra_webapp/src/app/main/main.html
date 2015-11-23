@@ -6,9 +6,9 @@
     </header> -->
 
     <div layout="row" layout-sm="column" flex="auto">
-      <md-card layout-align="center" ng-repeat="module in main.modules | orderBy:'rank'">
+      <md-card layout-align="center center" ng-repeat="module in main.modules | orderBy:'rank'">
         <md-card-content>
-          <md-icon class="material-icons large">{{module.icon}}</md-icon>
+          <md-icon class="material-icons large round-bg">{{module.icon}}</md-icon>
         </md-card-content>
         <md-card-actions class="md-action-buttons">
           <md-button ng-href="{{ module.url }}">{{ module.description }}</md-button>
