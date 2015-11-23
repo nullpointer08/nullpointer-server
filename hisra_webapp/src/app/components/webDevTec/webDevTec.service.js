@@ -31,7 +31,7 @@
         'url': '/#/stats',
         'description': 'Examine system statistics',
         'icon': 'assessment'
-      },
+      }
 
     ];
 

@@ -9,7 +9,7 @@
   function MainController($timeout, webDevTec, toastr) {
     var vm = this;
 
-    vm.awesomeThings = [];
+    vm.modules = [];
     vm.classAnimation = '';
     vm.creationDate = 1447844996577;
     vm.showToastr = showToastr;
@@ -31,9 +31,9 @@
     function getWebDevTec() {
       vm.modules = webDevTec.getTec();
 
-      angular.forEach(vm.awesomeThings, function(awesomeThing) {
-        awesomeThing.rank = Math.random();
-      });
+      // angular.forEach(vm.modules, function(mod) {
+      //   mod.rank = Math.random();
+      // });
     }
   }
 })();
