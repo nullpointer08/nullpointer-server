@@ -42,6 +42,9 @@
 
   /* Support for IE. */
   font-feature-settings: 'liga';
+  &.large {
+   font-size: 48px;
+  }
 }
 
 html {
@@ -76,19 +79,6 @@ section.jumbotron {
   }
 }
 
-.techs {
-  display: flex;
-  flex-flow: row wrap;
-
-  md-card {
-    width: 30%;
-
-    img.pull-right {
-      float: right;
-      width: 100px;
-    }
-  }
-}
 
 /**
  *  Do not remove the comment below. It's the markers used by gulp-inject to inject

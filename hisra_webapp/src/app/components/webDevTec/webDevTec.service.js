@@ -18,19 +18,19 @@
         'title': 'Playlists',
         'url': '/#/playlists',
         'description': 'Manage playlists',
-        'icon': 'playlist'
+        'icon': 'list'
       },
       {
         'title': 'Media',
         'url': '/#/media',
         'description': 'Manage media',
-        'icon': 'video'
+        'icon': 'video_library'
       },
       {
         'title': 'Statistics',
         'url': '/#/stats',
         'description': 'Examine system statistics',
-        'icon': 'status'
+        'icon': 'assessment'
       },
 
     ];
