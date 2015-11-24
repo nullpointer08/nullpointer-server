@@ -1,0 +1,18 @@
+<md-toolbar layout="row" layout-align="center center">
+
+  <section flex layout="row" layout-align="left center">
+    <md-button class="md-icon-button" hide-gt-md>
+      <md-icon class="material-icons">menu</md-icon>
+    </md-button>
+
+    <md-button hide show-gt-md href="#/" hide-lt-md>
+      {{vm.title}}
+    </md-button>
+  </section>
+
+  <md-button aria-label="Account">
+    <md-icon class="material-icons">account_circle</md-icon>
+    {{vm.username}}
+  </md-button>
+
+</md-toolbar>

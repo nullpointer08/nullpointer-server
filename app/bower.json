@@ -25,6 +25,7 @@
     "bootstrap-css-only": "~3.3.5",
     "angular-route": "~1.4.7",
     "html5-boilerplate": "~5.2.0",
-    "angular-resource": "~1.4.7"
+    "angular-resource": "~1.4.7",
+    "angular-mocks": "~1.4.7"
   }
 }
