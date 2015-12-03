@@ -4,3 +4,5 @@
 *.pyc
 nothing-suspicious-here/
 media/
+static/admin/
+static/rest_framework/

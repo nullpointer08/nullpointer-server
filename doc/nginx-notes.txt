@@ -1,0 +1,21 @@
+To run this with nginx:
+
+1) pip install uwsgi
+2) sudo apt-get install nginx
+3) Configure hisra_server_nginx.conf
+    - Set the media, static and location parameters to point to the right
+      location on your disk (this will be automated later)
+4) Restart nginx: sudo service nginx restart
+    - This will read the configuration of step 3
+    - Check /var/log/nginx/error.log for errors
+5) Run ./nginx_start.sh
+    - This will start uwsgi with the django project
+    - Check if the server is running using the browser: localhost:8000
+
+Problems:
+Check /var/log/nginx/error.log for nginx errors
+Many problems are caused by permission issues. The nginx process needs permission
+to read and write the socket file (see the static file location in
+hisra_server_nginx.conf line 3 and nginx_start.sh). The nginx process also
+needs permission to read static files (see the static file directory in
+hisra_server_nginx.conf line 24 and hisra_server/settings.py lines 143-144)
