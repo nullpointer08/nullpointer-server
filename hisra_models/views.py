@@ -41,27 +41,31 @@ logger.setLevel(logging.DEBUG)
 class MediaDownloadView(APIView):
     authentication_classes = (BasicAuthentication, SessionAuthentication)
 
-    def get(self, request, path):
-        logger.debug('calling download_document')
-        filename = path.split('/')
-        user_id_from_path = int(filename[0])
-        filename = filename[1]
-        authorized = self.check_authorization(request, user_id_from_path)
+    def get(self, request, media_id):
+        media = Media.objects.get(id=media_id)
+        logger.debug("Media owner id: %s", media.owner.id)
+        authorized = self.check_authorization(request, media.owner.id)
         print 'IS %s AUTHORIZED: %s' % (request.user, authorized)
         if not authorized:
             return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
         logger.debug("authorization ok!")
-        path = os.path.join(MEDIA_ROOT, path)
-        response = HttpResponse(content=FileWrapper(file(path)))
-        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
+        response = HttpResponse()
+        filename_str = smart_str(media.media_file.name)
+        redirect_url = "/protected/{0}".format(filename_str);
+        logger.debug("Redirect url: %s", redirect_url)
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename_str.split('/')[1]
+        response['X-Accel-Redirect'] = redirect_url
         return response
 
     def check_authorization(self, request, user_id):
         if request.user.is_authenticated and request.user.id == user_id:
             return True
         query_params = request.GET
+
         if 'device_id' in query_params:
+
             device_id = query_params['device_id']
+            logger.debug("device_id: %s", device_id)
             try:
                 device = Device.objects.get(pk=device_id)
             except Device.DoesNotExist:

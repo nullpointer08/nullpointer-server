@@ -60,13 +60,13 @@ urlpatterns = [
     url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
         views.DevicePlaylist.as_view()),
 
-    #
-    url(r'^media/(?P<path>.*)$', views.MediaDownloadView.as_view()),
+    # GET /media/id
+    url(r'^media/(?P<media_id>[a-zA-Z0-9_]+)/?$', views.MediaDownloadView.as_view()),
 
     #LOGIN LOGOUT PASWORD CHANGE/RESET
     url('^', include('django.contrib.auth.urls')),
-    # /uploadfile/
 
+    # /uploadfile/
     url(r'^uploadfile/?$',
         views.ChunkedUploadDemo.as_view(),name='chunked_upload'),
 

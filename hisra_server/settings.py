@@ -142,9 +142,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 STATIC_ROOT = "/tmp/hisra/static"  # os.path.join(BASE_DIR, "static/")
 STATIC_URL = '/static/'
-#  STATICFILES_DIRS = (
-#      os.path.join(BASE_DIR, 'static/'),
-#  )
+STATICFILES_DIRS = (
+   os.path.join(BASE_DIR, 'static/'),
+)
 
-MEDIA_ROOT = 'media/'
+MEDIA_ROOT = '/home/hannu/hisra-media/'
 MEDIA_URL = 'http://127.0.0.1:8000/media/'

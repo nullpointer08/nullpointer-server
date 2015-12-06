@@ -2,9 +2,15 @@ To run this with nginx:
 
 1) pip install uwsgi
 2) sudo apt-get install nginx
+2.5) python manage.py collectstatic
+   - this collects your static files to /tmp/static/hisra (same as the default configuration in next step)
 3) Configure hisra_server_nginx.conf
-    - Set the media, static and location parameters to point to the right
+    - Set the media, static and location parameters to point to the right 
       location on your disk (this will be automated later)
+    - NOTE: media directory needs to have permissions for www-data user to execute
+            if it is inside your user home folder (eg /home/username/media) you might need to add user www-data to your username's group: gpasswd -a www-data username
+3.5) Symlink hisra_server_nginx.conf with nginx:
+      sudo ln -s /path/to/django/project/hisra_server_nginx.conf /etc/nginx/sites-enabled/
 4) Restart nginx: sudo service nginx restart
     - This will read the configuration of step 3
     - Check /var/log/nginx/error.log for errors
