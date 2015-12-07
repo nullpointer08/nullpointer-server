@@ -13,6 +13,7 @@
       'ngResource',
       'ngRoute',
       'ngMaterial',
-      'toastr']);
+      'toastr',
+      'ngResource']);
 
 })();

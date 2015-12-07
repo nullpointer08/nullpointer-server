@@ -1,11 +1,17 @@
+(function(){
 'use strict';
 
 /* global angular */
 
-var Media = angular.module('Media', ['ngResource']);
+angular.module('hisraWebapp')
 
-Media.factory('Media', ['$resource', function ($resource) {
-  return $resource('/api/user/:username/media/:id', {
+.factory('Media', MediaFactory);
+
+/*@ngInject*/
+function MediaFactory($resource, BASE_URL) {
+  return $resource(BASE_URL + '/api/user/:username/media/:id', {
     id: '@id'
   });
-}]);
+}
+
+})();

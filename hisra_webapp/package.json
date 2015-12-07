@@ -1,7 +1,9 @@
 {
   "name": "hisraWebapp",
   "version": "0.0.0",
-  "dependencies": {},
+  "dependencies": {
+    "gulp-sass": "^2.1.0"
+  },
   "scripts": {
     "test": "gulp test"
   },

@@ -1,15 +1,20 @@
+(function(){
 'use strict';
 
 /* global angular */
 
-var Playlist = angular.module('Playlist', ['ngResource']);
+angular.module('hisraWebapp')
 
-Playlist.factory('Playlist', ['$resource', function ($resource) {
-  return $resource('/api/user/:username/playlist/:id', {
+.factory('Playlist', PlaylistFactory);
+
+/*@ngInject*/
+function PlaylistFactory($resource, BASE_URL) {
+  return $resource(BASE_URL + '/api/user/:username/playlist/:id', {
     id: '@id'
   }, {
     update: {
       method: 'PUT'
     }
   });
-}]);
+}
+})();
