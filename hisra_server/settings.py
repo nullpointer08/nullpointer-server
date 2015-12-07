@@ -42,7 +42,6 @@ INSTALLED_APPS = (
     'rest_framework',
     'chunked_upload',
     'hisra_models',
-    #'mod_wsgi.server'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -147,4 +146,4 @@ STATICFILES_DIRS = (
 )
 
 MEDIA_ROOT = '/home/hannu/hisra-media/'
-MEDIA_URL = 'http://127.0.0.1:8000/media/'
+MEDIA_URL = 'http://192.168.1.60:8000/media/'

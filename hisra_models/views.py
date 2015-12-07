@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 
 from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
-from hisra_models.permissions import IsOwnerPermission
+from hisra_models.permissions import IsOwnerPermission, DeviceAuthentication
 from hisra_models.serializers import UserSerializer, MediaSerializer
 from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
 
@@ -27,9 +27,13 @@ logger.setLevel(logging.DEBUG)
 
 
 class MediaDownloadView(APIView):
-    authentication_classes = (BasicAuthentication, SessionAuthentication)
+    authentication_classes = (SessionAuthentication, DeviceAuthentication, BasicAuthentication)
 
     def get(self, request, media_id=None, owner_id=None, filename=None):
+        logger.debug("REQUEST USER: %s", request.user)
+        if not request.user.is_authenticated():
+            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
+
         logger.debug("MediaDownloadView GET: media_id: %s owner_id: %s filename: %s", media_id, owner_id, filename)
         try:
             if not media_id:
@@ -40,39 +44,24 @@ class MediaDownloadView(APIView):
         except Media.DoesNotExist, e:
             # TODO questionable if we should inform a file does not exist without authorization
             return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-        logger.debug("Media owner id: %s", media.owner.id)
-        authorized = self.check_authorization(request, media.owner.id)
-        print 'IS %s AUTHORIZED: %s' % (request.user, authorized)
-        if not authorized:
-            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
+
+        #User requested another users file!
+        logger.debug('User %s requested user %s\'s media', request.user.username, media.owner.username)
+        if request.user.id != media.owner.id:
+            logger.debug('User %s requested user %s\'s media', request.user.username, media.owner.username)
+            return HttpResponse(status=status.HTTP_403_FORBIDDEN)
+
         logger.debug("authorization ok!")
         response = HttpResponse()
         filename_str = smart_str(media.media_file.name)
+
         redirect_url = "/protected/{0}".format(filename_str);
         logger.debug("Redirect url: %s", redirect_url)
+
         response['Content-Disposition'] = 'attachment; filename=%s' % filename_str.split('/')[1]
         response['X-Accel-Redirect'] = redirect_url
+
         return response
-
-    def check_authorization(self, request, user_id):
-        if request.user.is_authenticated and request.user.id == user_id:
-            return True
-        query_params = request.GET
-
-        if 'device_id' in query_params:
-
-            device_id = query_params['device_id']
-            logger.debug("device_id: %s", device_id)
-            try:
-                device = Device.objects.get(pk=device_id)
-            except Device.DoesNotExist:
-                logger.debug('No such device: %s' % device_id)
-                return False
-            device_owner = User.objects.get(pk=device.owner.id)
-            if device_owner.id == user_id:
-                return True
-        return False
-
 
 # temporary for testing
 class ChunkedUploadDemo(TemplateView):
@@ -378,27 +367,12 @@ class UserDetail(APIView):
 
 
 class DevicePlaylist(APIView):
-    def get(self, request, id):
-        try:
-            device = Device.objects.get(pk=id)
-        except Device.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if device.playlist is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        try:
-            playlist = Playlist.objects.get(pk=device.playlist.id)
-        except Playlist.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        try:
-            device_owner = User.objects.get(pk=device.owner.id)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        try:
-            playlist_owner = User.objects.get(pk=playlist.owner.id)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        if playlist_owner != device_owner:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+    authentication_classes = (BasicAuthentication, SessionAuthentication, DeviceAuthentication,)
 
-        serializer = PlaylistSerializer(playlist)
+    def get(self, request, id):
+        if not request.user.is_authenticated():
+            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
+
+        device = Device.objects.get(unique_device_id=id)
+        serializer = PlaylistSerializer(device.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)

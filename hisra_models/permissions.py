@@ -1,6 +1,8 @@
-from rest_framework import permissions, status
-from rest_framework.authentication import BasicAuthentication
-from django.http import HttpResponse
+from rest_framework import permissions, exceptions
+from django.contrib.auth.models import User
+from rest_framework import authentication
+from models import Device
+from django.utils.translation import ugettext_lazy as _
 import logging
 logger = logging.getLogger(__name__)
 
@@ -17,14 +19,27 @@ class IsOwnerPermission(permissions.BasePermission):
             return False
         return obj.owner == request.user
 
-#
-# def checkBasicAuthentication(view, request, *args, **kwargs):
-#     basicAuth = BasicAuthentication
-#     if request.user.id is not None:
-#         pass
-#     try:
-#         request.user = basicAuth.authenticate(request)
-#
-#     except Exception, e:
-#         logger.warn('Authentication failed: %s',e)
-#         return HttpResponse(status=status.HTTP_403_FORBIDDEN)
+
+class DeviceAuthentication(authentication.BaseAuthentication):
+    def authenticate(self, request):
+
+        auth = authentication.get_authorization_header(request).split()
+        if not auth or auth[0].lower() != b'device':
+            return None
+        if len(auth) == 1:
+            msg = _('Invalid device header. No credentials provided.')
+            raise exceptions.AuthenticationFailed(msg)
+        elif len(auth) > 2:
+            msg = _('Invalid device header. Device string should not contain spaces.')
+            raise exceptions.AuthenticationFailed(msg)
+        try:
+            device_id = auth[1].decode()
+        except UnicodeError:
+            msg = _('Invalid device header. Token string should not contain invalid characters.')
+            raise exceptions.AuthenticationFailed(msg)
+        try:
+            device = Device.objects.get(unique_device_id=device_id)
+        except Device.DoesNotExist:
+            raise exceptions.AuthenticationFailed(_('Invalid device id.'))
+
+        return (device.owner, device)

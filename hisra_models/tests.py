@@ -563,7 +563,7 @@ class MediaUploadTestCase(APITestCase):
         if not response.get('Content-Disposition').startswith("attachment; filename=kuva"):
             raise AssertionError("Content disposition was unexpected")
         if not response.get('X-Accel-Redirect').startswith("/protected/" + str(self.owner.id)):
-            raise AssertionError("Content disposition was unexpected")
+            raise AssertionError("X-Accel-Redirect was unexpected")
 
     # note: does not actually return a file because we use web server to do that
     def test_get_file_owned_device(self):
@@ -571,23 +571,27 @@ class MediaUploadTestCase(APITestCase):
 
         media = Media.objects.create_media(self.upload_file, self.owner)
         logger.debug("Media id: %s", media.id)
-
-        url = '/media/' + str(media.id) + '?device_id=device_1'
-
+        device_id =  'Device device_1'
+        self.client.credentials(HTTP_AUTHORIZATION=device_id)
+        url = '/media/' + str(media.id)
         response = self.client.get(url)
 
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         if not response.get('Content-Disposition').startswith("attachment; filename=kuva"):
             raise AssertionError("Content disposition was unexpected")
         if not response.get('X-Accel-Redirect').startswith("/protected/" + str(self.owner.id)):
-            raise AssertionError("Content disposition was unexpected")
+            raise AssertionError("X-Accel-Redirect was unexpected")
 
     def test_get_file_with_filename(self):
 
         Device.objects.create(unique_device_id='device_1', owner=self.owner)
 
         media = Media.objects.create_media(self.upload_file, self.owner)
-        url = '/media/' + media.media_file.name + '?device_id=device_1'
+
+        device_auth =  'Device device_1'
+        self.client.credentials(HTTP_AUTHORIZATION=device_auth)
+
+        url = '/media/' + media.media_file.name
         #set_basic_auth_header(self.client, self.username, self.password)
         response = self.client.get(url)
         logger.debug(response)
@@ -595,7 +599,7 @@ class MediaUploadTestCase(APITestCase):
         if not response.get('Content-Disposition').startswith("attachment; filename=kuva"):
             raise AssertionError("Content disposition was unexpected")
         if not response.get('X-Accel-Redirect').startswith("/protected/" + str(self.owner.id)):
-            raise AssertionError("Content disposition was unexpected")
+            raise AssertionError("X-Accel-Redirect was unexpected")
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
