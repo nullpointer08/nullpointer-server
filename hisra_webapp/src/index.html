@@ -19,21 +19,18 @@
     <!-- endinject -->
     <!-- endbuild -->
   </head>
-  <body>
+  <body layout="column" flex>
     <!--[if lt IE 10]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
-    <md-content>
-      <header>
-        <acme-navbar creation-date="main.creationDate"></acme-navbar>
-      </header>
+    <acme-navbar creation-date="main.creationDate"></acme-navbar>
 
+    <div layout="row" flex>
       <side-nav></side-nav>
-    </md-content>
 
-    <div ng-view></div>
-
+      <div ng-view></div>
+    </div>
     <!-- build:js(src) scripts/vendor.js -->
     <!-- bower:js -->
     <!-- run `gulp inject` to automatically populate bower script dependencies -->
