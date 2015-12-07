@@ -1,27 +1,29 @@
 (function() {
-   'use strict'
-   angular.module('hisraWebapp')
-   .directive('sideNav', sideNav);
+  'use strict'
+  angular
+    .module('hisraWebapp')
+    .directive('sideNav', sideNav);
 
-   // @ngInject
-   function sideNav() {
+    // @ngInject
+    function sideNav() {
       var directive = {
-        restrict: 'E',
-        templateUrl: 'app/components/sidenav/sidenav.html',
+      restrict: 'E',
+      templateUrl: 'app/components/sidenav/sidenav.html',
       //   scope: {
       //       creationDate: '='
       //   },
-        controller: SideNavController,
-        controllerAs: 'vm',
-        bindToController: true
-      };
+      controller: SideNavController,
+      controllerAs: 'sidenav',
+      bindToController: true
+    };
 
-      return directive;
+    return directive;
 
       // @ngInject
-      function SideNavController() {
-         // var vm = this;
+    function SideNavController() {
+      var sidenav = this;
+      sidenav.title = 'SideNav';
 
-      }
-   }
+    }
+  }
 })();
