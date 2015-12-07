@@ -34,8 +34,9 @@ class MediaManager(models.Manager):
         uploaded_file.close()
         logger.debug("media_file saved")
         media.media_type = determine_media_type(os.path.join(MEDIA_ROOT, file_path))
-        media.url = os.path.join(MEDIA_URL, media.media_file.name)
+        media.url = os.path.join(MEDIA_URL, str(media.id))
         media.save()
+        return media
 
 
 def get_upload_to(instance, filename):

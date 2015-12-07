@@ -1,11 +1,8 @@
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.core.servers.basehttp import FileWrapper
-
-import os
 
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from chunked_upload.exceptions import ChunkedUploadError
@@ -15,24 +12,15 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 
 from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
 from hisra_models.permissions import IsOwnerPermission
 from hisra_models.serializers import UserSerializer, MediaSerializer
 from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
-from hisra_server.settings import MEDIA_ROOT, MEDIA_URL, BASE_DIR
-from hisra_models.utils import determine_media_type_from_filename
-
-# when we deploy we might need these but not for now
-#from hisra_server.wsgi import application
-#from xsendfile import XSendfileApplication
-#DOCUMENT_SENDING_APP = XSendfileApplication(os.path.join(BASE_DIR,MEDIA_ROOT))
 
 from django.utils.encoding import smart_str
-
+import os
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -41,8 +29,17 @@ logger.setLevel(logging.DEBUG)
 class MediaDownloadView(APIView):
     authentication_classes = (BasicAuthentication, SessionAuthentication)
 
-    def get(self, request, media_id):
-        media = Media.objects.get(id=media_id)
+    def get(self, request, media_id=None, owner_id=None, filename=None):
+        logger.debug("MediaDownloadView GET: media_id: %s owner_id: %s filename: %s", media_id, owner_id, filename)
+        try:
+            if not media_id:
+                media_file_filename = owner_id + "/" + filename
+                media = Media.objects.get(owner=owner_id, media_file=media_file_filename)
+            else:
+                media = Media.objects.get(id=media_id)
+        except Media.DoesNotExist, e:
+            # TODO questionable if we should inform a file does not exist without authorization
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         logger.debug("Media owner id: %s", media.owner.id)
         authorized = self.check_authorization(request, media.owner.id)
         print 'IS %s AUTHORIZED: %s' % (request.user, authorized)

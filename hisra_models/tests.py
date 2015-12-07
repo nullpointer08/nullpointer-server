@@ -1,3 +1,4 @@
+from django import contrib
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
@@ -512,16 +513,15 @@ class MediaUploadTestCase(APITestCase):
         self.owner = User.objects.create_user(username=self.username,
                                               password=self.password,id=2000000000)
         self.assertEquals(User.objects.count(), 1)
-        set_basic_auth_header(self.client, self.username, self.password)
-
         self.test_file = 'test_media/kuva.jpg'
+        original = open(self.test_file, "rb")
+        self.upload_file = SimpleUploadedFile(name="kuva.jpg", content=original.read())
+        original.close()
 
     def test_post_file(self):
-        original = open(self.test_file, "rb")
-        upload_file = SimpleUploadedFile(name="kuva.jpg", content=original.read())
-        original.close()
         logger.debug("MEDIA ROOT IS: %s", settings.MEDIA_ROOT)
-        response = self.client.post('/api/chunked_upload/', {'the_file':upload_file})
+        set_basic_auth_header(self.client, self.username, self.password)
+        response = self.client.post('/api/chunked_upload/', {'the_file':self.upload_file})
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         dictResp = json.loads(response.content)
         upload_id = dictResp['upload_id']
@@ -534,37 +534,68 @@ class MediaUploadTestCase(APITestCase):
         }
         response = self.client.post('/api/chunked_upload_complete/', data=data)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
+        return json.loads(response.content)
         # for chunk in upload_file.chunks(100):
         #     response = self.client.post('/api/chunked_upload/', {'the_file':chunk})
         #     logger.info("RESPONSE: %s", response)
 
     def test_get_file_no_authorization(self):
-        # Post a file first
-        self.test_post_file()
-        url = '/media/1/kuva.jpg'
+        # create media first
+        media = Media.objects.create_media(self.upload_file, self.owner)
+        logger.debug("Media id: %s", media.id)
+        url = '/media/' + str(media.id)
+        # NO auth
         response = self.client.get(url)
+
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    # note: does not actually return a file because we use web server to do that
     def test_get_file_basic_auth(self):
-        # Post a file first
-        self.test_post_file()
+
+        media = Media.objects.create_media(self.upload_file, self.owner)
+        logger.debug("Media id: %s", media.id)
+        url = '/media/' + str(media.id)
+
         set_basic_auth_header(self.client, self.username, self.password)
-        url = '/media/%s/kuva.jpg' % self.owner.id
+
         response = self.client.get(url)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
-        orig_data = open(self.test_file, 'rb').read()
-        self.assertEquals(orig_data, response.content)
+        if not response.get('Content-Disposition').startswith("attachment; filename=kuva"):
+            raise AssertionError("Content disposition was unexpected")
+        if not response.get('X-Accel-Redirect').startswith("/protected/" + str(self.owner.id)):
+            raise AssertionError("Content disposition was unexpected")
 
+    # note: does not actually return a file because we use web server to do that
     def test_get_file_owned_device(self):
         Device.objects.create(unique_device_id='device_1', owner=self.owner)
-        # Post a file first
-        self.test_post_file()
-        set_basic_auth_header(self.client, self.username, self.password)
-        url = '/media/%s/kuva.jpg?device_id=device_1' % self.owner.id
+
+        media = Media.objects.create_media(self.upload_file, self.owner)
+        logger.debug("Media id: %s", media.id)
+
+        url = '/media/' + str(media.id) + '?device_id=device_1'
+
         response = self.client.get(url)
+
         self.assertEquals(response.status_code, status.HTTP_200_OK)
-        orig_data = open(self.test_file, 'rb').read()
-        self.assertEquals(orig_data, response.content)
+        if not response.get('Content-Disposition').startswith("attachment; filename=kuva"):
+            raise AssertionError("Content disposition was unexpected")
+        if not response.get('X-Accel-Redirect').startswith("/protected/" + str(self.owner.id)):
+            raise AssertionError("Content disposition was unexpected")
+
+    def test_get_file_with_filename(self):
+
+        Device.objects.create(unique_device_id='device_1', owner=self.owner)
+
+        media = Media.objects.create_media(self.upload_file, self.owner)
+        url = '/media/' + media.media_file.name + '?device_id=device_1'
+        #set_basic_auth_header(self.client, self.username, self.password)
+        response = self.client.get(url)
+        logger.debug(response)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        if not response.get('Content-Disposition').startswith("attachment; filename=kuva"):
+            raise AssertionError("Content disposition was unexpected")
+        if not response.get('X-Accel-Redirect').startswith("/protected/" + str(self.owner.id)):
+            raise AssertionError("Content disposition was unexpected")
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)

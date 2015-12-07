@@ -60,6 +60,9 @@ urlpatterns = [
     url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
         views.DevicePlaylist.as_view()),
 
+    # GET /media/:owner_id/:filename
+    url(r'^media/(?P<owner_id>[a-zA-Z0-9_]+)/(?P<filename>.*)$', views.MediaDownloadView.as_view()),
+
     # GET /media/id
     url(r'^media/(?P<media_id>[a-zA-Z0-9_]+)/?$', views.MediaDownloadView.as_view()),
 
