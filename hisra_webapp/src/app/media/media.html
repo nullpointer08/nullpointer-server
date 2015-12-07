@@ -1,0 +1,37 @@
+<div class="media">
+
+   <!-- <side-nav></side-nav> -->
+	<md-content>
+		<section class="jumbotron media-add__droparea">
+			<div>Add media by dragging and dropping it here<br/> or press the "add" button</div>
+
+			<md-button ng-click="media.openFileBrowser()" class="md-fab md-primary" aria-label="Add Media">
+            <md-icon class="material-icons">add</md-icon>
+		        <md-tooltip>
+                 Add Media
+  			    </md-tooltip>
+         </md-button>
+
+			<input id="media-add__file" type="file" style="display: none;"/>
+
+		</section>
+
+		<h3>Added media</h3>
+		<div>
+			<div class="row media-added__filter">
+				<span>
+					<span><label><input type="checkbox"> Show videos</label></span>
+					<span><label><input type="checkbox"> Show images</label></span>
+				</span>
+				<span class="media-added__filter-text">
+					<span><i></i></span>
+					<input type="text" placeholder="Filter media">
+				</span>
+			</div>
+		</div>
+		<div class="media-added__media">
+			Videos...
+			Pictures...
+		</div>
+	</md-content>
+</div>

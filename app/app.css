@@ -1,0 +1,72 @@
+/* app css stylesheet */
+
+.menu {
+  /*list-style: none;*/
+  border-bottom: 0.1em solid black;
+  margin-bottom: 2em;
+  padding: 0 0 0.5em;
+}
+
+.menu__breadcrumb {
+}
+
+.menu__user {
+  float: right;
+  padding: 8px 15px;
+}
+
+
+.media {
+  margin: 15px;
+}
+
+.media-add__droparea {
+  text-align: center;
+  border: 1px dotted black;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.media-added__filter {
+  position:relative;
+  padding: 5px 8px;
+  line-height: 34px;
+  border: 1px solid black;
+}
+
+.media-added__filter label {
+  margin: 0;
+}
+
+.media-added__filter-text {
+  position: absolute;
+  right: 23px;
+}
+
+.media-added__media {
+  border: 1px solid black;
+  border-top: none;
+}
+
+
+/*.menu:before {
+  content: "[";
+}
+
+.menu:after {
+  content: "]";
+}
+
+.menu > li {
+  display: inline;
+}
+
+.menu > li:before {
+  content: "|";
+  padding-right: 0.3em;
+}
+
+.menu > li:nth-child(1):before {
+  content: "";
+  padding: 0;
+}*/

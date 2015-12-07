@@ -6,3 +6,5 @@ nothing-suspicious-here/
 media/
 static/admin/
 static/rest_framework/
+app/bower_components/
+app/node_modules

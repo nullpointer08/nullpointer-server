@@ -1,0 +1,31 @@
+{
+  "name": "hisra_webapp",
+  "version": "0.0.0",
+  "authors": [
+    "Mikael Viitaniemi <mikael.viitaniemi@zc.fi>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [
+    "node"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.7",
+    "angular-strap": "~2.3.3",
+    "bootstrap-css-only": "~3.3.5",
+    "angular-route": "~1.4.7",
+    "html5-boilerplate": "~5.2.0",
+    "angular-resource": "~1.4.7",
+    "angular-mocks": "~1.4.7"
+  }
+}

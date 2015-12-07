@@ -1,0 +1,70 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+
+@import "compass/reset";
+
+// Mixins:
+@mixin vertical-align($position: relative) {
+  position: $position;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+@mixin horizontal-align($position: relative) {
+  position: $position;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
+
+html {
+   font-family: Arial, Helvetica, sans-serif;
+}
+
+.container.main {
+   ul {
+      list-style: none;
+      float: left;
+      display: inline;
+
+      li {
+         display: inline-block;
+      }
+   }
+
+   a {
+      &:hover {
+         text-decoration: none;
+         cursor: pointer;
+      }
+
+      div {
+         width: 9em;
+         height: 9em;
+         border: 1px solid #c1c1c1;
+         border-radius: 0.2em;
+         margin: 0.5em;
+         text-align: center;
+         @include horizontal-align();
+
+         label {
+            @include horizontal-align(absolute);
+            bottom: 0;
+            padding: 0.5em;
+            background-color: #eee;
+            width: 100%;
+         }
+
+         i.glyphicon {
+            display: block;
+            margin-top: 1em;
+            font-size: 3em;
+         }
+      }
+   }
+}
