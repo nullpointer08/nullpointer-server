@@ -17,6 +17,9 @@ gulp.task('inject', ['scripts', 'styles'], function () {
 
   var injectScripts = gulp.src([
     path.join(conf.paths.src, '/app/index.module.js'),
+    path.join(conf.paths.src, '/app/components/fileupload/vendor/jquery.ui.widget.js'),
+    path.join(conf.paths.src, '/app/components/fileupload/jquery.fileupload.js'),
+    path.join(conf.paths.src, '/app/components/**/*.js'),
     path.join(conf.paths.src, '/app/**/*.module.js'),
     path.join(conf.paths.src, '/app/**/*.js'),
     path.join('!' + conf.paths.src, '/app/**/*.spec.js'),

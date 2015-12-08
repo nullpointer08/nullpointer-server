@@ -12,10 +12,10 @@ function DevicesController(/*User*/) {
   vm.devices = [];
 
   // TODO: Get username from auth service
-  // User.getDevices({username: 'test'}).$promise
-  //   .then(function (devices) {
-  //     vm.devices = devices;
-  //   });
+  User.getDevices({username: 'apina'}).$promise
+    .then(function (devices) {
+      vm.devices = devices;
+    });
 }
 
 })();
