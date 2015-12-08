@@ -1,3 +1,6 @@
 <div>
-	Device list... -> Device details (manage playlists, etc)
+	<h3>Your devices</h3>
+	<ul>
+		<li ng-repeat="device in devices.devices">{{device.unique_device_id}} - Playlist {{device.playlist}}</li>
+	</ul>
 </div>
