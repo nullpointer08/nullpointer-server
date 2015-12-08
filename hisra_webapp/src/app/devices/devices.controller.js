@@ -6,7 +6,7 @@ angular.module('hisraWebapp')
 .controller('DevicesController', DevicesController);
 
 /* @ngInject */
-function DevicesController(User) {
+function DevicesController(/*User*/) {
   var vm = this;
 
   vm.devices = [];
