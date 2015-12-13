@@ -591,7 +591,7 @@ class MediaUploadTestCase(APITestCase):
         device_auth =  'Device device_1'
         self.client.credentials(HTTP_AUTHORIZATION=device_auth)
 
-        url = '/media/' + media.media_file.name
+        url = '/media/' + str(media.owner.id) + '/' + str(media.name)
         #set_basic_auth_header(self.client, self.username, self.password)
         response = self.client.get(url)
         logger.debug(response)
