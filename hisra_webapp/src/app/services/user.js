@@ -12,19 +12,24 @@
     });
 
 
-    angular.extend(resource.prototype, {
-      getMedia: function() {
-        return Media.query({username: this.username});
+    return angular.extend(resource.prototype, {
+      getMedia: function(config) {
+        config = config || {};
+        config.username = config.username || this.username;
+        return Media.query(config);
       },
-      getPlaylists: function() {
-        return Playlist.query({username: this.username});
+      getPlaylists: function(config) {
+        config = config || {};
+        config.username = config.username || this.username;
+        return Playlist.query(config);
       },
-      getDevices: function() {
-        return Device.query({username: this.username});
+      getDevices: function(config) {
+        config = config || {};
+        config.username = config.username || this.username;
+        return Device.query(config);
       }
     });
 
-    return resource;
   }
 
 })();
