@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from chunked_upload.exceptions import ChunkedUploadError
 from chunked_upload.constants import http_status
+from chunked_upload.models import ChunkedUpload
 
 from rest_framework import status
 from rest_framework import generics
@@ -14,10 +15,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 
-from hisra_models.models import Media, Playlist, Device, HisraChunkedUpload
+from hisra_models.models import Media, Playlist, Device
 from hisra_models.permissions import IsOwnerPermission, DeviceAuthentication
 from hisra_models.serializers import UserSerializer, MediaSerializer
 from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
+from hisra_models import utils
+from hisra_server.settings import MEDIA_ROOT
 
 from django.utils.encoding import smart_str
 import os
@@ -57,8 +60,10 @@ class MediaDownloadView(APIView):
 
         redirect_url = "/protected/{0}".format(filename_str);
         logger.debug("Redirect url: %s", redirect_url)
-
+        logger.debug("Headers: %s", response._headers)
         response['Content-Disposition'] = 'attachment; filename=%s' % filename_str.split('/')[1]
+        response['Content-MD5'] = media.media_file.md5
+        logger.debug("Content md5: %s", media.media_file.md5)
         response['X-Accel-Redirect'] = redirect_url
 
         return response
@@ -72,22 +77,17 @@ class ChunkedUploadDemo(TemplateView):
         return super(ChunkedUploadDemo, self).dispatch(*args, **kwargs)
 
 
-class HisraChunkedUploadView(APIView, ChunkedUploadView):
-    model = HisraChunkedUpload
-    field_name = 'the_file'
-    authentication_classes = (BasicAuthentication, SessionAuthentication)
+class HisraChunkedUploadView(ChunkedUploadView):
 
-    # check_permissions is called from both super classes atm.
-    def check_permissions(self, request):
-    #     checkBasicAuthentication(self, request)
-        logger.debug("HisraChunkeDUploadView check_permissions user: %s", request.user)
+    def check_file_permission(self, request, upload_file):
+        if request.user != upload_file.user:
+            raise ChunkedUploadError(
+                status=status.HTTP_403_FORBIDDEN,
+                detail='Authentication credentials were not correct'
+            )
 
-#        if request.user.id is None:
-#            raise ChunkedUploadError(
-#                status=http_status.HTTP_403_FORBIDDEN,
-#                detail='Authentication credentials were not provided'
-#            )
 
+    #
     # def validate(self, request):
     #     filename = request.FILES.get(self.field_name).name
     #     path = os.path.join(MEDIA_ROOT + str(request.user.id), '/', filename)
@@ -95,26 +95,33 @@ class HisraChunkedUploadView(APIView, ChunkedUploadView):
     #     if os.path.exists(path):
     #         return HttpResponse(status=status.HTTP_409_CONFLICT)
     #
-    #     if filename is not None and determine_media_type_from_filename(filename):
+    #     if filename is not None and utils.determine_media_type_from_filename(filename):
     #         return HttpResponse(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
 
-class HisraChunkedUploadCompleteView(APIView, ChunkedUploadCompleteView):
-    model = HisraChunkedUpload
+class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
+    model = ChunkedUpload
     authentication_classes = (BasicAuthentication, SessionAuthentication)
 
     def check_permissions(self, request):
-        logger.debug("HisraChunkeDUploadCompleteView check_permissions user: %s", request.user)
-        if request.user.id is None:
-            raise ChunkedUploadError(
-                status=http_status.HTTP_403_FORBIDDEN,
-                detail='Authentication credentials were not provided'
-            )
+        '''
+        Handled by APIView
+        '''
+        # logger.debug("HisraChunkeDUploadCompleteView check_permissions user: %s", request.user)
+        # if request.user.id is None:
+        #     raise ChunkedUploadError(
+        #         status=http_status.HTTP_403_FORBIDDEN,
+        #         detail='Authentication credentials were not provided'
+        #     )
+
+    def post_save(self, chunked_upload, request, new=False):
+        chunked_upload.close_file()
 
     def on_completion(self, uploaded_file, request):
         try:
             Media.objects.create_media(uploaded_file, request.user)
             logger.info("Media saved")
+            logger.info("Deleting chunked upload from db: %s", uploaded_file.delete())
         except Exception, e:
             logger.error(e)
 

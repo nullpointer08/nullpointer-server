@@ -13,10 +13,10 @@ class UserSerializer(serializers.ModelSerializer):
 class MediaSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.id')
-    #media_type = serializers.ReadOnlyField(source='media_type')
+
     class Meta:
         model = Media
-        fields = ('id', 'owner', 'url', 'media_type')
+        fields = ('id', 'owner', 'url', 'media_type', 'md5')
 
 
 class PlaylistSerializer(serializers.ModelSerializer):

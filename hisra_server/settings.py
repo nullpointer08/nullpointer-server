@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -147,3 +148,13 @@ STATICFILES_DIRS = (
 
 MEDIA_ROOT = '/home/hannu/hisra-media/'
 MEDIA_URL = 'http://192.168.1.60:8000/media/'
+
+# CHUNKED UPLOAD SETTINGS
+CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)
+
+# NOTE!: CHUNKED_UPLOAD_PATH is NOT in use! Overridden
+#CHUNKED_UPLOAD_PATH = "chunked_uploads/"
+
+CHUNKED_UPLOAD_ABSTRACT_MODEL = False
+# Possible to replace with for example Amazon S3 storage class
+#CHUNKED_UPLOAD_STORAGE_CLASS = lambda: None

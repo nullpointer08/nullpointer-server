@@ -1,0 +1,1 @@
+Needed to alter the original https://github.com/juliomalegria/django-chunked-upload

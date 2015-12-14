@@ -1,5 +1,4 @@
 from rest_framework import permissions, exceptions
-from django.contrib.auth.models import User
 from rest_framework import authentication
 from models import Device
 from django.utils.translation import ugettext_lazy as _
