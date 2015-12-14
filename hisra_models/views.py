@@ -40,8 +40,7 @@ class MediaDownloadView(APIView):
         logger.debug("MediaDownloadView GET: media_id: %s owner_id: %s filename: %s", media_id, owner_id, filename)
         try:
             if not media_id:
-                media_file_filename = owner_id + "/" + filename
-                media = Media.objects.get(owner=owner_id, media_file=media_file_filename)
+                media = Media.objects.get(owner=owner_id, name=filename)
             else:
                 media = Media.objects.get(id=media_id)
         except Media.DoesNotExist, e:
@@ -56,14 +55,14 @@ class MediaDownloadView(APIView):
 
         logger.debug("authorization ok!")
         response = HttpResponse()
-        filename_str = smart_str(media.media_file.name)
+        filename_str = smart_str(media.name)
 
         redirect_url = "/protected/{0}".format(filename_str);
         logger.debug("Redirect url: %s", redirect_url)
         logger.debug("Headers: %s", response._headers)
         response['Content-Disposition'] = 'attachment; filename=%s' % filename_str.split('/')[1]
-        response['Content-MD5'] = media.media_file.md5
-        logger.debug("Content md5: %s", media.media_file.md5)
+        response['Content-MD5'] = media.md5
+        logger.debug("Content md5: %s", media.md5)
         response['X-Accel-Redirect'] = redirect_url
 
         return response
@@ -121,7 +120,6 @@ class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
         try:
             Media.objects.create_media(uploaded_file, request.user)
             logger.info("Media saved")
-            logger.info("Deleting chunked upload from db: %s", uploaded_file.delete())
         except Exception, e:
             logger.error(e)
 

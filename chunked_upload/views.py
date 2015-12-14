@@ -292,6 +292,7 @@ class ChunkedUploadCompleteView(ChunkedUploadBaseView):
         chunked_upload.completed_on = timezone.now()
         self._save(chunked_upload)
         self.on_completion(chunked_upload, request)
-
-        return Response(self.get_response_data(chunked_upload, request),
+        response_data = self.get_response_data(chunked_upload, request)
+        chunked_upload.delete()
+        return Response(response_data,
                         status=http_status.HTTP_200_OK)
