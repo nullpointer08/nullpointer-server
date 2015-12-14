@@ -55,12 +55,12 @@ class MediaDownloadView(APIView):
 
         logger.debug("authorization ok!")
         response = HttpResponse()
-        filename_str = smart_str(media.name)
+        filename_str = os.path.join(str(media.owner.id), media.name)
 
         redirect_url = "/protected/{0}".format(filename_str);
         logger.debug("Redirect url: %s", redirect_url)
         logger.debug("Headers: %s", response._headers)
-        response['Content-Disposition'] = 'attachment; filename=%s' % filename_str.split('/')[1]
+        response['Content-Disposition'] = 'attachment; filename=%s' % media.name
         response['Content-MD5'] = media.md5
         logger.debug("Content md5: %s", media.md5)
         response['X-Accel-Redirect'] = redirect_url
