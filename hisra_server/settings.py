@@ -145,5 +145,10 @@ STATICFILES_DIRS = (
    os.path.join(BASE_DIR, 'static/'),
 )
 
-MEDIA_ROOT = '/home/hannu/hisra-media/'
+MEDIA_ROOT = '/srv/hisra/media/'
 MEDIA_URL = 'http://192.168.1.60:8000/media/'
+
+ALLOWED_ORIGIN = '*'
+MIDDLEWARE_CLASSES = (
+    'hisra_server.middleware.CorsMiddleware',
+)
