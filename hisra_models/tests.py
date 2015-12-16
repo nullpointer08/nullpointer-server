@@ -315,6 +315,22 @@ class PlaylistTest(APITestCase):
         response = self.client.put(url, data, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_delete_playlist(self):
+        playlist = Playlist.objects.create(
+            owner=self.owner,
+            name='Cool playlist',
+            description='All the best stuff',
+            media_schedule_json='{"fake_playlist_json": "true"}'
+        )
+        url = '/api/user/' + self.username + '/playlist/' + str(playlist.id)
+        response = self.client.delete(url)
+        self.assertEquals(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_missing_playlist(self):
+        url = '/api/user/' + self.username + '/playlist/1234567890'
+        response = self.client.delete(url)
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class MediaTestBase(APITestCase):
 
@@ -440,9 +456,11 @@ class MediaTestBase(APITestCase):
 class DevicePlaylist(APITestCase):
 
     def setUp(self):
+        self.username = 'testuser'
+        self.password = 'testpassword'
         self.user = User.objects.create_user(
-            username='testuser',
-            password='testpassword'
+            username=self.username,
+            password=self.password
         )
         self.playlist = Playlist.objects.create(
             owner=self.user,
@@ -455,6 +473,7 @@ class DevicePlaylist(APITestCase):
             unique_device_id='testdevice',
             playlist=self.playlist
         )
+        set_basic_auth_header(self.client, self.username, self.password)
 
     def test_get_device_playlist(self):
         url = '/api/device/' + self.device.unique_device_id + '/playlist'
@@ -588,11 +607,11 @@ class MediaUploadTestCase(APITestCase):
 
         media = Media.objects.create_media(self.upload_file, self.owner)
 
-        device_auth =  'Device device_1'
+        device_auth = 'Device device_1'
         self.client.credentials(HTTP_AUTHORIZATION=device_auth)
 
-        url = '/media/' + str(media.owner.id) + '/' + str(media.name)
-        #set_basic_auth_header(self.client, self.username, self.password)
+        url = '/media/' + str(media.id)
+        #  url = '/media/' + str(media.owner.id) + '/' + str(media.name)
         response = self.client.get(url)
         logger.debug(response)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
