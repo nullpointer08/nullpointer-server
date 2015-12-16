@@ -243,6 +243,19 @@ class PlaylistDetail(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, username, id):
+        '''
+        DELETE /api/user/:username/playlist/:id
+        Deletes a playlist
+        '''
+        try:
+            playlist = Playlist.objects.get(pk=id)
+        except Playlist.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        playlist.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class DeviceList(APIView):
     queryset = Device.objects.all()
@@ -380,6 +393,9 @@ class DevicePlaylist(APIView):
         if not request.user.is_authenticated():
             return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
 
-        device = Device.objects.get(unique_device_id=id)
+        try:
+            device = Device.objects.get(unique_device_id=id)
+        except Device.DoesNotExist:
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         serializer = PlaylistSerializer(device.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)

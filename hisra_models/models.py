@@ -43,7 +43,7 @@ class Media(models.Model):
     objects = MediaManager()
 
     def __unicode__(self):
-        return 'Media:[' + str(self.name) + ']'
+        return 'Media:[' + str(self.id) + ']'
 
 
 class Playlist(models.Model):

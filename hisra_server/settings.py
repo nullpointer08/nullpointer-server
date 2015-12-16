@@ -149,6 +149,11 @@ STATICFILES_DIRS = (
 MEDIA_ROOT = '/home/hannu/hisra-media/'
 MEDIA_URL = 'http://192.168.1.60:8000/media/'
 
+ALLOWED_ORIGIN = '*'
+MIDDLEWARE_CLASSES = (
+    'hisra_server.middleware.CorsMiddleware',
+)
+
 # CHUNKED UPLOAD SETTINGS
 CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)
 
