@@ -54,6 +54,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'hisra_server.middleware.CorsMiddleware',
 )
 
 ROOT_URLCONF = 'hisra_server.urls'
@@ -150,16 +151,17 @@ MEDIA_ROOT = '/home/hannu/hisra-media/'
 MEDIA_URL = 'http://192.168.1.60:8000/media/'
 
 ALLOWED_ORIGIN = '*'
-MIDDLEWARE_CLASSES = (
-    'hisra_server.middleware.CorsMiddleware',
-)
 
 # CHUNKED UPLOAD SETTINGS
 CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)
 
+def generate_filename(instance, filename):
+    filename = str(instance.upload_id) + '.part'
+    return "{0}/{1}".format(instance.user.id, filename)
+
 # NOTE!: CHUNKED_UPLOAD_PATH is NOT in use! Overridden
-#CHUNKED_UPLOAD_PATH = "chunked_uploads/"
+CHUNKED_UPLOAD_PATH = generate_filename
+# Possible to replace with for example Amazon S3 storage class
+#STORAGE = FileSystemStorage(location=MEDIA_ROOT)
 
 CHUNKED_UPLOAD_ABSTRACT_MODEL = False
-# Possible to replace with for example Amazon S3 storage class
-#CHUNKED_UPLOAD_STORAGE_CLASS = lambda: None

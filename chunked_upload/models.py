@@ -11,12 +11,13 @@ from django.utils import timezone
 from .settings import EXPIRATION_DELTA, UPLOAD_PATH, STORAGE, ABSTRACT_MODEL
 from .constants import CHUNKED_UPLOAD_CHOICES, UPLOADING
 
+from django.core.files.storage import FileSystemStorage
+
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 def generate_upload_id():
     return uuid.uuid4().hex
-
 
 # def generate_filename(instance, filename):
 #     filename = os.path.join(UPLOAD_PATH, instance.upload_id + '.part')
@@ -30,13 +31,9 @@ class BaseChunkedUpload(models.Model):
     Inherit from this model to implement your own.
     """
 
-    def generate_filename(self, filename):
-        filename = str(self.upload_id) + '.part'
-        return os.path.join(MEDIA_ROOT, str(self.user.id), filename)
-
     upload_id = models.CharField(max_length=32, unique=True, editable=False,
                                  default=generate_upload_id)
-    file = models.FileField(max_length=255, upload_to=generate_filename,
+    file = models.FileField(max_length=255, upload_to=UPLOAD_PATH,
                             storage=STORAGE)
     filename = models.CharField(max_length=255)
     offset = models.BigIntegerField(default=0)

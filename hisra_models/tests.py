@@ -520,7 +520,7 @@ def get_md5(filePath):
             m.update(chunk)
     return m.hexdigest()
 
-
+from chunked_upload.models import ChunkedUpload
 class MediaUploadTestCase(APITestCase):
     def setUp(self):
         self.__real_media_dir = settings.MEDIA_ROOT
@@ -540,7 +540,9 @@ class MediaUploadTestCase(APITestCase):
         logger.debug("MEDIA ROOT IS: %s", settings.MEDIA_ROOT)
         set_basic_auth_header(self.client, self.username, self.password)
         response = self.client.post('/api/chunked_upload/', {'the_file':self.upload_file})
+        logger.error(response)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
+
         dictResp = json.loads(response.content)
         upload_id = dictResp['upload_id']
         logger.debug(upload_id)
@@ -558,10 +560,8 @@ class MediaUploadTestCase(APITestCase):
         #     logger.info("RESPONSE: %s", response)
 
     def test_get_file_no_authorization(self):
-        # create media first
-        media = Media.objects.create_media(self.upload_file, self.owner)
-        logger.debug("Media id: %s", media.id)
-        url = '/media/' + str(media.id)
+        logger.debug("Media id: %s", self.media.id)
+        url = '/media/' + str(self.media.id)
         # NO auth
         response = self.client.get(url)
 
@@ -569,10 +569,8 @@ class MediaUploadTestCase(APITestCase):
 
     # note: does not actually return a file because we use web server to do that
     def test_get_file_basic_auth(self):
-
-        media = Media.objects.create_media(self.upload_file, self.owner)
-        logger.debug("Media id: %s", media.id)
-        url = '/media/' + str(media.id)
+        logger.debug("Media id: %s", self.media.id)
+        url = '/media/' + str(self.media.id)
 
         set_basic_auth_header(self.client, self.username, self.password)
 
@@ -587,11 +585,10 @@ class MediaUploadTestCase(APITestCase):
     def test_get_file_owned_device(self):
         Device.objects.create(unique_device_id='device_1', owner=self.owner)
 
-        media = Media.objects.create_media(self.upload_file, self.owner)
-        logger.debug("Media id: %s", media.id)
+        logger.debug("Media id: %s", self.media.id)
         device_id =  'Device device_1'
         self.client.credentials(HTTP_AUTHORIZATION=device_id)
-        url = '/media/' + str(media.id)
+        url = '/media/' + str(self.media.id)
         response = self.client.get(url)
 
         self.assertEquals(response.status_code, status.HTTP_200_OK)
@@ -604,12 +601,11 @@ class MediaUploadTestCase(APITestCase):
 
         Device.objects.create(unique_device_id='device_1', owner=self.owner)
 
-        media = Media.objects.create_media(self.upload_file, self.owner)
 
         device_auth = 'Device device_1'
         self.client.credentials(HTTP_AUTHORIZATION=device_auth)
 
-        url = '/media/' + str(media.id)
+        url = '/media/' + str(self.media.id)
         #  url = '/media/' + str(media.owner.id) + '/' + str(media.name)
         response = self.client.get(url)
         logger.debug(response)
