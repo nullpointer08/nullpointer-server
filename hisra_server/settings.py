@@ -155,13 +155,13 @@ ALLOWED_ORIGIN = '*'
 # CHUNKED UPLOAD SETTINGS
 CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)
 
+
 def generate_filename(instance, filename):
     filename = str(instance.upload_id) + '.part'
     return "{0}/{1}".format(instance.user.id, filename)
 
-# NOTE!: CHUNKED_UPLOAD_PATH is NOT in use! Overridden
 CHUNKED_UPLOAD_PATH = generate_filename
 # Possible to replace with for example Amazon S3 storage class
-#STORAGE = FileSystemStorage(location=MEDIA_ROOT)
+# STORAGE = FileSystemStorage(location=MEDIA_ROOT)
 
 CHUNKED_UPLOAD_ABSTRACT_MODEL = False

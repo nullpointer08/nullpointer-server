@@ -1,46 +1,79 @@
 from django.db import models
 from django.contrib.auth.models import User
-from chunked_upload.models import ChunkedUpload
-from hisra_server.settings import MEDIA_ROOT, MEDIA_URL
-
-from hisra_models.utils import determine_media_type, MEDIA_CHOICES
+from django.conf import settings
+from magic import from_file
+from mimetypes import guess_type
 import os
 
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-import uuid
 
 class MediaManager(models.Manager):
 
-    def create_media(self, uploaded_file, user):
+    @staticmethod
+    def create_media(uploaded_file, user):
         old_file_path = uploaded_file.file.path
         filename = uploaded_file.filename
         new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
-        if(os.path.isfile(new_file_path)):
+
+        if os.path.isfile(new_file_path):
             filename = uploaded_file.upload_id + uploaded_file.filename
             new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
+
         print "New file path %s" % new_file_path
         os.rename(old_file_path, new_file_path)
         media = Media(owner=user, media_file=new_file_path, md5=uploaded_file.md5)
-        media.media_type = determine_media_type(new_file_path)
-        media.url = os.path.join(MEDIA_URL, str(media.id))
+        media.media_type = Media.determine_media_type(new_file_path)
+        media.url = os.path.join(settings.MEDIA_URL, str(media.id))
         media.name = uploaded_file.filename
         media.save()
         return media
 
 
 class Media(models.Model):
+    VIDEO = 'V'
+    IMAGE = 'I'
+    WEB_PAGE = 'W'
+    MEDIA_CHOICES = (
+        ('V', 'video'),
+        ('I', 'image'),
+        ('W', 'web_page'),
+    )
+
     owner = models.ForeignKey(User)
-    media_file = models.CharField(max_length=256)
-    md5 = models.CharField(max_length=32)
-    url = models.CharField(max_length=256)
+    media_file = models.CharField(max_length=256, blank=True)
+    md5 = models.CharField(max_length=32, blank=True)
+    url = models.CharField(max_length=256, blank=True)
     media_type = models.CharField(max_length=1, choices=MEDIA_CHOICES)
     name = models.CharField(max_length=256, blank=True)
     description = models.CharField(max_length=256, blank=True)
 
     objects = MediaManager()
+
+    @staticmethod
+    def is_supported_media_type(filename):
+        file_type = guess_type(filename, strict=True)
+        if not file_type:
+            return False
+        file_type = file_type[0].split('/',1)[0]
+        logger.debug("TYPE: %s", file_type)
+        if file_type in Media.MEDIA_CHOICES:
+            return True
+        return False
+
+    @staticmethod
+    def determine_media_type(file_path):
+        mime = from_file(file_path, mime=True)
+        file_type = mime.split('/', 1)[0]
+        media_type = None
+        for choice in Media.MEDIA_CHOICES:
+            if choice[1] == file_type:
+                media_type = choice[0]
+        if not media_type or len(media_type) > 1:
+            raise TypeError("media type error: ", file_type)
+        return media_type
 
     def __unicode__(self):
         return 'Media:[' + str(self.id) + ']'

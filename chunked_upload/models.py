@@ -19,11 +19,7 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 def generate_upload_id():
     return uuid.uuid4().hex
 
-# def generate_filename(instance, filename):
-#     filename = os.path.join(UPLOAD_PATH, instance.upload_id + '.part')
-#     return time.strftime(filename)
 
-from hisra_server.settings import MEDIA_ROOT
 class BaseChunkedUpload(models.Model):
     """
     Base chunked upload model. This model is abstract (doesn't create a table

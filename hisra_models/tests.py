@@ -1,10 +1,19 @@
+import base64
+import json
+import logging
+import shutil
+from hashlib import md5
+
+from django.conf import settings
+from django.contrib.auth import hashers
+from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth.models import User
-from django.contrib.auth import hashers
+
 from models import Playlist, Device, Media
 from serializers import DeviceSerializer, MediaSerializer, PlaylistSerializer
-import base64
 
 
 def resp_equals(expected, got):
@@ -491,23 +500,7 @@ class DevicePlaylist(APITestCase):
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-
-
-
-
-
-
-
-
-from django.core.files.uploadedfile import SimpleUploadedFile
-import os
-import logging
 logger = logging.getLogger(__name__)
-from hashlib import md5
-import json
-import tempfile
-import shutil
-from hisra_server import settings
 
 
 def get_md5(filePath):
@@ -520,12 +513,13 @@ def get_md5(filePath):
             m.update(chunk)
     return m.hexdigest()
 
-from chunked_upload.models import ChunkedUpload
-class MediaUploadTestCase(APITestCase):
-    def setUp(self):
-        self.__real_media_dir = settings.MEDIA_ROOT
-        settings.MEDIA_ROOT = tempfile.mkdtemp(suffix='test')
 
+
+@override_settings(MEDIA_ROOT='/tmp/hisra_test_media_root')
+class MediaUploadTestCase(APITestCase):
+
+
+    def setUp(self):
         self.username = 'testuser'
         self.password = 'testpassword'
         self.owner = User.objects.create_user(username=self.username,
@@ -540,11 +534,10 @@ class MediaUploadTestCase(APITestCase):
         logger.debug("MEDIA ROOT IS: %s", settings.MEDIA_ROOT)
         set_basic_auth_header(self.client, self.username, self.password)
         response = self.client.post('/api/chunked_upload/', {'the_file':self.upload_file})
-        logger.error(response)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
-        dictResp = json.loads(response.content)
-        upload_id = dictResp['upload_id']
+        dict_resp = json.loads(response.content)
+        upload_id = dict_resp['upload_id']
         logger.debug(upload_id)
         md5_checksum = get_md5(self.test_file)
         logger.debug(md5_checksum)
@@ -554,23 +547,23 @@ class MediaUploadTestCase(APITestCase):
         }
         response = self.client.post('/api/chunked_upload_complete/', data=data)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
-        return json.loads(response.content)
-        # for chunk in upload_file.chunks(100):
-        #     response = self.client.post('/api/chunked_upload/', {'the_file':chunk})
-        #     logger.info("RESPONSE: %s", response)
 
     def test_get_file_no_authorization(self):
-        logger.debug("Media id: %s", self.media.id)
-        url = '/media/' + str(self.media.id)
+        self.test_post_file()
+        self.client.credentials()
+        media = Media.objects.first()
+        logger.debug("Media id: %s", media.id)
+        url = '/media/' + str(media.id)
         # NO auth
         response = self.client.get(url)
-
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # note: does not actually return a file because we use web server to do that
     def test_get_file_basic_auth(self):
-        logger.debug("Media id: %s", self.media.id)
-        url = '/media/' + str(self.media.id)
+        self.test_post_file()
+        media = Media.objects.first()
+        logger.debug("Media id: %s", media.id)
+        url = '/media/' + str(media.id)
 
         set_basic_auth_header(self.client, self.username, self.password)
 
@@ -583,12 +576,13 @@ class MediaUploadTestCase(APITestCase):
 
     # note: does not actually return a file because we use web server to do that
     def test_get_file_owned_device(self):
+        self.test_post_file()
         Device.objects.create(unique_device_id='device_1', owner=self.owner)
-
-        logger.debug("Media id: %s", self.media.id)
+        media = Media.objects.first()
+        logger.debug("Media id: %s", media.id)
         device_id =  'Device device_1'
         self.client.credentials(HTTP_AUTHORIZATION=device_id)
-        url = '/media/' + str(self.media.id)
+        url = '/media/' + str(media.id)
         response = self.client.get(url)
 
         self.assertEquals(response.status_code, status.HTTP_200_OK)
@@ -597,18 +591,19 @@ class MediaUploadTestCase(APITestCase):
         if not response.get('X-Accel-Redirect').startswith("/protected/" + str(self.owner.id)):
             raise AssertionError("X-Accel-Redirect was unexpected")
 
+    # note: does not actually return a file because we use web server to do that
     def test_get_file_with_filename(self):
-
+        self.test_post_file()
+        self.client.credentials()
         Device.objects.create(unique_device_id='device_1', owner=self.owner)
-
+        media = Media.objects.first()
 
         device_auth = 'Device device_1'
         self.client.credentials(HTTP_AUTHORIZATION=device_auth)
 
-        url = '/media/' + str(self.media.id)
+        url = '/media/' + str(media.id)
         #  url = '/media/' + str(media.owner.id) + '/' + str(media.name)
         response = self.client.get(url)
-        logger.debug(response)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         if not response.get('Content-Disposition').startswith("attachment; filename=kuva"):
             raise AssertionError("Content disposition was unexpected")
@@ -616,5 +611,4 @@ class MediaUploadTestCase(APITestCase):
             raise AssertionError("X-Accel-Redirect was unexpected")
 
     def tearDown(self):
-        shutil.rmtree(settings.MEDIA_ROOT)
-        settings.MEDIA_ROOT = self.__real_media_dir
+        shutil.rmtree('/tmp/hisra_test_media_root')

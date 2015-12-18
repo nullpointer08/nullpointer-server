@@ -1,26 +1,21 @@
 import re
 
-from django.views.generic import View
-from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.views.generic import View
 
-
-from .settings import MAX_BYTES
+from .constants import COMPLETE, http_status
+from .exceptions import ChunkedUploadError
 from .models import ChunkedUpload
 from .response import Response
-from .constants import http_status, COMPLETE
-from .exceptions import ChunkedUploadError
+from .settings import MAX_BYTES
 
-from rest_framework.views import APIView
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
-
-class ChunkedUploadBaseView(APIView):
+class ChunkedUploadBaseView(View):
     """
     Base view for the rest of chunked upload views.
     """
 
-    authentication_classes = (BasicAuthentication, SessionAuthentication)
     # Has to be a ChunkedUpload subclass
     model = ChunkedUpload
 
@@ -33,12 +28,6 @@ class ChunkedUploadBaseView(APIView):
         if hasattr(request, 'user') and request.user.is_authenticated():
             queryset = queryset.filter(user=request.user)
         return queryset
-
-    def validate(self, request):
-        """
-        Placeholder method to define extra validation.
-        Must raise ChunkedUploadError if validation fails.
-        """
 
     def get_response_data(self, chunked_upload, request):
         """
@@ -79,17 +68,10 @@ class ChunkedUploadBaseView(APIView):
         """
         Grants permission to start/continue an upload based on the request.
         """
-        if not request.user.is_authenticated():
-            raise ChunkedUploadError(
-                status=http_status.HTTP_401_UNAUTHORIZED,
+        if hasattr(request, 'user') and not request.user.is_authenticated():
+            raise ChunkedUploadError().from_status_and_detail(
+                status=401,
                 detail='Authentication credentials were not provided'
-            )
-
-    def check_file_permission(self, request, upload_file):
-        if request.user != upload_file.user:
-            raise ChunkedUploadError(
-                status=http_status.HTTP_403_FORBIDDEN,
-                detail='Authentication credentials were not correct'
             )
 
     def _post(self, request, *args, **kwargs):
@@ -103,7 +85,6 @@ class ChunkedUploadBaseView(APIView):
             self.check_permissions(request)
             return self._post(request, *args, **kwargs)
         except ChunkedUploadError as error:
-            print error.data
             return Response(error.data, status=error.status_code)
 
 
@@ -151,7 +132,7 @@ class ChunkedUploadView(ChunkedUploadBaseView):
         chunked_upload.file.save(name='', content=ContentFile(''), save=save)
         return chunked_upload
 
-    def is_valid_chunked_upload(self, chunked_upload):
+    def is_valid_chunked_upload(self, request, chunked_upload):
         """
         Check if chunked upload has already expired or is already complete.
         """
@@ -163,6 +144,13 @@ class ChunkedUploadView(ChunkedUploadBaseView):
             raise ChunkedUploadError(status=http_status.HTTP_400_BAD_REQUEST,
                                      detail=error_msg % 'complete')
 
+    def is_valid_chunked_upload_request(self, **attrs):
+        """
+        Placeholder for extra validation on first request
+        :param attrs:
+        :return:
+        """
+        
     def get_response_data(self, chunked_upload, request):
         """
         Data for the response. Should return a dictionary-like object.
@@ -175,22 +163,23 @@ class ChunkedUploadView(ChunkedUploadBaseView):
 
     def _post(self, request, *args, **kwargs):
         chunk = request.FILES.get(self.field_name)
+
         if chunk is None:
             raise ChunkedUploadError(status=http_status.HTTP_400_BAD_REQUEST,
                                      detail='No chunk file was submitted')
-        self.validate(request)
 
         upload_id = request.POST.get('upload_id')
         if upload_id:
             chunked_upload = get_object_or_404(self.get_queryset(request),
                                                upload_id=upload_id)
-            self.check_file_permission(request, chunked_upload)
-            self.is_valid_chunked_upload(chunked_upload)
+            self.is_valid_chunked_upload(request, chunked_upload)
         else:
             attrs = {'filename': chunk.name}
             if hasattr(request, 'user') and request.user.is_authenticated():
                 attrs['user'] = request.user
+
             attrs.update(self.get_extra_attrs(request))
+            self.is_valid_chunked_upload_request(**attrs)
             chunked_upload = self.create_chunked_upload(save=False, **attrs)
 
         content_range = request.META.get(self.content_range_header, '')
@@ -247,7 +236,7 @@ class ChunkedUploadCompleteView(ChunkedUploadBaseView):
         Placeholder method to define what to do when upload is complete.
         """
 
-    def is_valid_chunked_upload(self, chunked_upload):
+    def is_valid_chunked_upload(self, request, chunked_upload):
         """
         Check if chunked upload is already complete.
         """
@@ -281,10 +270,7 @@ class ChunkedUploadCompleteView(ChunkedUploadBaseView):
         chunked_upload = get_object_or_404(self.get_queryset(request),
                                            upload_id=upload_id)
 
-        self.check_file_permission(request, chunked_upload)
-
-        self.validate(request)
-        self.is_valid_chunked_upload(chunked_upload)
+        self.is_valid_chunked_upload(request, chunked_upload)
         if self.do_md5_check:
             self.md5_check(chunked_upload, md5)
 

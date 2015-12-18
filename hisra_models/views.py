@@ -1,30 +1,24 @@
-from django.contrib.auth.models import User
-from django.utils.decorators import method_decorator
-from django.views.generic.base import TemplateView
+import logging
+import os
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.views.generic.base import TemplateView
 
-from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
-from chunked_upload.exceptions import ChunkedUploadError
-from chunked_upload.constants import http_status
-from chunked_upload.models import ChunkedUpload
-
-from rest_framework import status
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 
-from hisra_models.models import Media, Playlist, Device
-from hisra_models.permissions import IsOwnerPermission, DeviceAuthentication
-from hisra_models.serializers import UserSerializer, MediaSerializer
-from hisra_models.serializers import PlaylistSerializer, DeviceSerializer
-from hisra_models import utils
-from hisra_server.settings import MEDIA_ROOT
+from chunked_upload.exceptions import ChunkedUploadError
+from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
+from .models import Media, Playlist, Device
+from .permissions import IsOwnerPermission, DeviceAuthentication
+from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer
 
-from django.utils.encoding import smart_str
-import os
-import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -47,7 +41,7 @@ class MediaDownloadView(APIView):
             # TODO questionable if we should inform a file does not exist without authorization
             return HttpResponse(status=status.HTTP_404_NOT_FOUND)
 
-        #User requested another users file!
+        # User requested another users file!
         logger.debug('User %s requested user %s\'s media', request.user.username, media.owner.username)
         if request.user.id != media.owner.id:
             logger.debug('User %s requested user %s\'s media', request.user.username, media.owner.username)
@@ -57,17 +51,19 @@ class MediaDownloadView(APIView):
         response = HttpResponse()
         filename_str = os.path.join(str(media.owner.id), media.name)
 
-        redirect_url = "/protected/{0}".format(filename_str);
+        redirect_url = "/protected/{0}".format(filename_str)
         logger.debug("Redirect url: %s", redirect_url)
         response['Content-Disposition'] = 'attachment; filename=%s' % media.name
         response['Accept-Ranges'] = 'bytes'
-        response['Content-MD5'] = media.md5
+        if media.md5:
+            response['Content-MD5'] = media.md5
         logger.debug("Content md5: %s", response['Content-MD5'])
 
         logger.debug("Headers: %s", response._headers)
         response['X-Accel-Redirect'] = redirect_url
 
         return response
+
 
 # temporary for testing
 class ChunkedUploadDemo(TemplateView):
@@ -78,42 +74,35 @@ class ChunkedUploadDemo(TemplateView):
         return super(ChunkedUploadDemo, self).dispatch(*args, **kwargs)
 
 
-class HisraChunkedUploadView(ChunkedUploadView):
+class ApiViewAuthenticationMixin(object):
+    authentication_classes = (BasicAuthentication, SessionAuthentication)
 
-    def check_file_permission(self, request, upload_file):
-        if request.user != upload_file.user:
+    def authenticate(self, request):
+        request = Request(request=request, authenticators=[auth() for auth in self.authentication_classes])
+        if not request.user.is_authenticated:
+            raise ChunkedUploadError(status=401, detail="Authorization required")
+
+class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
+    def check_permissions(self, request):
+        self.authenticate(request)
+
+    def is_valid_chunked_upload_request(self, **attrs):
+        if os.path.isfile(os.path.join(settings.MEDIA_ROOT, str(attrs['user'].id), str(attrs['filename']))):
+            raise ChunkedUploadError(status=status.HTTP_409_CONFLICT, detail='File already exists on the server.')
+        return Media.is_supported_media_type(attrs['filename'])
+
+    def is_valid_chunked_upload(self, request, chunked_upload):
+        if request.user != chunked_upload.user:
             raise ChunkedUploadError(
                 status=status.HTTP_403_FORBIDDEN,
                 detail='Authentication credentials were not correct'
             )
+        return super(HisraChunkedUploadView, self).is_valid_chunked_upload(request, chunked_upload)
 
 
-    #
-    # def validate(self, request):
-    #     filename = request.FILES.get(self.field_name).name
-    #     path = os.path.join(MEDIA_ROOT + str(request.user.id), '/', filename)
-    #     logger.debug("PATH %s", path)
-    #     if os.path.exists(path):
-    #         return HttpResponse(status=status.HTTP_409_CONFLICT)
-    #
-    #     if filename is not None and utils.determine_media_type_from_filename(filename):
-    #         return HttpResponse(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-
-
-class HisraChunkedUploadCompleteView(ChunkedUploadCompleteView):
-    model = ChunkedUpload
-    authentication_classes = (BasicAuthentication, SessionAuthentication)
-
+class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCompleteView):
     def check_permissions(self, request):
-        '''
-        Handled by APIView
-        '''
-        # logger.debug("HisraChunkeDUploadCompleteView check_permissions user: %s", request.user)
-        # if request.user.id is None:
-        #     raise ChunkedUploadError(
-        #         status=http_status.HTTP_403_FORBIDDEN,
-        #         detail='Authentication credentials were not provided'
-        #     )
+        self.authenticate(request)
 
     def post_save(self, chunked_upload, request, new=False):
         chunked_upload.close_file()
