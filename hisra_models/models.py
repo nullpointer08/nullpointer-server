@@ -4,7 +4,7 @@ from django.conf import settings
 from magic import from_file
 from mimetypes import guess_type
 import os
-
+from urlparse import urljoin
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -26,8 +26,9 @@ class MediaManager(models.Manager):
         os.rename(old_file_path, new_file_path)
         media = Media(owner=user, media_file=new_file_path, md5=uploaded_file.md5)
         media.media_type = Media.determine_media_type(new_file_path)
-        media.url = os.path.join(settings.MEDIA_URL, str(media.id))
         media.name = uploaded_file.filename
+        media.save()
+        media.url = urljoin(settings.MEDIA_URL, str(media.id))
         media.save()
         return media
 
@@ -54,13 +55,21 @@ class Media(models.Model):
 
     @staticmethod
     def is_supported_media_type(filename):
-        file_type = guess_type(filename, strict=True)
+        logger.debug('Checking filename: %s', filename)
+        file_type = guess_type(filename, strict=False)
         if not file_type:
+            logger.debug('Not file_type')
             return False
-        file_type = file_type[0].split('/',1)[0]
+        file_type = file_type[0]
+        if not file_type:
+            logger.debug('Not file_type 0: %s', file_type)
+            return False
+        file_type = file_type.split('/',1)[0]
         logger.debug("TYPE: %s", file_type)
-        if file_type in Media.MEDIA_CHOICES:
-            return True
+        for choice in Media.MEDIA_CHOICES:
+            if choice[1] == file_type:
+                return True
+        logger.debug('Not in media choices')
         return False
 
     @staticmethod

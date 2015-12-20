@@ -90,7 +90,9 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
     def is_valid_chunked_upload_request(self, **attrs):
         if os.path.isfile(os.path.join(settings.MEDIA_ROOT, str(attrs['user'].id), str(attrs['filename']))):
             raise ChunkedUploadError(status=status.HTTP_409_CONFLICT, detail='File already exists on the server.')
-        return Media.is_supported_media_type(attrs['filename'])
+        if not Media.is_supported_media_type(attrs['filename']):
+            raise ChunkedUploadError(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                                     detail='This file type is not supported.')
 
     def is_valid_chunked_upload(self, request, chunked_upload):
         if request.user != chunked_upload.user:
@@ -98,7 +100,7 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
                 status=status.HTTP_403_FORBIDDEN,
                 detail='Authentication credentials were not correct'
             )
-        return super(HisraChunkedUploadView, self).is_valid_chunked_upload(request, chunked_upload)
+        super(HisraChunkedUploadView, self).is_valid_chunked_upload(request, chunked_upload)
 
 
 class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCompleteView):
