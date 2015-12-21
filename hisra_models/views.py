@@ -55,7 +55,8 @@ class MediaDownloadView(APIView):
         redirect_url = "/protected/{0}".format(filename_str)
         logger.debug("Redirect url: %s", redirect_url)
         response['Content-Disposition'] = 'attachment; filename=%s' % media.name
-        response['Accept-Ranges'] = 'bytes'
+        response['Content-Type'] = ''
+        #response['Accept-Ranges'] = 'bytes'
         if media.md5:
             response['Content-MD5'] = media.md5
         logger.debug("Content md5: %s", response['Content-MD5'])
