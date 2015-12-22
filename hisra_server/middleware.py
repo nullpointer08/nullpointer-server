@@ -9,4 +9,5 @@ class CorsMiddleware(object):
     def process_response(self, request, response):
         response['Access-Control-Allow-Origin'] = self.allowed_origin
         response['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT'
+        response['Access-Control-Allow-Headers'] = 'X-Custom-Header, Authorization, Content-Type'
         return response

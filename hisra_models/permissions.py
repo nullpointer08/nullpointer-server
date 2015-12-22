@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 class IsOwnerPermission(permissions.BasePermission):
 
     def has_permission(self, request, view, obj=None):
+        if request.method == 'OPTIONS':
+            return True
         if request.user is None:
             return False
         return request.user.username == view.kwargs['username']
