@@ -3,10 +3,10 @@
 // var controllerID = 'DevicesController';
 angular.module('hisraWebapp')
 
-.controller('DevicesController', DevicesController);
+.controller('LoginController', LoginController);
 
 /* @ngInject */
-function DevicesController(User) {
+function LoginController(User) {
   var vm = this;
 
   vm.devices = [];

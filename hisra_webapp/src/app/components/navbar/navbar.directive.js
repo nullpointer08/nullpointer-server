@@ -21,7 +21,7 @@
     return directive;
 
     /** @ngInject */
-    function NavbarController(moment/*, User*/) {
+    function NavbarController(moment, User) {
       var vm = this;
 
       // "vm.creation" is avaible by directive option "bindToController: true"

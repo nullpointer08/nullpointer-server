@@ -21,7 +21,7 @@
     toastrConfig.preventDuplicates = true;
     toastrConfig.progressBar = true;
 
-    $httpProvider.defaults.headers.common['Authorization']= 'Basic YXBpbmE6Z29yaWxsYQ==';
+    $httpProvider.defaults.headers.common['Authorization']= 'Basic dGVzdHk6cGFzcw==';
   }
 
 })();

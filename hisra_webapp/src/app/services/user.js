@@ -11,7 +11,6 @@
       username: '@username'
     });
 
-
     return angular.extend(resource.prototype, {
       getMedia: function(config) {
         config = config || {};
