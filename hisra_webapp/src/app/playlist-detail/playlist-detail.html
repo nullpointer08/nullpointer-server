@@ -1,0 +1,31 @@
+<style>
+table, th , td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+table tr:nth-child(odd)	{
+  background-color: #f1f1f1;
+}
+table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+</style>
+<div>
+	<h3>Playlist details</h3>
+	<b>Name:</b> {{playlist.playlist.name}} <br>
+	<b>Description: </b> {{playlist.playlist.description}} <br>
+	<b>Schedule:</b><br>
+	<table>
+		<tr>
+			<th>URL</th>
+			<th>Type</th>
+			<th>Display time</th>
+		</tr>
+		<tr ng-repeat="media in playlist.playlist.media_schedule">
+    		<td>{{ media.uri }}</td>
+			<td>{{ media.type }}</td>
+			<td>{{ media.time }}</td>
+  		</tr>
+	</table>
+</div>

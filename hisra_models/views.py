@@ -19,6 +19,7 @@ from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from .models import Media, Playlist, Device
 from .permissions import IsOwnerPermission, DeviceAuthentication
 from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -84,7 +85,13 @@ class ApiViewAuthenticationMixin(object):
         if not request.user.is_authenticated:
             raise ChunkedUploadError(status=401, detail="Authorization required")
 
+
 class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(HisraChunkedUploadView, self).dispatch(*args, **kwargs)
+
     def check_permissions(self, request):
         self.authenticate(request)
 
@@ -101,7 +108,7 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
                 status=status.HTTP_403_FORBIDDEN,
                 detail='Authentication credentials were not correct'
             )
-        super(HisraChunkedUploadView, self).is_valid_chunked_upload(request, chunked_upload)
+        return super(HisraChunkedUploadView, self).is_valid_chunked_upload(request, chunked_upload)
 
 
 class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCompleteView):

@@ -1,6 +1,6 @@
 <div>
 	<h3>Your playlists</h3>
 	<ul>
-		<li ng-repeat="playlist in playlists.playlists">{{playlist.name}} - {{playlist.description}} - {{playlist.media_schedule.length}} items</li>
+		<li ng-repeat="playlist in playlists.playlists"><a href='#/playlist/{{playlist.id}}'>{{playlist.name}} - {{playlist.description}} - {{playlist.media_schedule.length}} items</a></li>
 	</ul>
 </div>
