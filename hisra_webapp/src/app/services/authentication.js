@@ -21,8 +21,10 @@ function AuthenticationFactory($http, $cookieStore, BASE_URL) {
   authentication.getCurrentUser = GetCurrentUser;
 
   function Login(username, password, callback) {
+      console.log("CALLING LOGIN");
       $http.post(BASE_URL + '/api/authentication', { username: username, password: password })
       .success(function (response) {
+          console.dir(response);
         if(response.success) {
             var authdata = btoa(username + ':' + password);
             $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
@@ -39,9 +41,9 @@ function AuthenticationFactory($http, $cookieStore, BASE_URL) {
   };
 
   function Logout() {
-    delete userHolder.currentUser
+    userHolder.currentUser = undefined;
     $cookieStore.remove('currentUser');
-    $http.defaults.headers.common.Authorization = 'Basic';
+    delete $http.defaults.headers.common['Authorization'];
   }
 
   function GetCurrentUser() {

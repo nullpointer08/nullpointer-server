@@ -11,16 +11,15 @@ function LoginController($scope, User, Authentication, $location) {
   vm.loggedAs = Authentication.getCurrentUser();
 
   $scope.login = function(user) {
+      console.dir(user);
+      console.dir(Authentication);
+      console.dir(Authentication.getCurrentUser());
       Authentication.login(user.username, user.password, function(response) {
           if(response.success) {
               $location.path('/');
           }
       });
   };
-
-  $scope.logout = function() {
-      Authentication.logout();
-  }
 }
 
 })();

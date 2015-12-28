@@ -9,10 +9,9 @@
       {{vm.title}}
     </md-button>
   </section>
-
-  <md-button aria-label="Account">
+  <md-button aria-label="Account" href="#/account"/>
     <md-icon class="material-icons">account_circle</md-icon>
-    {{vm.username}}
+    {{vm.getUsername()}}
   </md-button>
 
 </md-toolbar>

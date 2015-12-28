@@ -372,6 +372,7 @@ class UserList(APIView):
 
 
 class UserDetail(APIView):
+    permission_classes = (IsOwnerPermission,)
     '''
     GET /api/user/:username
     Returns some details for the user
