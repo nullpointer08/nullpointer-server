@@ -6,7 +6,12 @@
     .controller('MainController', MainController);
 
   /* @ngInject */
-  function MainController($timeout, webDevTec, toastr) {
+  function MainController(Authentication, $location, $timeout, webDevTec, toastr) {
+    var user = Authentication.getCurrentUser();
+    if(user == undefined) {
+        return $location.path('/login');
+    }
+
     var vm = this;
 
     vm.modules = [];

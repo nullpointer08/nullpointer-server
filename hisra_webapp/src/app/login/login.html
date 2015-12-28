@@ -1,4 +1,14 @@
+<div class="col-md-6 col-md-offset-3">
+    <h2>Login</h2>
+    <form novalidate class="simple-form">
+    Username: <input type="text" ng-model="user.username" /><br />
+    Password: <input type="password" ng-model="user.password" /><br />
+    <input type="submit" ng-click="login(user)" value="Login" />
+  </form>
+</div>
 <div>
-	<h3>Login</h3>
-    Login login
+    <h2>Logout</h3>
+    <form novalidate class="simple-form">
+        <input type="submit" ng-click="logout(user)" value="Logout"/>
+    </form>
 </div>

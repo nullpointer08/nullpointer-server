@@ -6,16 +6,21 @@ angular.module('hisraWebapp')
 .controller('LoginController', LoginController);
 
 /* @ngInject */
-function LoginController(User) {
+function LoginController($scope, User, Authentication, $location) {
   var vm = this;
+  vm.loggedAs = Authentication.getCurrentUser();
 
-  vm.devices = [];
+  $scope.login = function(user) {
+      Authentication.login(user.username, user.password, function(response) {
+          if(response.success) {
+              $location.path('/');
+          }
+      });
+  };
 
-  // TODO: Get username from auth service
-  User.getDevices({username: 'testy'}).$promise
-    .then(function (devices) {
-      vm.devices = devices;
-    });
+  $scope.logout = function() {
+      Authentication.logout();
+  }
 }
 
 })();

@@ -5,21 +5,25 @@
   .controller('MediaController', MediaController);
 
   /* @ngInject */
-  function MediaController(User, Media, BASE_URL) {
+  function MediaController(Authentication, $location, User, Media, BASE_URL) {
+
+    var user = Authentication.getCurrentUser();
+    if(user == undefined) {
+      return $location.path('/');
+    }
+
     var vm = this;
-
     vm.media = [];
-
     vm.BASE_URL = BASE_URL;
 
     // TODO: Get username from auth service
-    User.getMedia({username: 'testy'}).$promise
+    User.getMedia({username: user.username}).$promise
       .then(function (media) {
         vm.media = media;
       });
 
     vm.removeMedia = function(id) {
-      Media.delete({username: 'testy', id: id})
+      Media.delete({username: user.username, id: id})
         .$promise.then(function() {
           vm.media.filter(function(file) {
             return file.id != id;
@@ -36,7 +40,7 @@
       autoUpload: true,
       maxNumberOfFiles: 1,
       beforeSend: function(xhr) {
-        xhr.setRequestHeader('Authorization', 'Basic dGVzdHk6cGFzcw==');
+        xhr.setRequestHeader('Authorization', 'Basic ' + user.authdata);
       },
       done: function(e, data) {
         console.log(data);

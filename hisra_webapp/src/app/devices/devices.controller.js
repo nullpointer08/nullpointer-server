@@ -6,13 +6,16 @@ angular.module('hisraWebapp')
 .controller('DevicesController', DevicesController);
 
 /* @ngInject */
-function DevicesController(User) {
+function DevicesController($location, Authentication, User) {
   var vm = this;
 
   vm.devices = [];
+  var user = Authentication.getCurrentUser();
+  if(user == undefined) {
+      return $location.path('/login');
+  }
 
-  // TODO: Get username from auth service
-  User.getDevices({username: 'testy'}).$promise
+  User.getDevices({username: user.username}).$promise
     .then(function (devices) {
       vm.devices = devices;
     });

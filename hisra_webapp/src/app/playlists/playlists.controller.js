@@ -6,13 +6,17 @@ angular.module('hisraWebapp')
 .controller('PlaylistsController', PlaylistController);
 
 /* @ngInject */
-function PlaylistController(User) {
+function PlaylistController($location, Authentication, User) {
   var vm = this;
 
+  var user = Authentication.getCurrentUser();
+  if(user == undefined) {
+      return $location.path('/login');
+  }
   vm.playlists = [];
 
   // TODO: Get username from auth service
-  User.getPlaylists({username: 'testy'}).$promise
+  User.getPlaylists({username: user.username}).$promise
     .then(function (playlists) {
       console.dir(playlists)
       vm.playlists = playlists.map(function(playlist) {

@@ -7,8 +7,7 @@ angular.module('hisraWebapp')
 function routeConfig ($routeProvider) {
   $routeProvider.when('/login', {
     templateUrl: 'app/login/login.html',
-    controller: 'LoginController',
-    controllerAs: 'login'
+    controller: 'LoginController'
   });
 }
 

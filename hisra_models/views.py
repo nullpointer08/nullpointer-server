@@ -411,7 +411,7 @@ class AuthenticationView(APIView):
             password=request.data['password']
         )
         if user is not None:
-            return Response({"suceess": True}, status=status.HTTP_200_OK)
+            return Response({"success": True}, status=status.HTTP_200_OK)
         else:
             return Response(
                 {"success": False},

@@ -21,21 +21,20 @@
     return directive;
 
     /** @ngInject */
-    function NavbarController(moment, User) {
+    function NavbarController(moment, User, Authentication) {
       var vm = this;
+
+      vm.getUsername = function () {
+          var user = Authentication.getCurrentUser();
+          if(user == undefined) {
+              return 'Anonymous';
+          }
+          return user.username;
+      }
 
       // "vm.creation" is avaible by directive option "bindToController: true"
       vm.relativeDate = moment(vm.creationDate).fromNow();
-
       vm.title = 'HISRA Management';
-
-      vm.username = 'P. Lace Holder';
-
-
-      // function getUserName(User)
-      // {
-      //   return User.resource;
-      // }
     }
   }
 
