@@ -20,6 +20,7 @@ from .models import Media, Playlist, Device
 from .permissions import IsOwnerPermission, DeviceAuthentication
 from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -399,3 +400,20 @@ class DevicePlaylist(APIView):
             return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         serializer = PlaylistSerializer(device.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AuthenticationView(APIView):
+
+    def post(self, request):
+        print request.data
+        user = authenticate(
+            username=request.data['username'],
+            password=request.data['password']
+        )
+        if user is not None:
+            return Response({"suceess": True}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"success": False},
+                status=status.HTTP_401_UNAUTHORIZED
+            )

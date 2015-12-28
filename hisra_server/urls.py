@@ -71,7 +71,7 @@ urlpatterns = [
 
     # /uploadfile/
     url(r'^uploadfile/?$',
-        views.ChunkedUploadDemo.as_view(),name='chunked_upload'),
+        views.ChunkedUploadDemo.as_view(), name='chunked_upload'),
 
     url(r'^api/chunked_upload/?$',
         HisraChunkedUploadView.as_view(),
@@ -80,6 +80,8 @@ urlpatterns = [
         HisraChunkedUploadCompleteView.as_view(),
         name='api_chunked_upload_complete'),
 
+    # POST /api/authentication
+    url(r'^api/authentication/?$', views.AuthenticationView.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
