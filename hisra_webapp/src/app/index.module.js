@@ -14,6 +14,7 @@
       'ngRoute',
       'ngMaterial',
       'toastr',
-      'ngResource']);
+      'ngResource',
+      'ui.sortable']);
 
 })();
