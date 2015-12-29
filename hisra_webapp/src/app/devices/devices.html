@@ -1,6 +1,45 @@
+
 <div>
 	<h3>Your devices</h3>
-	<ul>
-		<li ng-repeat="device in devices.devices">{{device.unique_device_id}} - Playlist {{device.playlist}}</li>
-	</ul>
+	<select ng-model="selectedDevice">
+			<option value="" disabled>Device</option>
+      <option ng-repeat="device in devices.devices" value="{{device.unique_device_id}}">{{device.unique_device_id}}</option>
+  </select>
+	<select ng-model="selectedPlaylist">
+			<option value="" disabled>Playlist</option>
+      <option ng-repeat="playlist in devices.playlists" value="{{playlist.id}}">{{playlist.name}}</option>
+  </select>
+	<input type="submit" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)" value="Set Device Playlist" />
+</div>
+<div style="color:#FF0000">{{devices.errorMessage}}</div>
+<style>
+table, th , td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+table tr:nth-child(odd)	{
+  background-color: #f1f1f1;
+}
+table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+</style>
+<div>
+	<h3>Playlist details</h3>
+	<b>Name:</b> {{devices.getPlaylistDetail(selectedPlaylist, 'name')}} <br>
+	<b>Description: </b> {{devices.getPlaylistDetail(selectedPlaylist, 'description')}} <br>
+	<b>Schedule:</b><br>
+	<table>
+		<tr>
+			<th>URL</th>
+			<th>Type</th>
+			<th>Display time</th>
+		</tr>
+		<tr ng-repeat="media in devices.getPlaylistDetail(selectedPlaylist, 'media_schedule')">
+    		<td>{{ media.uri }}</td>
+			<td>{{ media.type }}</td>
+			<td>{{ media.time }}</td>
+  		</tr>
+	</table>
 </div>
