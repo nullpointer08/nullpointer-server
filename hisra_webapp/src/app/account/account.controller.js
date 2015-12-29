@@ -23,7 +23,6 @@ function AccountController($scope, User, Authentication, $location) {
   };
 
   $scope.updateUser = function(user) {
-      console.dir(user);
   }
 }
 

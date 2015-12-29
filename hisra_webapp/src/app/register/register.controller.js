@@ -3,11 +3,11 @@
 // var controllerID = 'DevicesController';
 angular.module('hisraWebapp')
 
-.controller('LoginController', LoginController);
+.controller('RegisterController', RegisterController);
 
 /* @ngInject */
-function LoginController($scope, User, Authentication, $location) {
-  $scope.login = function(user) {
+function RegisterController($scope, User, Authentication, $location) {
+  $scope.register = function(user) {
       Authentication.login(user.username, user.password, function(response) {
           if(response.success) {
               $location.path('/');

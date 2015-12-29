@@ -18,7 +18,6 @@ function PlaylistController($location, Authentication, User) {
   // TODO: Get username from auth service
   User.getPlaylists({username: user.username}).$promise
     .then(function (playlists) {
-      console.dir(playlists)
       vm.playlists = playlists.map(function(playlist) {
         // JSON parsing doesn't seem to accept single parentheses
         var json = playlist.media_schedule_json.replace(/'/g, '"');

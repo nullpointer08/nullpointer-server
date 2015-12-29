@@ -24,7 +24,6 @@ function AuthenticationFactory($http, $cookieStore, BASE_URL) {
       console.log("CALLING LOGIN");
       $http.post(BASE_URL + '/api/authentication', { username: username, password: password })
       .success(function (response) {
-          console.dir(response);
         if(response.success) {
             var authdata = btoa(username + ':' + password);
             $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;

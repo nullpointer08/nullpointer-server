@@ -1,0 +1,11 @@
+<div class="col-md-6 col-md-offset-3">
+    <h2>Register account</h2>
+    <form novalidate class="simple-form">
+    First name: <input type="text" ng-model="user.first_name" /><br />
+    Last name: <input type="text" ng-model="user.last_name" /><br />
+    Email: <input type="email" ng-model="user.email" /><br />
+    Username  <input type="text" ng-model="user.username" /><br />
+    Password: <input type="password" ng-model="password" /><br />
+    <input type="submit" ng-click="updateUser(user)" value="Register" />
+  </form>
+</div>
