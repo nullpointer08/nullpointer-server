@@ -1,0 +1,101 @@
+First startup of a fresh install of Linux Mint 17.3:
+
+# Git install and clone repo
+sudo apt-get install git
+mkdir -p ~/work/hisra
+cd ~/work/hisra
+git clone https://github.com/nullpointer08/nullpointer-server.git
+cd nullpointer-server
+
+# Virtualenvwrapper installation
+sudo apt-get install python-pip
+sudo pip install virtualenvwrapper
+nano ~/.profile
+    Add these lines and save:
+        export WORKON_HOME=$HOME/.virtualenvs
+	export PROJECT_HOME=$HOME/Devel
+	source /usr/local/bin/virtualenvwrapper.sh
+source ~/.profile
+mkvirtualenv env1
+workon env1
+
+# APT package installation
+sudo apt-get install -y postgresql postgresql-client postgresql-contrib postgresql-server-dev-9.3 python-dev python-django python-psycopg2 libpq-dev libffi-dev nginx
+
+# Pip package installation (make sure you are working on the right virtual env)
+sudo pip install -r requirements.txt
+
+# Database setup
+sudo su - postgres
+createdb hisra_db
+createuser django_user
+psql
+    Enter into the psql interpreter:
+	GRANT ALL PRIVILEGES ON DATABASE hisra_db TO django_user;
+	ALTER USER django_user WITH PASSWORD 'k3k3KUUSI';
+	ALTER USER django_user CREATEDB; # Needed to create test DB
+	\q
+logout
+
+# Initialize database schema
+python manage.py migrate
+
+# Test if the back end API works
+python manage.py test
+
+# Configure nginx
+nano hisra_server_nginx.conf
+    Change the following to whatever you want:
+	- path to static files, e.g. /srv/hisra/static
+	- path to media folder, e.g. /srv/hisra/media
+	- path to uwsgi_params (included in repo), /home/dano/work/hisra/nullpointer-server/uwsgi_params
+
+# Create a symlink to nginx sites_enabled, so nginx uses this config file
+sudo ln -s /home/dano/work/hisra/nullpointer-server/hisra_server_nginx.conf /etc/nginx/sites-enabled/
+
+# Configure django
+nano hisra_server/settings.py
+    Make sure the MEDIA_ROOT and STATIC_ROOT are the same as in hisra_server_nginx.conf,
+    Also make sure MEDIA_URL points to where the media can be accessed by the client.
+    Make sure that ALLOWED_ORIGIN points to the origin of the angular web client e.g.:
+	STATIC_ROOT = '/srv/hisra/static'
+	MEDIA_ROOT = '/srv/hisra/media'
+	MEDIA_RUL = 'http://drajala.ddns.net:8000/media/'
+	ALLOWED_ORIGIN = '*' # Allows every origin, fine for testing
+
+# Start serving the API with nginx
+sudo service nginx restart # Reads the new config
+./nginx_start.sh
+Test to see if there is any activity, e.g.
+with your browser go to http://localhost:8000/admin
+
+# [OPTIONAL] Create an admin user for django and some test data
+python manage.py createsuperuser
+Open your browser and got to http://localhost:8000/admin
+Use the UI to create some test data
+
+# Install Node.js (needed for the webapp)
+Follow the instructions at:
+https://github.com/nodejs/node-v0.x-archive/wiki/Installing-Node.js-via-package-manager
+In this case:
+sudo apt-get install curl
+curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install the webapp
+cd hisra_webapp
+sudo npm install
+sudo apt-get install g++  # Needed to install bower
+sudo npm install -g bower
+bower install
+sudo npm install -g gulp
+
+# Configure webapp to use backend API
+nano src/app/config.js
+Edit the 'BASE_URL' constant to point to where the backend is served, e.g. http://localhost:8000
+
+# Start the webapp
+gulp serve
+This should open your browser to the webapp. If the backend API is running, it should
+fetch information from it.
+
