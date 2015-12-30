@@ -26,8 +26,8 @@ table tr:nth-child(even) {
                 <th></th>
             </tr>
         </thead>
-        <tbody ui-sortable ng-model="playlist.playlist.media_schedule">
-            <tr ng-repeat="media in playlist.playlist.media_schedule track by $index" class="item" style="cursor: move;" ng-include="getTemplate(media)">
+        <tbody ui-sortable ng-model="playlist.media_schedule">
+            <tr ng-repeat="media in playlist.media_schedule track by $index" class="item" style="cursor: move;" ng-include="getTemplate(media)">
                 <td>{{media.uri}}</td>
                 <td>{{media.type}}</td>
                 <td>{{media.time}}</td>
@@ -35,6 +35,7 @@ table tr:nth-child(even) {
         </tbody>{{list}}
    </table>
 </div>
+<input type="submit" ng-click="savePlaylist()" value="Save changes" />
 
 <script type="text/ng-template" id="display">
         <td>{{media.uri}}</td>

@@ -11,8 +11,6 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
       return $location.path('/login');
   }
 
-  var vm = this;
-  $scope.items = ["one", "two", "thre", "four", "five", "six"];
   $scope.types = ['web_page', 'video', 'image'];
   $scope.selected = undefined;
   $scope.getTemplate = function (media) {
@@ -28,12 +26,24 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
 
     $scope.saveMedia = function (index) {
         console.log("Saving contact");
-        vm.playlist.media_schedule[index] = angular.copy($scope.selected);
+        $scope.playlist.media_schedule[index] = angular.copy($scope.selected);
         $scope.reset();
     };
 
     $scope.reset = function () {
         $scope.selected = undefined;
+    };
+
+    $scope.savePlaylist = function() {
+      var updatedPlaylist = angular.copy($scope.playlist);
+      updatedPlaylist.media_schedule_json = JSON.stringify(updatedPlaylist.media_schedule).replace(/"/g, "'");
+      delete updatedPlaylist.media_schedule;
+      Playlist.update({
+          username: user.username,
+          id: updatedPlaylist.id
+        }, 
+        updatedPlaylist
+      );
     };
 
   Playlist.get({
@@ -43,7 +53,7 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
     .then(function(playlist) {
         var json = playlist.media_schedule_json.replace(/'/g, '"');
         playlist.media_schedule = JSON.parse(json);
-        vm.playlist = playlist;
+        $scope.playlist = playlist;
     });
 }
 })();
