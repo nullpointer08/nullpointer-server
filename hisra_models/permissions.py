@@ -2,8 +2,10 @@ from rest_framework import permissions, exceptions
 from rest_framework import authentication
 from models import Device
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
 import logging
 logger = logging.getLogger(__name__)
+
 
 class IsOwnerPermission(permissions.BasePermission):
 
@@ -15,9 +17,10 @@ class IsOwnerPermission(permissions.BasePermission):
         return request.user.username == view.kwargs['username']
 
     def has_object_permission(self, request, view, obj):
-        # Write permissions are only allowed to the owner of the snippet.
         if request.user is None:
             return False
+        if isinstance(obj, User) and obj == request.user:
+            return True
         return obj.owner == request.user
 
 

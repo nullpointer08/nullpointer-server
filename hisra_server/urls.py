@@ -51,7 +51,7 @@ urlpatterns = [
         views.DeviceDetail.as_view()),
 
     # POST /api/user
-    url(r'^api/user/?$', views.UserList.as_view()),
+    # url(r'^api/user/?$', views.UserList.as_view()),
 
     # GET /api/user/:username
     url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/?$', views.UserDetail.as_view()),
@@ -81,7 +81,9 @@ urlpatterns = [
         name='api_chunked_upload_complete'),
 
     # POST /api/authentication
-    url(r'^api/authentication/?$', views.AuthenticationView.as_view())
+    #url(r'^api/authentication/?$', views.AuthenticationView.as_view()),
+
+    url(r'^api/authentication/?$', 'rest_framework_jwt.views.obtain_jwt_token'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -21,7 +21,8 @@
     toastrConfig.preventDuplicates = true;
     toastrConfig.progressBar = true;
 
-    $httpProvider.defaults.headers.common['Authorization']= 'Basic dGVzdHk6cGFzcw==';
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
   }
 
 })();
