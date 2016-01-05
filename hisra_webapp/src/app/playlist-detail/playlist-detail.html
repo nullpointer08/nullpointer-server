@@ -38,20 +38,25 @@ table tr:nth-child(even) {
 <input type="submit" ng-click="savePlaylist()" value="Save changes" />
 
 <script type="text/ng-template" id="display">
-        <td>{{media.uri}}</td>
-        <td>{{media.type}}</td>
-        <td>{{media.time}}</td>
-        <td>
-            <button ng-click="editMedia(media)">Edit</button>
-        </td>
-    </script>
-    <script type="text/ng-template" id="edit">
-        <td><input type="text" ng-model="selected.uri" /></td>
-        <td><input type="text" ng-model="selected.type" /></td>
-        <td><input type="text" ng-model="selected.time"/></td>
-        <td>
-            <button ng-click="saveMedia($index)">Save</button>
-            <button ng-click="reset()">Cancel</button>
-        </td>
-    </script>
+  <td>{{media.uri}}</td>
+  <td>{{media.type}}</td>
+  <td>{{media.time}}</td>
+  <td>
+      <button ng-click="editMedia(media)">Edit</button>
+  </td>
+</script>
+
+<script type="text/ng-template" id="edit">
+  <td><input type="text" ng-model="selected.uri" /></td>
+  <td><select ng-model="selected.type">
+    <option>image</option>
+    <option>video</option>
+    <option>web_page</option>
+  </select></td>
+  <td><input type="text" ng-model="selected.time"/></td>
+  <td>
+      <button ng-click="saveMedia($index)">Save</button>
+      <button ng-click="reset()">Cancel</button>
+  </td>
+</script>
 <!--script type="text/javascript" src="modules/directives/sortable/src/sortable.js"></script-->

@@ -115,6 +115,12 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
 
 
 class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCompleteView):
+    do_md5_check = False
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(HisraChunkedUploadCompleteView, self).dispatch(*args, **kwargs)
+
     def check_permissions(self, request):
         self.authenticate(request)
 

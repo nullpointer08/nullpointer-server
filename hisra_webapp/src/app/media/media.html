@@ -35,8 +35,18 @@
 		</div>
 	</div>
 	<div class="media-added__media">
-		<ul>
-			<li ng-repeat="file in media.media|filter:filterParam">{{file.url}} - Type: {{file.media_type}} <a ng-click="media.removeMedia(file.id)">(Remove)</a></li>
-		</ul>
+		<table>
+			<thead>
+				<th>URL</th>
+				<th>File type</th>
+				<th>Actions</th>
+			</thead>
+
+			<tbody ng-repeat="file in media.media|filter:filterParam">
+				<td>{{file.url}}</td>
+				<td>{{file.media_type}}</td>
+				<td><button ng-click="media.removeMedia(file.id)">Remove</button></td>
+			</tbody>
+		</table>
 	</div>
 </div>

@@ -6,13 +6,13 @@ angular.module('hisraWebapp')
 .controller('LoginController', LoginController);
 
 /* @ngInject */
-function LoginController($scope, User, Authentication, $location) {
-  $scope.login = function(user) {
-      Authentication.login(user.username, user.password, function(response) {
-          if(response.success) {
-              $location.path('/');
-          }
-      });
+function LoginController(Authentication, $location) {
+  	var vm = this;
+	vm.login = function(user) {
+      Authentication.login(user.username, user.password)
+      	.then(function() {
+          $location.path('/');
+      	});
   };
 }
 
