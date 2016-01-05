@@ -5,7 +5,7 @@ angular.module('hisraWebapp')
 .controller('PlaylistDetailController', PlaylistDetailController);
 
 /* @ngInject */
-function PlaylistDetailController($scope, $location, $routeParams, Authentication, User, Playlist, Media, MediaTypes) {
+function PlaylistDetailController($scope, $location, $timeout, $routeParams, Authentication, User, Playlist, Media, MediaTypes, Notification) {
   var user = Authentication.getCurrentUser();
   if(user === undefined) {
       return $location.path('/login');
@@ -70,6 +70,8 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
       }
     );
   };
+
+  $scope.notifier = Notification;
 }
 
 })();

@@ -10,8 +10,12 @@ table tr:nth-child(odd)	{
 table tr:nth-child(even) {
   background-color: #ffffff;
 }
+.success-message {
+  display: block;
+	background: #CCFFCC;
+	text-align: center;
+}
 </style>
-
 <div>
   <h3>Playlist details</h3>
   <b>Name:</b> <input type="text" ng-model="playlist.name" size='60'><br>
@@ -67,3 +71,6 @@ table tr:nth-child(even) {
 
 <input type="submit" ng-click="savePlaylist()" value="Save changes" />
 <input type="submit" ng-click="deletePlaylist()" value="Delete playlist" />
+<div class="success-message" ng-show="notifier.isSuccessVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong> Stuff</div>
+</div>
