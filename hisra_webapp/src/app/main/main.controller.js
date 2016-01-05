@@ -8,7 +8,8 @@
   /* @ngInject */
   function MainController(Authentication, $location, $timeout, webDevTec, toastr) {
     var user = Authentication.getCurrentUser();
-    if(user == undefined) {
+    console.dir(user);
+    if(user === undefined) {
         return $location.path('/login');
     }
 

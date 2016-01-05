@@ -5,10 +5,10 @@
   .controller('MediaController', MediaController);
 
   /* @ngInject */
-  function MediaController($scope, Authentication, $cookieStore, $location, User, Media, BASE_URL) {
+  function MediaController($scope, Authentication, $cookieStore, $location, User, Media, BASE_URL, MediaTypes) {
 
     var user = Authentication.getCurrentUser();
-    if(user == undefined) {
+    if(user === undefined) {
       return $location.path('/');
     }
 
@@ -22,6 +22,7 @@
         $scope.allMedia = media;
       });
 
+    $scope.mediaTypes = MediaTypes;
     $scope.removeMedia = function(media) {
       Media.delete(
         {username: user.username, id: media.id},
@@ -39,21 +40,15 @@
       );
     };
 
-    $scope.webPageToAdd = {
-      name: '',
-      description: '',
-      url: '',
-      type: 'web_page'
-    };
+    $scope.externalMedia = {};
 
-    $scope.addWebPage = function(webPage) {
-      webPage.media_type = 'W';
+    $scope.addExternalMedia = function(externalMedia) {
       Media.save(
         {username: user.username},
-        webPage,
+        externalMedia,
         function() {
           console.log("SUCCESS");
-          $scope.allMedia.push(webPage);
+          $scope.allMedia.push(externalMedia);
         },
         function() {
           console.log("FAILURE");

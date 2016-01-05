@@ -32,8 +32,8 @@ table tr:nth-child(even) {
             <tr ng-repeat="media in playlist.media_schedule track by $index" class="item" style="cursor: move;">
                 <td>{{media.name}}</td>
                 <td>{{media.description}}</td>
-                <td>{{media.uri}}</td>
-                <td>{{media.type}}</td>
+                <td>{{media.url}}</td>
+                <td>{{mediaTypes.labelFor(media.media_type)}}</td>
                 <td><input type="text" ng-model="media.time"/></td>
                 <td><input type="submit" value="Remove" ng-click="removeMedia(media)"/></td>
             </tr>
@@ -57,8 +57,8 @@ table tr:nth-child(even) {
             <tr ng-repeat="media in allMedia track by $index" class="item" style="cursor: move;">
                 <td>{{media.name}}</td>
                 <td>{{media.description}}</td>
-                <td>{{media.uri}}</td>
-                <td>{{media.type}}</td>
+                <td>{{media.url}}</td>
+                <td>{{mediaTypes.labelFor(media.media_type)}}</td>
                 <td><input type="submit" value="Add to playlist" ng-click="addToPlaylist(media)"/></td>
             </tr>
         </tbody>{{list}}
@@ -66,3 +66,4 @@ table tr:nth-child(even) {
 </div><br>
 
 <input type="submit" ng-click="savePlaylist()" value="Save changes" />
+<input type="submit" ng-click="deletePlaylist()" value="Delete playlist" />

@@ -62,19 +62,23 @@ table tr:nth-child(even) {
 				<td>{{media.name}}</td>
 				<td>{{media.description}}</td>
 				<td>{{media.url}}</td>
-				<td>{{media.media_type}}</td>
+				<td>{{mediaTypes.labelFor(media.media_type)}}</td>
 				<td><button ng-click="removeMedia(media)">Remove</button></td>
 			</tbody>
 		</table>
 	</div>
 
 	<div>
-		<h3>Add web page</h3>
+		<h3>Add external media</h3>
 	  <form>
-	    Name: <input type="text" ng-model="webPageToAdd.name"/><br>
-	    Description: <input type="text" ng-model="webPageToAdd.description"/><br>
-	    URL: <input type="text" ng-model="webPageToAdd.url"/><br>
-	    <input type="submit" value="Add web page" ng-click="addWebPage(webPageToAdd)" style="width: 20"/>
+	    Name: <input type="text" ng-model="externalMedia.name"/><br>
+	    Description: <input type="text" ng-model="externalMedia.description"/><br>
+	    URL: <input type="text" ng-model="externalMedia.url"/><br>
+			Type:
+				<select ng-model="externalMedia.media_type">
+      		<option ng-repeat="option in mediaTypes.types" value="{{option.fieldName}}">{{option.label}}</option>
+    		</select><br>
+	    <input type="submit" value="Add media" ng-click="addExternalMedia(externalMedia)" style="width: 20"/>
 	  </form>
 	</div>
 </div>

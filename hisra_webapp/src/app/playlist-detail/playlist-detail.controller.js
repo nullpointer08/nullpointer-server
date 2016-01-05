@@ -5,44 +5,20 @@ angular.module('hisraWebapp')
 .controller('PlaylistDetailController', PlaylistDetailController);
 
 /* @ngInject */
-function PlaylistDetailController($scope, $location, $routeParams, Authentication, User, Playlist, Media) {
+function PlaylistDetailController($scope, $location, $routeParams, Authentication, User, Playlist, Media, MediaTypes) {
   var user = Authentication.getCurrentUser();
   if(user === undefined) {
       return $location.path('/login');
   }
 
-  var typeMap = {
-    'I': 'image',
-    'V': 'video',
-    'W': 'web_page'
-  };
-  var reverseTypeMap = {
-    'image': 'I',
-    'video': 'V',
-    'web_page': 'W'
-  };
-
-  $scope.types = ['web_page', 'video', 'image'];
-
   $scope.allMedia = [];
   User.getMedia({username: user.username}).$promise
   .then(function (media) {
-    media.forEach(function(m) {
-      m.uri = m.url;
-      m.type = typeMap[m.media_type];
-      m.time = 0;
-    });
     $scope.allMedia = media;
     console.dir(media);
   });
 
-  $scope.webPageToAdd = {
-    name: '',
-    description: '',
-    uri: '',
-    type: 'web_page',
-    time: 20
-  };
+  $scope.mediaTypes = MediaTypes;
 
   $scope.addToPlaylist = function(media) {
     media.time = 20;
@@ -76,6 +52,24 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
     playlist.media_schedule = JSON.parse(json);
     $scope.playlist = playlist;
   });
+
+  $scope.deletePlaylist = function() {
+    var answer = confirm("Are you sure you want to delete the playlist?");
+    if(!answer) {
+      return;
+    }
+    Playlist.delete(
+      {username: user.username, id: $scope.playlist.id},
+      null,
+      function() {
+        console.log("SUCCESS: playlist deleted");
+        $location.path('/playlists');
+      },
+      function() {
+        console.log("FAILURE: Could not delete playlist");
+      }
+    );
+  };
 }
 
 })();
