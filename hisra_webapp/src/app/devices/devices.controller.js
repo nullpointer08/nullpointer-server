@@ -6,7 +6,7 @@ angular.module('hisraWebapp')
 .controller('DevicesController', DevicesController);
 
 /* @ngInject */
-function DevicesController($scope, $location, Authentication, User, Device) {
+function DevicesController($scope, $location, Authentication, User, Device, MediaTypes) {
   var vm = this;
 
   vm.devices = [];
@@ -35,6 +35,8 @@ function DevicesController($scope, $location, Authentication, User, Device) {
         return playlist;
       });
     });
+
+  $scope.mediaTypes = MediaTypes;
 
   $scope.setDevicePlaylist = function(deviceId, playlistId) {
     if(deviceId === undefined || playlistId === undefined) {

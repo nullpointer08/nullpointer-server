@@ -32,13 +32,17 @@ table tr:nth-child(even) {
 	<b>Schedule:</b><br>
 	<table>
 		<tr>
+			<th>Name</th>
+			<th>Description</th>
 			<th>URL</th>
 			<th>Type</th>
 			<th>Display time</th>
 		</tr>
 		<tr ng-repeat="media in devices.getPlaylistDetail(selectedPlaylist, 'media_schedule')">
-    		<td>{{ media.uri }}</td>
-			<td>{{ media.type }}</td>
+			<td>{{media.name}}</td>
+			<td>{{media.description}}</td>
+    	<td>{{ media.url }}</td>
+			<td>{{ mediaTypes.labelFor(media.media_type) }}</td>
 			<td>{{ media.time }}</td>
   		</tr>
 	</table>
