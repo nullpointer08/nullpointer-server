@@ -16,7 +16,7 @@ class MediaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Media
-        fields = ('id', 'owner', 'url', 'media_type', 'md5')
+        fields = ('id', 'owner', 'url', 'media_type', 'md5', 'name', 'description')
 
 
 class PlaylistSerializer(serializers.ModelSerializer):

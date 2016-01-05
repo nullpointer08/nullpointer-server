@@ -20,6 +20,8 @@ table tr:nth-child(even) {
     <table style="width:auto;" class="table table-bordered">
         <thead>
             <tr>
+                <th>Name</th>
+                <th>Description</th>
                 <th>URL</th>
                 <th>Type</th>
                 <th>Display time</th>
@@ -27,37 +29,49 @@ table tr:nth-child(even) {
             </tr>
         </thead>
         <tbody ui-sortable ng-model="playlist.media_schedule">
-            <tr ng-repeat="media in playlist.media_schedule track by $index" class="item" style="cursor: move;" ng-include="getTemplate(media)">
+            <tr ng-repeat="media in playlist.media_schedule track by $index" class="item" style="cursor: move;">
+                <td>{{media.name}}</td>
+                <td>{{media.description}}</td>
                 <td>{{media.uri}}</td>
                 <td>{{media.type}}</td>
-                <td>{{media.time}}</td>
+                <td><input type="text" ng-model="media.time"/></td>
+                <td><input type="submit" value="Remove" ng-click="removeMedia(media)"/></td>
             </tr>
         </tbody>{{list}}
    </table>
+</div><br>
+<div>
+  <form>
+    Name: <input type="text" ng-model="webPageToAdd.name"/>
+    Description: <input type="text" ng-model="webPageToAdd.description"/>
+    URL: <input type="text" ng-model="webPageToAdd.uri"/>
+    Time: <input type="number" min="1" ng-model="webPageToAdd.time"/>
+    <input type="submit" value="Add web page" ng-click="addWebPage(webPageToAdd)" style="width: 20"/>
+  </form>
 </div>
+
+<div>
+  <h3>Available media</h3>
+    <table style="width:auto;" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>URL</th>
+                <th>Type</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody ui-sortable ng-model="allMedia">
+            <tr ng-repeat="media in allMedia track by $index" class="item" style="cursor: move;">
+                <td>{{media.name}}</td>
+                <td>{{media.description}}</td>
+                <td>{{media.uri}}</td>
+                <td>{{media.type}}</td>
+                <td><input type="submit" value="Add to playlist" ng-click="addToPlaylist(media)"/></td>
+            </tr>
+        </tbody>{{list}}
+   </table>
+</div><br>
+
 <input type="submit" ng-click="savePlaylist()" value="Save changes" />
-<input type="submit" ng-click="addMedia()" value="Add media" />
-
-<script type="text/ng-template" id="display">
-  <td>{{media.uri}}</td>
-  <td>{{media.type}}</td>
-  <td>{{media.time}}</td>
-  <td>
-      <button ng-click="editMedia(media)">Edit</button>
-  </td>
-</script>
-
-<script type="text/ng-template" id="edit">
-  <td><input type="text" ng-model="selected.uri" /></td>
-  <td><select ng-model="selected.type">
-    <option>image</option>
-    <option>video</option>
-    <option>web_page</option>
-  </select></td>
-  <td><input type="text" ng-model="selected.time"/></td>
-  <td>
-      <button ng-click="saveMedia($index)">Save</button>
-      <button ng-click="reset()">Cancel</button>
-  </td>
-</script>
-<!--script type="text/javascript" src="modules/directives/sortable/src/sortable.js"></script-->

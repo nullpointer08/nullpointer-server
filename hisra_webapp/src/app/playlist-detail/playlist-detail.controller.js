@@ -5,33 +5,50 @@ angular.module('hisraWebapp')
 .controller('PlaylistDetailController', PlaylistDetailController);
 
 /* @ngInject */
-function PlaylistDetailController($scope, $location, $routeParams, Authentication, User, Playlist) {
+function PlaylistDetailController($scope, $location, $routeParams, Authentication, User, Playlist, Media) {
   var user = Authentication.getCurrentUser();
   if(user === undefined) {
       return $location.path('/login');
   }
 
+  var typeMap = {
+    'I': 'image',
+    'V': 'video'
+  };
   $scope.types = ['web_page', 'video', 'image'];
-  $scope.selected = undefined;
 
-  $scope.getTemplate = function (media) {
-    if ($scope.selected && media.uri === $scope.selected.uri) return 'edit';
-    return 'display';
-  };
-
-  $scope.editMedia = function (media) {
+  $scope.allMedia = [];
+  User.getMedia({username: user.username}).$promise
+  .then(function (media) {
+    media.forEach(function(m) {
+      m.uri = m.url;
+      m.type = typeMap[m.media_type];
+      m.time = 0;
+    });
+    $scope.allMedia = media;
     console.dir(media);
-    $scope.selected = angular.copy(media);
+  });
+
+  $scope.webPageToAdd = {
+    name: '',
+    description: '',
+    uri: '',
+    type: 'web_page',
+    time: 20
   };
 
-  $scope.saveMedia = function (index) {
-    console.log("Saving contact");
-    $scope.playlist.media_schedule[index] = angular.copy($scope.selected);
-    $scope.reset();
+  $scope.addWebPage = function(webPage) {
+    $scope.playlist.media_schedule.push(webPage);
   };
 
-  $scope.reset = function () {
-    $scope.selected = undefined;
+  $scope.addToPlaylist = function(media) {
+    var added = {};
+    added.name = media.name;
+    added.description = media.description;
+    added.uri = media.url;
+    added.type = media.type;
+    added.time = 20;
+    $scope.playlist.media_schedule.push(added);
   };
 
   $scope.savePlaylist = function() {
@@ -46,32 +63,21 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
     );
   };
 
-    $scope.removeMedia = function(media) {
-      var index = $scope.playlist.media_schedule.indexOf(media);
-      if(index != -1) {
-        $scope.playlist.media_schedule.splice(index, 1);
-      }
-    };
-
-    $scope.addMedia = function() {
-      var added = {
-        uri: '',
-        type: '',
-        time: ''
-      };
-      $scope.added = added;
-      $scope.playlist.media_schedule.push(added);
-      $scope.selected = added;
-    };
+  $scope.removeMedia = function(media) {
+    var index = $scope.playlist.media_schedule.indexOf(media);
+    if(index != -1) {
+      $scope.playlist.media_schedule.splice(index, 1);
+    }
+  };
 
   Playlist.get({
-      id: $routeParams.playlistId,
-      username: user.username
-  }).$promise
-    .then(function(playlist) {
-        var json = playlist.media_schedule_json.replace(/'/g, '"');
-        playlist.media_schedule = JSON.parse(json);
-        $scope.playlist = playlist;
-    });
+    id: $routeParams.playlistId,
+    username: user.username
+  }).$promise.then(function(playlist) {
+    var json = playlist.media_schedule_json.replace(/'/g, '"');
+    playlist.media_schedule = JSON.parse(json);
+    $scope.playlist = playlist;
+  });
 }
+
 })();
