@@ -13,8 +13,15 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
 
   var typeMap = {
     'I': 'image',
-    'V': 'video'
+    'V': 'video',
+    'W': 'web_page'
   };
+  var reverseTypeMap = {
+    'image': 'I',
+    'video': 'V',
+    'web_page': 'W'
+  };
+
   $scope.types = ['web_page', 'video', 'image'];
 
   $scope.allMedia = [];
@@ -37,18 +44,9 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
     time: 20
   };
 
-  $scope.addWebPage = function(webPage) {
-    $scope.playlist.media_schedule.push(webPage);
-  };
-
   $scope.addToPlaylist = function(media) {
-    var added = {};
-    added.name = media.name;
-    added.description = media.description;
-    added.uri = media.url;
-    added.type = media.type;
-    added.time = 20;
-    $scope.playlist.media_schedule.push(added);
+    media.time = 20;
+    $scope.playlist.media_schedule.push(media);
   };
 
   $scope.savePlaylist = function() {

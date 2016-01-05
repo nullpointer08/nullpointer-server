@@ -5,7 +5,7 @@
   .controller('MediaController', MediaController);
 
   /* @ngInject */
-  function MediaController(Authentication, $cookieStore, $location, User, Media, BASE_URL) {
+  function MediaController($scope, Authentication, $cookieStore, $location, User, Media, BASE_URL) {
 
     var user = Authentication.getCurrentUser();
     if(user == undefined) {
@@ -13,22 +13,53 @@
     }
 
     var vm = this;
-    vm.media = [];
     vm.BASE_URL = BASE_URL;
+
+    $scope.allMedia = [];
 
     User.getMedia({username: user.username}).$promise
       .then(function (media) {
-        vm.media = media;
+        $scope.allMedia = media;
       });
 
-    vm.removeMedia = function(id) {
-      Media.delete({username: user.username, id: id})
-        .$promise.then(function() {
-          vm.media.filter(function(file) {
-            return file.id != id;
-          })
-        })
-    }
+    $scope.removeMedia = function(media) {
+      Media.delete(
+        {username: user.username, id: media.id},
+        null,
+        function() {
+          console.log("SUCCESS: Removed media from server");
+          console.log("MEDIA ID TO REMOVE: " + media.id);
+          $scope.allMedia = $scope.allMedia.filter(function(m) {
+            return m.id != media.id;
+          });
+        },
+        function() {
+          console.log("FAILURE: Could not remove media from server");
+        }
+      );
+    };
+
+    $scope.webPageToAdd = {
+      name: '',
+      description: '',
+      url: '',
+      type: 'web_page'
+    };
+
+    $scope.addWebPage = function(webPage) {
+      webPage.media_type = 'W';
+      Media.save(
+        {username: user.username},
+        webPage,
+        function() {
+          console.log("SUCCESS");
+          $scope.allMedia.push(webPage);
+        },
+        function() {
+          console.log("FAILURE");
+        }
+      );
+    };
 
     vm.openFileBrowser = function () {
       document.getElementById('media-add__file').click();

@@ -1,5 +1,6 @@
 import logging
 import os
+import json
 
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -179,6 +180,21 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
     serializer_class = MediaSerializer
     permission_classes = (IsOwnerPermission,)
 
+'''
+    def perform_destroy(self, instance):
+        print "PERFORM DESTROY called for %s" % instance
+        owner = instance.owner
+        print "OWNER: %s" % owner
+        playlists = Playlist.objects.all().filter(owner=owner.id)
+        print "PLAYLISTS: %s" % playlists
+        for playlist in playlists:
+            self.remove_from_playlist(instance, playlist)
+        # return super(MediaDetail, self).perform_destroy(instance)
+
+    def remove_from_playlist(self, media, playlist):
+        loaded = json.loads(playlist.media_schedule_json.replace("'", '"'))
+        print "CALLING REMOVE FROM PLAYLIST %s" % loaded
+'''
 
 class PlaylistList(APIView):
 

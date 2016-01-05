@@ -1,3 +1,17 @@
+<style>
+table, th , td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+table tr:nth-child(odd)	{
+  background-color: #f1f1f1;
+}
+table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+</style>
+
 <div layout="column">
 
 	<md-card class="media-add__droparea">
@@ -10,7 +24,7 @@
 		</md-card-title>
 
 		<input name="the_file" id="media-add__file" type="file" style="display: none;"/>
-		
+
 		<md-card-actions>
 			<md-button ng-click="media.openFileBrowser()" class="md-fab md-fab-top-right md-primary" aria-label="Add Media">
 				<md-icon class="material-icons">add</md-icon>
@@ -35,18 +49,32 @@
 		</div>
 	</div>
 	<div class="media-added__media">
-		<table>
+		<table style="width:auto;" class="table table-bordered">
 			<thead>
+				<th>Name</th>
+				<th>Description</th>
 				<th>URL</th>
-				<th>File type</th>
+				<th>Type</th>
 				<th>Actions</th>
 			</thead>
 
-			<tbody ng-repeat="file in media.media|filter:filterParam">
-				<td>{{file.url}}</td>
-				<td>{{file.media_type}}</td>
-				<td><button ng-click="media.removeMedia(file.id)">Remove</button></td>
+			<tbody ng-repeat="media in allMedia|filter:filterParam">
+				<td>{{media.name}}</td>
+				<td>{{media.description}}</td>
+				<td>{{media.url}}</td>
+				<td>{{media.media_type}}</td>
+				<td><button ng-click="removeMedia(media)">Remove</button></td>
 			</tbody>
 		</table>
+	</div>
+
+	<div>
+		<h3>Add web page</h3>
+	  <form>
+	    Name: <input type="text" ng-model="webPageToAdd.name"/><br>
+	    Description: <input type="text" ng-model="webPageToAdd.description"/><br>
+	    URL: <input type="text" ng-model="webPageToAdd.url"/><br>
+	    <input type="submit" value="Add web page" ng-click="addWebPage(webPageToAdd)" style="width: 20"/>
+	  </form>
 	</div>
 </div>
