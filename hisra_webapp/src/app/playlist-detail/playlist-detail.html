@@ -39,21 +39,25 @@ table tr:nth-child(even) {
 <input type="submit" ng-click="addMedia()" value="Add media" />
 
 <script type="text/ng-template" id="display">
-  <td><input type="text" ng-model="media.uri" size='30' /></td>
+  <td>{{media.uri}}</td>
   <td>{{media.type}}</td>
   <td>{{media.time}}</td>
-    <td>
+  <td>
       <button ng-click="editMedia(media)">Edit</button>
-      <button ng-click="removeMedia(media)">Remove</button>
-    </td>
+  </td>
 </script>
+
 <script type="text/ng-template" id="edit">
   <td><input type="text" ng-model="selected.uri" /></td>
-  <td><input type="text" ng-model="selected.type" /></td>
+  <td><select ng-model="selected.type">
+    <option>image</option>
+    <option>video</option>
+    <option>web_page</option>
+  </select></td>
   <td><input type="text" ng-model="selected.time"/></td>
   <td>
-    <button ng-click="saveMedia($index)">Save</button>
-    <button ng-click="reset()">Cancel</button>
+      <button ng-click="saveMedia($index)">Save</button>
+      <button ng-click="reset()">Cancel</button>
   </td>
 </script>
 <!--script type="text/javascript" src="modules/directives/sortable/src/sortable.js"></script-->

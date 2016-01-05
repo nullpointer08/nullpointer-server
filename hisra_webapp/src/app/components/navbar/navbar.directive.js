@@ -23,7 +23,9 @@
     /** @ngInject */
     function NavbarController(moment, User, Authentication) {
       var vm = this;
-
+      
+      vm.getLogin = getLogin;
+      
       vm.getUsername = function () {
           var user = Authentication.getCurrentUser();
           if(user == undefined) {
@@ -31,10 +33,19 @@
           }
           return user.username;
       }
-
+      
       // "vm.creation" is avaible by directive option "bindToController: true"
       vm.relativeDate = moment(vm.creationDate).fromNow();
       vm.title = 'HISRA Management';
+      
+      function getLogin() {
+        var user = Authentication.getCurrentUser();
+        if(user == undefined) {
+          return false;
+        } else {
+          return true;
+        }
+      }
     }
   }
 

@@ -16,7 +16,6 @@
     vm.media = [];
     vm.BASE_URL = BASE_URL;
 
-    // TODO: Get username from auth service
     User.getMedia({username: user.username}).$promise
       .then(function (media) {
         vm.media = media;
@@ -34,18 +33,6 @@
     vm.openFileBrowser = function () {
       document.getElementById('media-add__file').click();
     };
-
-    /*$('#media-add__file').fileupload({
-      url: BASE_URL + '/api/chunked_upload/',
-      autoUpload: true,
-      maxNumberOfFiles: 1,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader('Authorization', 'Basic ' + user.authdata);
-      },
-      done: function(e, data) {
-        console.log(data);
-      }
-    });*/
 
     var md5 = "";
     var form_data = [];

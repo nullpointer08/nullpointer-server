@@ -20,10 +20,19 @@
     return directive;
 
       // @ngInject
-    function SideNavController() {
+    function SideNavController(Authentication, User) {
       var sidenav = this;
       sidenav.title = 'SideNav';
-
+      sidenav.getLogin = getLogin;
+      
+      function getLogin() {
+        var user = Authentication.getCurrentUser();
+        if(user == undefined) {
+          return false;
+        } else {
+          return true;
+        }
+      }
     }
   }
 })();
