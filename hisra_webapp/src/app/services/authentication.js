@@ -22,21 +22,27 @@ function AuthenticationFactory($http, $cookieStore, BASE_URL) {
 
   function Login(username, password, callback) {
       console.log("CALLING LOGIN");
-      $http.post(BASE_URL + '/api/authentication/', { username: username, password: password })
-      .success(function (data, status, headers, config) {
-        $window.sessionStorage.token = data.token;
-        callback(true);
-      })
-      .error(function (data, status, headers, config) {
-        // Erase the token if the user fails to log in
-        delete $window.sessionStorage.token;
-        callback(false);
+      $http.post(BASE_URL + '/api/authentication', { username: username, password: password })
+      .success(function (response) {
+        if(response.success) {
+            var authdata = btoa(username + ':' + password);
+            $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
+
+            var currentUser = {
+                username: username,
+                authdata: authdata
+            };
+            $cookieStore.put('currentUser', currentUser);
+            userHolder.currentUser = currentUser;
+        }
+        callback(response);
       });
   };
 
   function Logout() {
     userHolder.currentUser = undefined;
-    delete $window.sessionStorage.token;
+    $cookieStore.remove('currentUser');
+    delete $http.defaults.headers.common['Authorization'];
   }
 
   function GetCurrentUser() {
