@@ -27,10 +27,18 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
     $scope.saveMedia = function (index) {
         console.log("Saving contact");
         $scope.playlist.media_schedule[index] = angular.copy($scope.selected);
+        $scope.added = undefined;
         $scope.reset();
     };
 
     $scope.reset = function () {
+        console.log("RESET CALLED");
+        if($scope.selected === $scope.added) {
+          var index = $scope.playlist.media_schedule.indexOf($scope.added);
+          if(index != -1) {
+            $scope.playlist.media_schedule.splice(index, 1);
+          }
+        }
         $scope.selected = undefined;
     };
 
@@ -44,6 +52,24 @@ function PlaylistDetailController($scope, $location, $routeParams, Authenticatio
         }, 
         updatedPlaylist
       );
+    };
+
+    $scope.removeMedia = function(media) {
+      var index = $scope.playlist.media_schedule.indexOf(media);
+      if(index != -1) {
+        $scope.playlist.media_schedule.splice(index, 1);
+      }
+    };
+
+    $scope.addMedia = function() {
+      var added = {
+        uri: '',
+        type: '',
+        time: ''
+      };
+      $scope.added = added;
+      $scope.playlist.media_schedule.push(added);
+      $scope.selected = added;
     };
 
   Playlist.get({

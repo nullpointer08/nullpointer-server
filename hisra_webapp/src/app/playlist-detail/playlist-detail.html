@@ -14,8 +14,8 @@ table tr:nth-child(even) {
 
 <div>
   <h3>Playlist details</h3>
-  <b>Name:</b> {{playlist.playlist.name}} <br>
-  <b>Description: </b> {{playlist.playlist.description}} <br>
+  <b>Name:</b> <input type="text" ng-model="playlist.name" size='60'><br>
+  <b>Description:</b> <input type="text" ng-model="playlist.description" size='60'> <br>
   <b>Schedule:</b> (drag and drop to change order)<br>
     <table style="width:auto;" class="table table-bordered">
         <thead>
@@ -36,22 +36,24 @@ table tr:nth-child(even) {
    </table>
 </div>
 <input type="submit" ng-click="savePlaylist()" value="Save changes" />
+<input type="submit" ng-click="addMedia()" value="Add media" />
 
 <script type="text/ng-template" id="display">
-        <td>{{media.uri}}</td>
-        <td>{{media.type}}</td>
-        <td>{{media.time}}</td>
-        <td>
-            <button ng-click="editMedia(media)">Edit</button>
-        </td>
-    </script>
-    <script type="text/ng-template" id="edit">
-        <td><input type="text" ng-model="selected.uri" /></td>
-        <td><input type="text" ng-model="selected.type" /></td>
-        <td><input type="text" ng-model="selected.time"/></td>
-        <td>
-            <button ng-click="saveMedia($index)">Save</button>
-            <button ng-click="reset()">Cancel</button>
-        </td>
-    </script>
+  <td><input type="text" ng-model="media.uri" size='30' /></td>
+  <td>{{media.type}}</td>
+  <td>{{media.time}}</td>
+    <td>
+      <button ng-click="editMedia(media)">Edit</button>
+      <button ng-click="removeMedia(media)">Remove</button>
+    </td>
+</script>
+<script type="text/ng-template" id="edit">
+  <td><input type="text" ng-model="selected.uri" /></td>
+  <td><input type="text" ng-model="selected.type" /></td>
+  <td><input type="text" ng-model="selected.time"/></td>
+  <td>
+    <button ng-click="saveMedia($index)">Save</button>
+    <button ng-click="reset()">Cancel</button>
+  </td>
+</script>
 <!--script type="text/javascript" src="modules/directives/sortable/src/sortable.js"></script-->
