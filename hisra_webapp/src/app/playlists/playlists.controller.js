@@ -15,7 +15,6 @@ function PlaylistController($location, Authentication, User) {
   }
   vm.playlists = [];
 
-  // TODO: Get username from auth service
   User.getPlaylists({username: user.username}).$promise
     .then(function (playlists) {
       vm.playlists = playlists.map(function(playlist) {
