@@ -38,4 +38,4 @@ class DeviceSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.id')
     class Meta:
         model = Device
-        fields = ('name', 'playlist', 'owner')
+        fields = ('name', 'playlist', 'owner','id')
