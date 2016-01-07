@@ -1,5 +1,6 @@
 import logging
 import os
+import json
 
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -113,6 +114,12 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
 
 
 class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCompleteView):
+    do_md5_check = False
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(HisraChunkedUploadCompleteView, self).dispatch(*args, **kwargs)
+
     def check_permissions(self, request):
         self.authenticate(request)
 
@@ -172,6 +179,25 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
     permission_classes = (IsOwnerPermission,)
+
+    def perform_destroy(self, instance):
+        owner = instance.owner
+        playlists = Playlist.objects.all().filter(owner=owner.id)
+        for playlist in playlists:
+            self.remove_media_from_playlist(instance, playlist)
+        return super(MediaDetail, self).perform_destroy(instance)
+
+    def remove_media_from_playlist(self, media, db_playlist):
+        media_schedule = json.loads(db_playlist.media_schedule_json.replace("'", '"'))
+        new_schedule = []
+        for item in media_schedule:
+            if 'id' in item and item['id'] == media.id:
+                continue
+            new_schedule.append(item)
+        media_schedule_json = json.dumps(new_schedule).replace('"', '\'')
+        db_playlist.media_schedule_json = media_schedule_json
+        db_playlist.save()
+
 
 
 class PlaylistList(APIView):

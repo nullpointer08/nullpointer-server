@@ -5,55 +5,78 @@ angular.module('hisraWebapp')
 .controller('PlaylistDetailController', PlaylistDetailController);
 
 /* @ngInject */
-function PlaylistDetailController($scope, $location, $routeParams, Authentication, User, Playlist) {
+function PlaylistDetailController($scope, $location, $timeout, $routeParams, Authentication, User, Playlist, Media, MediaTypes, Notification) {
   var user = Authentication.getCurrentUser();
   if(user === undefined) {
       return $location.path('/login');
   }
 
-  $scope.types = ['web_page', 'video', 'image'];
-  $scope.selected = undefined;
-  $scope.getTemplate = function (media) {
-        if($scope.selected === undefined) return 'display';
-       if (media.uri === $scope.selected.uri) return 'edit';
-       else return 'display';
-   };
+  $scope.allMedia = [];
+  User.getMedia({username: user.username}).$promise
+  .then(function (media) {
+    $scope.allMedia = media;
+    console.dir(media);
+  });
 
-   $scope.editMedia = function (media) {
-     console.dir(media);
-        $scope.selected = angular.copy(media);
-    };
+  $scope.mediaTypes = MediaTypes;
 
-    $scope.saveMedia = function (index) {
-        console.log("Saving contact");
-        $scope.playlist.media_schedule[index] = angular.copy($scope.selected);
-        $scope.reset();
-    };
+  $scope.addToPlaylist = function(media) {
+    media.time = 20;
+    $scope.playlist.media_schedule.push(media);
+  };
 
-    $scope.reset = function () {
-        $scope.selected = undefined;
-    };
+  $scope.savePlaylist = function() {
+    var updatedPlaylist = angular.copy($scope.playlist);
+    updatedPlaylist.media_schedule_json = JSON.stringify(updatedPlaylist.media_schedule).replace(/"/g, "'");
+    delete updatedPlaylist.media_schedule;
+    Playlist.update({
+        username: user.username,
+        id: updatedPlaylist.id
+      }, 
+      updatedPlaylist,
+      function() {
+        $scope.notifier.showSuccess("Saved playlist");
+      },
+      function() {
+        $scope.notifier.showFailure("Failed to save playlist");
+      }
+    );
+  };
 
-    $scope.savePlaylist = function() {
-      var updatedPlaylist = angular.copy($scope.playlist);
-      updatedPlaylist.media_schedule_json = JSON.stringify(updatedPlaylist.media_schedule).replace(/"/g, "'");
-      delete updatedPlaylist.media_schedule;
-      Playlist.update({
-          username: user.username,
-          id: updatedPlaylist.id
-        }, 
-        updatedPlaylist
-      );
-    };
+  $scope.removeMedia = function(media) {
+    var index = $scope.playlist.media_schedule.indexOf(media);
+    if(index != -1) {
+      $scope.playlist.media_schedule.splice(index, 1);
+    }
+  };
 
   Playlist.get({
-      id: $routeParams.playlistId,
-      username: user.username
-  }).$promise
-    .then(function(playlist) {
-        var json = playlist.media_schedule_json.replace(/'/g, '"');
-        playlist.media_schedule = JSON.parse(json);
-        $scope.playlist = playlist;
-    });
+    id: $routeParams.playlistId,
+    username: user.username
+  }).$promise.then(function(playlist) {
+    var json = playlist.media_schedule_json.replace(/'/g, '"');
+    playlist.media_schedule = JSON.parse(json);
+    $scope.playlist = playlist;
+  });
+
+  $scope.deletePlaylist = function() {
+    var answer = confirm("Are you sure you want to delete the playlist?");
+    if(!answer) {
+      return;
+    }
+    Playlist.delete(
+      {username: user.username, id: $scope.playlist.id},
+      null,
+      function() {
+        $location.path('/playlists');
+      },
+      function() {
+        $scope.notifier.showFailure("FAILURE: Could not delete playlist");
+      }
+    );
+  };
+
+  $scope.notifier = Notification.createNotifier();
 }
+
 })();
