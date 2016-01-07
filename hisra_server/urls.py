@@ -51,13 +51,13 @@ urlpatterns = [
         views.DeviceDetail.as_view()),
 
     # POST /api/user
-    url(r'^api/user/?$', views.UserList.as_view()),
+    # url(r'^api/user/?$', views.UserList.as_view()),
 
     # GET /api/user/:username
     url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/?$', views.UserDetail.as_view()),
 
     # GET /api/device/:deviceid/playlist
-    url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
+    url(r'^api/device/playlist/?$',
         views.DevicePlaylist.as_view()),
 
     # GET /media/:owner_id/:filename

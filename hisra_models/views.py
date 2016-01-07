@@ -21,19 +21,19 @@ from .models import Media, Playlist, Device
 from .permissions import IsOwnerPermission, DeviceAuthentication
 from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
 class MediaDownloadView(APIView):
-    authentication_classes = (SessionAuthentication, DeviceAuthentication, BasicAuthentication)
+
+    authentication_classes = (BasicAuthentication, DeviceAuthentication)
+
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, media_id=None, owner_id=None, filename=None):
         logger.debug("REQUEST USER: %s", request.user)
-        if not request.user.is_authenticated():
-            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
 
         logger.debug("MediaDownloadView GET: media_id: %s owner_id: %s filename: %s", media_id, owner_id, filename)
         try:
@@ -96,9 +96,12 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
 
     def check_permissions(self, request):
         self.authenticate(request)
+        super(HisraChunkedUploadView,self).check_permissions(request)
 
     def is_valid_chunked_upload_request(self, **attrs):
-        if os.path.isfile(os.path.join(settings.MEDIA_ROOT, str(attrs['user'].id), str(attrs['filename']))):
+        user = attrs['user']
+        filename = attrs['filename']
+        if os.path.isfile(os.path.join(settings.MEDIA_ROOT, str(user.id), str(filename))):
             raise ChunkedUploadError(status=status.HTTP_409_CONFLICT, detail='File already exists on the server.')
         if not Media.is_supported_media_type(attrs['filename']):
             raise ChunkedUploadError(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
@@ -123,15 +126,13 @@ class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCo
     def check_permissions(self, request):
         self.authenticate(request)
 
-    def post_save(self, chunked_upload, request, new=False):
-        chunked_upload.close_file()
-
-    def on_completion(self, uploaded_file, request):
+    def on_completion(self, chunked_upload, request):
         try:
-            Media.objects.create_media(uploaded_file, request.user)
+            Media.objects.create_media(chunked_upload, request.user)
             logger.info("Media saved")
         except Exception, e:
-            logger.error(e)
+            logger.debug('Exception creating media: {0}'.format(e.message))
+            raise ChunkedUploadError(status=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Creating media on server failed')
 
     def get_response_data(self, chunked_upload, request):
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
@@ -140,37 +141,26 @@ class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCo
 
 class MediaList(APIView):
 
+    permission_classes = (IsOwnerPermission,)
+
     def get(self, request, username):
-        '''
+        """
         GET /api/user/:username/media
-        Returns all devices owned by the user
-        '''
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        assert len(owners) == 1
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        owner = owners[0]
-        media = Media.objects.all().filter(owner=owner)
+        Returns all media owned by the user
+        """
+
+        media = Media.objects.all().filter(owner=request.user)
         serializer = MediaSerializer(media, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, username):
-        '''
-        POST /api/user/:username/device
+        """
+        POST /api/user/:username/media
         Adds a device for the user
-        '''
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        assert len(owners) == 1
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        owner = owners[0]
+        """
         serializer = MediaSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(owner=owner)
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -185,6 +175,7 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
         playlists = Playlist.objects.all().filter(owner=owner.id)
         for playlist in playlists:
             self.remove_media_from_playlist(instance, playlist)
+        os.remove(instance.media_file)
         return super(MediaDetail, self).perform_destroy(instance)
 
     def remove_media_from_playlist(self, media, db_playlist):
@@ -203,36 +194,22 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
 class PlaylistList(APIView):
 
     def get(self, request, username):
-        '''
+        """
         GET /api/user/:username/media
         Returns all devices owned by the user
-        '''
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        assert len(owners) == 1
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        owner = owners[0]
-        playlists = Playlist.objects.all().filter(owner=owner)
+        """
+        playlists = Playlist.objects.all().filter(owner=request.user)
         serializer = PlaylistSerializer(playlists, many=True)
         return Response(serializer.data)
 
     def post(self, request, username):
-        '''
+        """
         POST /api/user/:username/device
         Adds a device for the user
-        '''
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        assert len(owners) == 1
-        if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        owner = owners[0]
+        """
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(owner=owner)
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -240,13 +217,14 @@ class PlaylistList(APIView):
 class PlaylistDetail(APIView):
     queryset = Playlist.objects.all()
     serializer_class = PlaylistSerializer
+
     permission_classes = (IsOwnerPermission,)
 
     def get(self, request, username, id):
-        '''
+        """
         GET /api/user/:username/playlist/:id
         Returns the playlist with the given id
-        '''
+        """
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -255,10 +233,10 @@ class PlaylistDetail(APIView):
         return Response(serializer.data)
 
     def put(self, request, username, id):
-        '''
+        """
         PUT /api/user/:username/playlist/:id
         Updates an existing playlist for the user
-        '''
+        """
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -266,15 +244,15 @@ class PlaylistDetail(APIView):
 
         serializer = PlaylistSerializer(playlist, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, username, id):
-        '''
+        """
         DELETE /api/user/:username/playlist/:id
         Deletes a playlist
-        '''
+        """
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -285,62 +263,38 @@ class PlaylistDetail(APIView):
 
 
 class DeviceList(APIView):
+    """
+    Provides GET and POST for new device.
+    """
+
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+
     permission_classes = (IsOwnerPermission,)
-    '''
-    Provides GET and POST for new device.
-    '''
 
     def get(self, request, username):
-        '''
+        """
         GET /api/user/:username/device
         Returns all devices owned by the user
-        '''
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        assert len(owners) == 1
-        owner = owners[0]
-        devices = Device.objects.all().filter(owner=owner)
+        """
+        devices = Device.objects.all().filter(owner=request.user)
         serializer = DeviceSerializer(devices, many=True)
         return Response(serializer.data)
 
-    def post(self, request, username):
-        '''
-        POST /api/user/:username/device
-        Adds a device for the user
-        '''
-        if 'playlist' in request.data:
-            try:
-                playlist = Playlist.objects.get(pk=request.data['playlist'])
-            except Playlist.DoesNotExist:
-                return Response(status=status.HTTP_403_FORBIDDEN)
-            if playlist.owner.id != request.user.id:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-        owners = User.objects.all().filter(username=username)
-        if len(owners) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        assert len(owners) == 1
-        owner = owners[0]
-        serializer = DeviceSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner=owner)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # Devices added and removed in Django admin for now
 
 
 class DeviceDetail(APIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+
     permission_classes = (IsOwnerPermission,)
 
     def get(self, request, username, id):
-        '''
+        """
         GET /api/user/:username/device/:id
         Returns details of a device
-        '''
+        """
         try:
             device = Device.objects.get(pk=id)
         except Device.DoesNotExist:
@@ -349,10 +303,13 @@ class DeviceDetail(APIView):
         return Response(serializer.data)
 
     def put(self, request, username, id):
-        '''
+        """
         GET /api/user/:username/device/:id
         Updates the device playlist
-        '''
+        """
+        if request.user.username != username:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         try:
             device = Device.objects.get(pk=id)
         except Device.DoesNotExist:
@@ -365,10 +322,9 @@ class DeviceDetail(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if playlist.owner.id != device.owner.id:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        if 'unique_device_id' not in request.data:
-            request.data['unique_device_id'] = id
+        request.data['unique_device_id'] = id
 
         serializer = DeviceSerializer(device, data=request.data)
         if serializer.is_valid():
@@ -377,6 +333,8 @@ class DeviceDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# User creation handled through django admin for now
+'''
 class UserList(APIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -384,10 +342,10 @@ class UserList(APIView):
     #permission_classes = (IsOwnerPermission,)
 
     def post(self, request):
-        '''
+        """
         POST /api/user
         Creates an new user
-        '''
+        """
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -395,52 +353,48 @@ class UserList(APIView):
             user.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+'''
 
 
 class UserDetail(APIView):
     permission_classes = (IsOwnerPermission,)
-    '''
-    GET /api/user/:username
-    Returns some details for the user
-    '''
-    def get(self, request, username):
-        users = User.objects.all().filter(username=username)
-        if len(users) == 0:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        assert len(users) == 1
 
-        user = users[0]
+    def get(self, request, username):
+        """
+        GET /api/user/:username
+        Returns some details for the user
+        """
+        if request.user.username != username:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        user = User.objects.get(username=username)
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
 
 class DevicePlaylist(APIView):
-    authentication_classes = (BasicAuthentication, SessionAuthentication, DeviceAuthentication,)
+    authentication_classes = (DeviceAuthentication,)
 
-    def get(self, request, id):
-        if not request.user.is_authenticated():
-            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
-
-        try:
-            device = Device.objects.get(unique_device_id=id)
-        except Device.DoesNotExist:
-            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-        serializer = PlaylistSerializer(device.playlist)
+    def get(self, request):
+        """
+        GET /api/device/:id/playlist
+        """
+        device = request.auth
+        if not device.playlist:
+            return Response('No playlist found', status.HTTP_404_NOT_FOUND)
+        serializer = PlaylistSerializer(request.auth.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AuthenticationView(APIView):
 
     def post(self, request):
-        print request.data
-        user = authenticate(
-            username=request.data['username'],
-            password=request.data['password']
-        )
-        if user is not None:
+        """
+        POST /api/authentication
+        """
+        if request.user.is_authenticated:
             return Response({"success": True}, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                {"success": False},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+        return Response(
+            {"success": False},
+            status=status.HTTP_401_UNAUTHORIZED
+        )

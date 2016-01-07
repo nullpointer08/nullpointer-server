@@ -48,7 +48,7 @@ nano hisra_server_nginx.conf
     Change the following to whatever you want:
 	- path to static files, e.g. /srv/hisra/static
 	- path to media folder, e.g. /srv/hisra/media
-	- path to uwsgi_params (included in repo), /home/dano/work/hisra/nullpointer-server/uwsgi_params
+	- path to uwsgi_params (included in repo), /home/user/work/hisra/nullpointer-server/uwsgi_params
 
 # Create a symlink to nginx sites_enabled, so nginx uses this config file
 sudo ln -s /home/dano/work/hisra/nullpointer-server/hisra_server_nginx.conf /etc/nginx/sites-enabled/
@@ -62,6 +62,9 @@ nano hisra_server/settings.py
 	MEDIA_ROOT = '/srv/hisra/media'
 	MEDIA_RUL = 'http://drajala.ddns.net:8000/media/'
 	ALLOWED_ORIGIN = '*' # Allows every origin, fine for testing
+
+# Collect static files
+python manage.py collectstatic
 
 # Start serving the API with nginx
 sudo service nginx restart # Reads the new config

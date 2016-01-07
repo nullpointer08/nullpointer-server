@@ -38,6 +38,8 @@ class BaseChunkedUpload(models.Model):
                                               default=UPLOADING)
     completed_on = models.DateTimeField(null=True, blank=True)
 
+    completed_md5 = models.CharField(max_length=32, null=True, blank=True)
+
     @property
     def expires_on(self):
         return self.created_on + EXPIRATION_DELTA
@@ -91,12 +93,6 @@ class BaseChunkedUpload(models.Model):
         if save:
             self.save()
         self.close_file()  # Flush
-
-    def get_uploaded_file(self):
-        self.close_file()
-        self.file.open(mode='rb')  # mode = read+binary
-        return UploadedFile(file=self.file, name=self.filename,
-                            size=self.offset)
 
     class Meta:
         abstract = True

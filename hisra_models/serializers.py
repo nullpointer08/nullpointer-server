@@ -3,6 +3,7 @@ from hisra_models.models import Media, Playlist, Device
 from django.contrib.auth.models import User
 from django.conf import settings
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -22,19 +23,19 @@ class MediaSerializer(serializers.ModelSerializer):
 class PlaylistSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.id')
-    playlist_url = serializers.SerializerMethodField()
+    media_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Playlist
-        fields = ('id', 'owner', 'playlist_url', 'name', 'description', 'media_schedule_json')
+        fields = ('id', 'owner', 'media_url', 'name', 'description', 'media_schedule_json')
 
-    def get_playlist_url(self, obj):
+    def get_media_url(self, obj):
         return settings.MEDIA_URL
 
 
 class DeviceSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.id')
-
     class Meta:
         model = Device
-        fields = ('unique_device_id', 'playlist', 'owner')
+        fields = ('name', 'playlist', 'owner')

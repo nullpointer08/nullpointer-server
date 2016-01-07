@@ -2,8 +2,10 @@ from rest_framework import permissions, exceptions
 from rest_framework import authentication
 from models import Device
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
 import logging
 logger = logging.getLogger(__name__)
+
 
 class IsOwnerPermission(permissions.BasePermission):
 
@@ -12,12 +14,15 @@ class IsOwnerPermission(permissions.BasePermission):
             return True
         if request.user is None:
             return False
-        return request.user.username == view.kwargs['username']
+        if 'username' in view.kwargs:
+            return request.user.username == view.kwargs['username']
+        return True
 
     def has_object_permission(self, request, view, obj):
-        # Write permissions are only allowed to the owner of the snippet.
         if request.user is None:
             return False
+        if isinstance(obj, User) and obj == request.user:
+            return True
         return obj.owner == request.user
 
 
@@ -26,7 +31,8 @@ class DeviceAuthentication(authentication.BaseAuthentication):
 
         auth = authentication.get_authorization_header(request).split()
         if not auth or auth[0].lower() != b'device':
-            return None
+            msg = _('No authorization provided.')
+            raise exceptions.NotAuthenticated(msg)
         if len(auth) == 1:
             msg = _('Invalid device header. No credentials provided.')
             raise exceptions.AuthenticationFailed(msg)
