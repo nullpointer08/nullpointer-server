@@ -10,7 +10,6 @@ from django.views.generic.base import TemplateView
 
 from rest_framework import generics, status
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +20,6 @@ from .models import Media, Playlist, Device
 from .permissions import IsOwnerPermission, DeviceAuthentication
 from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -31,7 +29,7 @@ class MediaDownloadView(APIView):
 
     authentication_classes = (SessionAuthentication, DeviceAuthentication)
 
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, media_id=None, owner_id=None, filename=None):
         logger.debug("REQUEST USER: %s", request.user)
@@ -141,7 +139,7 @@ class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCo
 
 class MediaList(APIView):
 
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, username):
         """
@@ -174,7 +172,7 @@ class MediaList(APIView):
 class MediaDetail(generics.RetrieveDestroyAPIView):
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
 
 class PlaylistList(APIView):
@@ -210,7 +208,7 @@ class PlaylistDetail(APIView):
     queryset = Playlist.objects.all()
     serializer_class = PlaylistSerializer
 
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, username, id):
         """
@@ -271,17 +269,19 @@ class DeviceList(APIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
 
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, username):
         """
         GET /api/user/:username/device
         Returns all devices owned by the user
         """
+        logger.debug(request.user.username)
+        logger.debug(username)
         if request.user.username != username:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        devices = Device.objects.get(owner=request.user)
+        devices = Device.objects.all().filter(owner=request.user)
         serializer = DeviceSerializer(devices, many=True)
         return Response(serializer.data)
 
@@ -292,7 +292,7 @@ class DeviceDetail(APIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
 
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, username, id):
         """
@@ -364,7 +364,7 @@ class UserList(APIView):
 
 
 class UserDetail(APIView):
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, username):
         """
@@ -382,7 +382,7 @@ class UserDetail(APIView):
 class DevicePlaylist(APIView):
 
     authentication_classes = (SessionAuthentication, DeviceAuthentication,)
-    permission_classes = (IsAuthenticated, IsOwnerPermission,)
+    permission_classes = (IsOwnerPermission,)
 
     def get(self, request, id):
         """
