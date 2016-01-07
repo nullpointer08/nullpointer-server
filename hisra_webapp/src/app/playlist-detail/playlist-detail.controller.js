@@ -33,7 +33,13 @@ function PlaylistDetailController($scope, $location, $timeout, $routeParams, Aut
         username: user.username,
         id: updatedPlaylist.id
       }, 
-      updatedPlaylist
+      updatedPlaylist,
+      function() {
+        $scope.notifier.showSuccess("Saved playlist");
+      },
+      function() {
+        $scope.notifier.showFailure("Failed to save playlist");
+      }
     );
   };
 
@@ -62,16 +68,15 @@ function PlaylistDetailController($scope, $location, $timeout, $routeParams, Aut
       {username: user.username, id: $scope.playlist.id},
       null,
       function() {
-        console.log("SUCCESS: playlist deleted");
         $location.path('/playlists');
       },
       function() {
-        console.log("FAILURE: Could not delete playlist");
+        $scope.notifier.showFailure("FAILURE: Could not delete playlist");
       }
     );
   };
 
-  $scope.notifier = Notification;
+  $scope.notifier = Notification.createNotifier();
 }
 
 })();
