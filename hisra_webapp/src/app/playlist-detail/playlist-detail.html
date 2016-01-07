@@ -10,16 +10,22 @@ table tr:nth-child(odd)	{
 table tr:nth-child(even) {
   background-color: #ffffff;
 }
+.success-message {
+  display: block;
+	background: #CCFFCC;
+	text-align: center;
+}
 </style>
-
 <div>
   <h3>Playlist details</h3>
-  <b>Name:</b> {{playlist.playlist.name}} <br>
-  <b>Description: </b> {{playlist.playlist.description}} <br>
+  <b>Name:</b> <input type="text" ng-model="playlist.name" size='60'><br>
+  <b>Description:</b> <input type="text" ng-model="playlist.description" size='60'> <br>
   <b>Schedule:</b> (drag and drop to change order)<br>
     <table style="width:auto;" class="table table-bordered">
         <thead>
             <tr>
+                <th>Name</th>
+                <th>Description</th>
                 <th>URL</th>
                 <th>Type</th>
                 <th>Display time</th>
@@ -27,36 +33,44 @@ table tr:nth-child(even) {
             </tr>
         </thead>
         <tbody ui-sortable ng-model="playlist.media_schedule">
-            <tr ng-repeat="media in playlist.media_schedule track by $index" class="item" style="cursor: move;" ng-include="getTemplate(media)">
-                <td>{{media.uri}}</td>
-                <td>{{media.type}}</td>
-                <td>{{media.time}}</td>
+            <tr ng-repeat="media in playlist.media_schedule track by $index" class="item" style="cursor: move;">
+                <td>{{media.name}}</td>
+                <td>{{media.description}}</td>
+                <td>{{media.url}}</td>
+                <td>{{mediaTypes.labelFor(media.media_type)}}</td>
+                <td><input type="text" ng-model="media.time"/></td>
+                <td><input type="submit" value="Remove" ng-click="removeMedia(media)"/></td>
             </tr>
         </tbody>{{list}}
    </table>
 </div>
+
+<div>
+  <h3>Available media</h3>
+    <table style="width:auto;" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>URL</th>
+                <th>Type</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody ng-model="allMedia">
+            <tr ng-repeat="media in allMedia track by $index" class="item">
+                <td>{{media.name}}</td>
+                <td>{{media.description}}</td>
+                <td>{{media.url}}</td>
+                <td>{{mediaTypes.labelFor(media.media_type)}}</td>
+                <td><input type="submit" value="Add to playlist" ng-click="addToPlaylist(media)"/></td>
+            </tr>
+        </tbody>{{list}}
+   </table>
+</div><br>
+
 <input type="submit" ng-click="savePlaylist()" value="Save changes" />
-
-<script type="text/ng-template" id="display">
-  <td>{{media.uri}}</td>
-  <td>{{media.type}}</td>
-  <td>{{media.time}}</td>
-  <td>
-      <button ng-click="editMedia(media)">Edit</button>
-  </td>
-</script>
-
-<script type="text/ng-template" id="edit">
-  <td><input type="text" ng-model="selected.uri" /></td>
-  <td><select ng-model="selected.type">
-    <option>image</option>
-    <option>video</option>
-    <option>web_page</option>
-  </select></td>
-  <td><input type="text" ng-model="selected.time"/></td>
-  <td>
-      <button ng-click="saveMedia($index)">Save</button>
-      <button ng-click="reset()">Cancel</button>
-  </td>
-</script>
-<!--script type="text/javascript" src="modules/directives/sortable/src/sortable.js"></script-->
+<input type="submit" ng-click="deletePlaylist()" value="Delete playlist" />
+<div class="success-message" ng-show="notifier.isSuccessVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong> Stuff</div>
+</div>

@@ -26,7 +26,7 @@ function AuthenticationFactory($http, $cookies, BASE_URL) {
         .then(function (response) {
           if(response.data.success) {
               var authdata = btoa(username + ':' + password);
-              $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
+              $http.defaults.headers.common.Authorization = 'Basic ' + authdata;
 
               var currentUser = {
                   username: username,
@@ -37,21 +37,22 @@ function AuthenticationFactory($http, $cookies, BASE_URL) {
               userHolder.currentUser = currentUser;
           }
         });
-  };
+  }
 
   function Logout() {
     userHolder.currentUser = undefined;
     $cookies.remove('currentUser');
-    delete $http.defaults.headers.common['Authorization'];
+    delete $http.defaults.headers.common.Authorization;
   }
 
   function GetCurrentUser() {
-      if(userHolder.currentUser != undefined) {
+      if(userHolder.currentUser !== undefined) {
           return userHolder.currentUser;
       }
       var cookieUser = $cookies.getObject('currentUser');
-      if(cookieUser != undefined) {
-          $http.defaults.headers.common['Authorization'] = 'Basic ' + cookieUser.authdata;
+      if(cookieUser !== undefined) {
+          cookieUser = JSON.parse(cookieUser);
+          $http.defaults.headers.common.Authorization = 'Basic ' + cookieUser.authdata;
           return cookieUser;
       }
       return undefined;
