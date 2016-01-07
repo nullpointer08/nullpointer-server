@@ -13,20 +13,20 @@ logger.setLevel(logging.DEBUG)
 class MediaManager(models.Manager):
 
     @staticmethod
-    def create_media(uploaded_file, user):
-        old_file_path = uploaded_file.file.path
-        filename = uploaded_file.filename
+    def create_media(chunked_upload, user):
+        old_file_path = chunked_upload.file.path
+        filename = chunked_upload.filename
         new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
 
         if os.path.isfile(new_file_path):
-            filename = uploaded_file.upload_id + uploaded_file.filename
+            filename = chunked_upload.upload_id + chunked_upload.filename
             new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
 
         print "New file path %s" % new_file_path
         os.rename(old_file_path, new_file_path)
-        media = Media(owner=user, media_file=new_file_path, md5=uploaded_file.md5)
+        media = Media(owner=user, media_file=new_file_path, md5=chunked_upload.completed_md5)
         media.media_type = Media.determine_media_type(new_file_path)
-        media.name = uploaded_file.filename
+        media.name = filename
         media.save()
         media.url = urljoin(settings.MEDIA_URL, str(media.id))
         media.save()
@@ -99,8 +99,9 @@ class Playlist(models.Model):
 
 
 class Device(models.Model):
-    unique_device_id = models.CharField(primary_key=True, max_length=256,
+    unique_device_id = models.CharField(max_length=256,
                                         unique=True)
+    name = models.CharField(max_length=256)
     owner = models.ForeignKey(User, null=True, blank=True, default=None)
     playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None)
 

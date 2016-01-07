@@ -14,7 +14,9 @@ class IsOwnerPermission(permissions.BasePermission):
             return True
         if request.user is None:
             return False
-        return request.user.username == view.kwargs['username']
+        if 'username' in view.kwargs:
+            return request.user.username == view.kwargs['username']
+        return True
 
     def has_object_permission(self, request, view, obj):
         if request.user is None:
@@ -29,7 +31,8 @@ class DeviceAuthentication(authentication.BaseAuthentication):
 
         auth = authentication.get_authorization_header(request).split()
         if not auth or auth[0].lower() != b'device':
-            return None
+            msg = _('No authorization provided.')
+            raise exceptions.NotAuthenticated(msg)
         if len(auth) == 1:
             msg = _('Invalid device header. No credentials provided.')
             raise exceptions.AuthenticationFailed(msg)

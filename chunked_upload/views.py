@@ -69,10 +69,8 @@ class ChunkedUploadBaseView(View):
         Grants permission to start/continue an upload based on the request.
         """
         if hasattr(request, 'user') and not request.user.is_authenticated():
-            raise ChunkedUploadError().from_status_and_detail(
-                status=401,
-                detail='Authentication credentials were not provided'
-            )
+            raise ChunkedUploadError(status=401,
+                                     detail='Authentication credentials were not provided')
 
     def _post(self, request, *args, **kwargs):
         raise NotImplementedError
@@ -231,7 +229,7 @@ class ChunkedUploadCompleteView(ChunkedUploadBaseView):
     # impacting your performance. Proceed at your own risk.
     do_md5_check = True
 
-    def on_completion(self, uploaded_file, request):
+    def on_completion(self, chunked_upload, request):
         """
         Placeholder method to define what to do when upload is complete.
         """
@@ -271,11 +269,15 @@ class ChunkedUploadCompleteView(ChunkedUploadBaseView):
                                            upload_id=upload_id)
 
         self.is_valid_chunked_upload(request, chunked_upload)
+
         if self.do_md5_check:
             self.md5_check(chunked_upload, md5)
 
+        chunked_upload.completed_md5 = md5
         chunked_upload.status = COMPLETE
         chunked_upload.completed_on = timezone.now()
+        chunked_upload.close_file()
+
         self._save(chunked_upload)
         self.on_completion(chunked_upload, request)
         response_data = self.get_response_data(chunked_upload, request)

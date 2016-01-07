@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.views.generic.base import TemplateView
 
 from rest_framework import generics, status
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -28,7 +28,7 @@ logger.setLevel(logging.DEBUG)
 
 class MediaDownloadView(APIView):
 
-    authentication_classes = (SessionAuthentication, DeviceAuthentication)
+    authentication_classes = (BasicAuthentication, DeviceAuthentication)
 
     permission_classes = (IsOwnerPermission,)
 
@@ -80,7 +80,7 @@ class ChunkedUploadDemo(TemplateView):
 
 
 class ApiViewAuthenticationMixin(object):
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (BasicAuthentication, SessionAuthentication)
 
     def authenticate(self, request):
         request = Request(request=request, authenticators=[auth() for auth in self.authentication_classes])
@@ -96,9 +96,12 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
 
     def check_permissions(self, request):
         self.authenticate(request)
+        super(HisraChunkedUploadView,self).check_permissions(request)
 
     def is_valid_chunked_upload_request(self, **attrs):
-        if os.path.isfile(os.path.join(settings.MEDIA_ROOT, str(attrs['user'].id), str(attrs['filename']))):
+        user = attrs['user']
+        filename = attrs['filename']
+        if os.path.isfile(os.path.join(settings.MEDIA_ROOT, str(user.id), str(filename))):
             raise ChunkedUploadError(status=status.HTTP_409_CONFLICT, detail='File already exists on the server.')
         if not Media.is_supported_media_type(attrs['filename']):
             raise ChunkedUploadError(status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
@@ -123,15 +126,13 @@ class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCo
     def check_permissions(self, request):
         self.authenticate(request)
 
-    def post_save(self, chunked_upload, request, new=False):
-        chunked_upload.close_file()
-
-    def on_completion(self, uploaded_file, request):
+    def on_completion(self, chunked_upload, request):
         try:
-            Media.objects.create_media(uploaded_file, request.user)
+            Media.objects.create_media(chunked_upload, request.user)
             logger.info("Media saved")
         except Exception, e:
-            logger.error(e)
+            logger.debug('Exception creating media: {0}'.format(e.message))
+            raise ChunkedUploadError(status=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Creating media on server failed')
 
     def get_response_data(self, chunked_upload, request):
         return {'message': ("You successfully uploaded '%s' (%s bytes)!" %
@@ -147,22 +148,16 @@ class MediaList(APIView):
         GET /api/user/:username/media
         Returns all media owned by the user
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         media = Media.objects.all().filter(owner=request.user)
         serializer = MediaSerializer(media, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
     def post(self, request, username):
         """
         POST /api/user/:username/media
         Adds a device for the user
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         serializer = MediaSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(owner=request.user)
@@ -180,6 +175,7 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
         playlists = Playlist.objects.all().filter(owner=owner.id)
         for playlist in playlists:
             self.remove_media_from_playlist(instance, playlist)
+        os.remove(instance.media_file)
         return super(MediaDetail, self).perform_destroy(instance)
 
     def remove_media_from_playlist(self, media, db_playlist):
@@ -202,9 +198,6 @@ class PlaylistList(APIView):
         GET /api/user/:username/media
         Returns all devices owned by the user
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         playlists = Playlist.objects.all().filter(owner=request.user)
         serializer = PlaylistSerializer(playlists, many=True)
         return Response(serializer.data)
@@ -214,9 +207,6 @@ class PlaylistList(APIView):
         POST /api/user/:username/device
         Adds a device for the user
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(owner=request.user)
@@ -235,9 +225,6 @@ class PlaylistDetail(APIView):
         GET /api/user/:username/playlist/:id
         Returns the playlist with the given id
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -250,9 +237,6 @@ class PlaylistDetail(APIView):
         PUT /api/user/:username/playlist/:id
         Updates an existing playlist for the user
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -269,9 +253,6 @@ class PlaylistDetail(APIView):
         DELETE /api/user/:username/playlist/:id
         Deletes a playlist
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         try:
             playlist = Playlist.objects.get(pk=id)
         except Playlist.DoesNotExist:
@@ -296,11 +277,6 @@ class DeviceList(APIView):
         GET /api/user/:username/device
         Returns all devices owned by the user
         """
-        logger.debug(request.user.username)
-        logger.debug(username)
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         devices = Device.objects.all().filter(owner=request.user)
         serializer = DeviceSerializer(devices, many=True)
         return Response(serializer.data)
@@ -319,9 +295,6 @@ class DeviceDetail(APIView):
         GET /api/user/:username/device/:id
         Returns details of a device
         """
-        if request.user.username != username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         try:
             device = Device.objects.get(pk=id)
         except Device.DoesNotExist:
@@ -400,19 +373,16 @@ class UserDetail(APIView):
 
 
 class DevicePlaylist(APIView):
+    authentication_classes = (DeviceAuthentication,)
 
-    authentication_classes = (SessionAuthentication, DeviceAuthentication,)
-    permission_classes = (IsOwnerPermission,)
-
-    def get(self, request, id):
+    def get(self, request):
         """
         GET /api/device/:id/playlist
         """
-        try:
-            device = Device.objects.get(unique_device_id=id)
-        except Device.DoesNotExist:
-            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-        serializer = PlaylistSerializer(device.playlist)
+        device = request.auth
+        if not device.playlist:
+            return Response('No playlist found', status.HTTP_404_NOT_FOUND)
+        serializer = PlaylistSerializer(request.auth.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
