@@ -6,7 +6,7 @@
     .config(config);
 
   /** @ngInject */
-  function config($logProvider, $mdThemingProvider, toastrConfig, $httpProvider) {
+  function config($logProvider, $mdThemingProvider, toastrConfig) {
     // Enable log
     $logProvider.debugEnabled(true);
 
@@ -21,7 +21,6 @@
     toastrConfig.preventDuplicates = true;
     toastrConfig.progressBar = true;
 
-    //$httpProvider.defaults.headers.common['Authorization']= 'Basic dGVzdHk6cGFzcw==';
   }
 
 })();

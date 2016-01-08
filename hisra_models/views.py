@@ -90,10 +90,6 @@ class ApiViewAuthenticationMixin(object):
 
 class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
 
-    @csrf_exempt
-    def dispatch(self, *args, **kwargs):
-        return super(HisraChunkedUploadView, self).dispatch(*args, **kwargs)
-
     def check_permissions(self, request):
         self.authenticate(request)
         super(HisraChunkedUploadView,self).check_permissions(request)
@@ -175,7 +171,8 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
         playlists = Playlist.objects.all().filter(owner=owner.id)
         for playlist in playlists:
             self.remove_media_from_playlist(instance, playlist)
-        os.remove(instance.media_file)
+        if os.path.isfile(instance.media_file):
+            os.remove(instance.media_file)
         return super(MediaDetail, self).perform_destroy(instance)
 
     def remove_media_from_playlist(self, media, db_playlist):
@@ -193,6 +190,7 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
 
 class PlaylistList(APIView):
 
+    permission_classes = (IsOwnerPermission,)
     def get(self, request, username):
         """
         GET /api/user/:username/media

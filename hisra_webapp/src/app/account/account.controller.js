@@ -8,7 +8,7 @@ angular.module('hisraWebapp')
 function AccountController($scope, User, Authentication, $location) {
   var loggedAs = Authentication.getCurrentUser();
   if(loggedAs == undefined) {
-      return $location.path('/login');
+        return $location.path('/login');
   }
 
   var vm = this;
@@ -16,6 +16,7 @@ function AccountController($scope, User, Authentication, $location) {
   .then(function(user) {
       vm.user = user;
   });
+
 
   $scope.logout = function() {
       Authentication.logout();
