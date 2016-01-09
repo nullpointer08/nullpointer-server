@@ -113,7 +113,7 @@ from jsonfield import JSONField
 class Playlist(models.Model):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=256)
-    description = models.CharField(max_length=256)
+    description = models.CharField(max_length=256, blank=True)
     media_schedule_json = JSONField()
 
     def __unicode__(self):
