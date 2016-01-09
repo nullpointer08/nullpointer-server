@@ -67,7 +67,10 @@ class Media(models.Model):
     @receiver(post_delete)
     def delete_file(sender, instance, **kwargs):
         if sender == Media:
-            os.remove(instance.media_file)
+            try:
+                os.remove(instance.media_file)
+            except OSError as e:
+                pass
             # if user has no more files remove dir as well.
             # os.rmdir only removes empty dirs
             try:

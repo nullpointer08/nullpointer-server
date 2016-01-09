@@ -136,16 +136,8 @@ class MediaList(generics.ListCreateAPIView):
     serializer_class = MediaSerializer
     permission_classes = (IsOwnerPermission,)
 
-    def post(self, request, username):
-        """
-        POST /api/user/:username/media
-        Adds a device for the user
-        """
-        serializer = MediaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class MediaDetail(generics.RetrieveDestroyAPIView):
@@ -209,6 +201,7 @@ class UserDetail(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsOwnerPermission,)
     serializer_class = UserSerializer
+    lookup_field = 'username'
 
 
 class DevicePlaylist(APIView):
