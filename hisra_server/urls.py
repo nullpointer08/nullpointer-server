@@ -39,7 +39,7 @@ urlpatterns = [
 
     # GET /api/user/:username/playlist/:id
     # PUT /api/user/:username/playlist/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/playlist/(?P<id>[0-9]+)/?$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/playlist/(?P<pk>[0-9]+)/?$',
         views.PlaylistDetail.as_view()),
 
     # GET /api/user/:username/device
@@ -47,7 +47,7 @@ urlpatterns = [
         views.DeviceList.as_view()),
 
     # GET /api/user/:username/device/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<id>[a-zA-Z0-9_]+)/?$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<pk>[a-zA-Z0-9_]+)/?$',
         views.DeviceDetail.as_view()),
 
     # POST /api/user

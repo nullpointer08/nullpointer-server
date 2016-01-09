@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from magic import from_file
 from mimetypes import guess_type
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 import os
 from urlparse import urljoin
 import logging
@@ -33,6 +35,15 @@ class MediaManager(models.Manager):
         return media
 
 
+@receiver(post_delete)
+def something_deleted(sender, instance, **kwargs):
+    """
+    For debugging deletes
+    """
+    logger.debug(sender)
+    logger.debug(instance)
+
+
 class Media(models.Model):
     VIDEO = 'V'
     IMAGE = 'I'
@@ -52,6 +63,17 @@ class Media(models.Model):
     description = models.CharField(max_length=256, blank=True)
 
     objects = MediaManager()
+
+    @receiver(post_delete)
+    def delete_file(sender, instance, **kwargs):
+        if sender == Media:
+            os.remove(instance.media_file)
+            # if user has no more files remove dir as well.
+            # os.rmdir only removes empty dirs
+            try:
+                os.rmdir(os.path.dirname(instance.media_file))
+            except OSError as e:
+                pass
 
     @staticmethod
     def is_supported_media_type(filename):
