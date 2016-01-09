@@ -54,8 +54,8 @@ function PlaylistDetailController($scope, $location, $timeout, $routeParams, Aut
     id: $routeParams.playlistId,
     username: user.username
   }).$promise.then(function(playlist) {
-    var json = playlist.media_schedule_json;
-    playlist.media_schedule = JSON.parse(json);
+    var jsonSchedule = playlist.media_schedule_json;
+    playlist.media_schedule = JSON.parse(jsonSchedule);
     $scope.playlist = playlist;
   });
 

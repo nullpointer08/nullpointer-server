@@ -6,6 +6,7 @@ enum34==1.0.4
 httpie==0.9.2
 idna==2.0
 ipaddress==1.0.14
+jsonfield==1.0.3
 ndg-httpsclient==0.4.0
 psycopg2==2.6.1
 pyasn1==0.1.9

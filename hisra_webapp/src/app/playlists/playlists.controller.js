@@ -10,7 +10,7 @@ function PlaylistController($location, Authentication, User) {
   var vm = this;
 
   var user = Authentication.getCurrentUser();
-  if(user == undefined) {
+  if(user === undefined) {
       return $location.path('/login');
   }
   vm.playlists = [];
@@ -19,8 +19,8 @@ function PlaylistController($location, Authentication, User) {
     .then(function (playlists) {
       vm.playlists = playlists.map(function(playlist) {
         // JSON parsing doesn't seem to accept single parentheses
-        var json = playlist.media_schedule_json.replace(/'/g, '"');
-        playlist.media_schedule = JSON.parse(json);
+        var jsonSchedule = playlist.media_schedule_json;
+        playlist.media_schedule = JSON.parse(jsonSchedule);
         return playlist;
       });
     });
