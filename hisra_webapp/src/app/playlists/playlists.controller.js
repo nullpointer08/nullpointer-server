@@ -42,20 +42,8 @@ function PlaylistController($location, $scope, Authentication, User, Playlist) {
     );
   };
 
-  $scope.removePlaylist = function(playlist) {
-    Playlist.remove(
-      {username: user.username, id: playlist.id},
-      null,
-      function() {
-        console.log("SUCCESS Removed playlist");
-        vm.playlists = vm.playlists.filter(function(pl) {
-          return pl.id !== playlist.id;
-        });
-      },
-      function() {
-        console.log("FAILURE Could not remove playlist");
-      }
-    );
+  $scope.editPlaylist = function(playlist) {
+    $location.path('/playlist/' + playlist.id);
   };
 }
 
