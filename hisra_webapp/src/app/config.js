@@ -2,5 +2,5 @@
 'use strict';
 
 angular.module('hisraWebapp')
-.constant('BASE_URL', 'http://192.168.1.60:8000')
+.constant('BASE_URL', 'http://drajala.ddns.net:8000')
 })();

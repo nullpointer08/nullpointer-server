@@ -87,12 +87,12 @@ class Media(models.Model):
     def __unicode__(self):
         return 'Media:[' + str(self.id) + ']'
 
-
+from jsonfield import JSONField
 class Playlist(models.Model):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
-    media_schedule_json = models.TextField()
+    media_schedule_json = JSONField()
 
     def __unicode__(self):
         return 'Playlist:[' + str(self.name) + ']'

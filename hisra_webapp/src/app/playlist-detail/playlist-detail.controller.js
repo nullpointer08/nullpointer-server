@@ -27,7 +27,7 @@ function PlaylistDetailController($scope, $location, $timeout, $routeParams, Aut
 
   $scope.savePlaylist = function() {
     var updatedPlaylist = angular.copy($scope.playlist);
-    updatedPlaylist.media_schedule_json = JSON.stringify(updatedPlaylist.media_schedule).replace(/"/g, "'");
+    updatedPlaylist.media_schedule_json = JSON.stringify(updatedPlaylist.media_schedule);
     delete updatedPlaylist.media_schedule;
     Playlist.update({
         username: user.username,
@@ -54,7 +54,7 @@ function PlaylistDetailController($scope, $location, $timeout, $routeParams, Aut
     id: $routeParams.playlistId,
     username: user.username
   }).$promise.then(function(playlist) {
-    var json = playlist.media_schedule_json.replace(/'/g, '"');
+    var json = playlist.media_schedule_json;
     playlist.media_schedule = JSON.parse(json);
     $scope.playlist = playlist;
   });
