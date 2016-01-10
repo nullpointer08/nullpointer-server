@@ -1,11 +1,9 @@
 <div class="col-md-6 col-md-offset-3">
     <h2>{{vm.user.username}}</h2>
     <form novalidate class="simple-form">
-    First name: <input type="text" ng-model="vm.user.first_name" /><br />
-    Last name: <input type="text" ng-model="vm.user.last_name" /><br />
-    Email: <input type="email" ng-model="vm.user.email" /><br />
-    Password: <input type="password" ng-model="user.password" /><br />
-    <input type="submit" ng-click="updateUser(vm.user)" value="Update" />
+    First name: {{vm.user.first_name}}<br />
+    Last name: {{vm.user.last_name}}<br />
+    Email: {{vm.user.email}}<br />
   </form>
 </div>
 <div class="col-md-6 col-md-offset-3">

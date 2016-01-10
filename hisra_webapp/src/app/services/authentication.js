@@ -29,7 +29,7 @@ function AuthenticationFactory($http, $window, BASE_URL) {
           };
 
           if($window.sessionStorage) {
-            $window.sessionStorage.setItem('currentUser', JSON.stringify(currentUser))
+            $window.sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
           }
 
           userHolder.currentUser = currentUser;
@@ -53,7 +53,7 @@ function AuthenticationFactory($http, $window, BASE_URL) {
 
       if($window.sessionStorage) {
         var sessionUser = $window.sessionStorage.getItem('currentUser');
-        if(sessionUser) {
+        if(sessionUser && sessionUser != "undefined") {
           sessionUser = JSON.parse(sessionUser);
           $http.defaults.headers.common.Authorization = 'Token ' + sessionUser.token;
           userHolder.currentUser = sessionUser;
