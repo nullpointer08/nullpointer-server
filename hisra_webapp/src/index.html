@@ -27,14 +27,14 @@
     <acme-navbar></acme-navbar>
     
     <!--
-    <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+    <md-sidenav >
       <side-nav>
       </side-nav>
     </md-sidenav>  
     -->
     <div layout="row" flex role="main">
       
-      <side-nav></side-nav>
+      <side-nav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')"></side-nav>
       
       <md-content flex ng-view></md-content>
     </div>
