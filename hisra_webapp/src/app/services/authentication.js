@@ -9,7 +9,7 @@ angular.module('hisraWebapp')
 .factory('Authentication', AuthenticationFactory);
 
 /*@ngInject*/
-function AuthenticationFactory($http, $cookies, BASE_URL) {
+function AuthenticationFactory($http, $window, BASE_URL) {
 
   var userHolder = {
       currentUser: undefined
@@ -21,27 +21,28 @@ function AuthenticationFactory($http, $cookies, BASE_URL) {
   authentication.getCurrentUser = GetCurrentUser;
 
   function Login(username, password) {
-      console.log("CALLING LOGIN");
       return $http.post(BASE_URL + '/api/authentication', { username: username, password: password })
         .then(function (response) {
-          if(response.data.success) {
-              var authdata = btoa(username + ':' + password);
-              $http.defaults.headers.common.Authorization = 'Basic ' + authdata;
+          var currentUser = {
+            username: username,
+            token: response.data.token
+          };
 
-              var currentUser = {
-                  username: username,
-                  authdata: authdata
-              };
-
-              $cookies.putObject('currentUser', JSON.stringify(currentUser));
-              userHolder.currentUser = currentUser;
+          if($window.sessionStorage) {
+            $window.sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
           }
+
+          userHolder.currentUser = currentUser;
+
+          $http.defaults.headers.common.Authorization = 'Token ' + currentUser.token;
         });
   }
 
   function Logout() {
     userHolder.currentUser = undefined;
-    $cookies.remove('currentUser');
+    if($window.sessionStorage) {
+      $window.sessionStorage.setItem('currentUser', undefined);
+    }
     delete $http.defaults.headers.common.Authorization;
   }
 
@@ -49,12 +50,17 @@ function AuthenticationFactory($http, $cookies, BASE_URL) {
       if(userHolder.currentUser !== undefined) {
           return userHolder.currentUser;
       }
-      var cookieUser = $cookies.getObject('currentUser');
-      if(cookieUser !== undefined) {
-          cookieUser = JSON.parse(cookieUser);
-          $http.defaults.headers.common.Authorization = 'Basic ' + cookieUser.authdata;
-          return cookieUser;
+
+      if($window.sessionStorage) {
+        var sessionUser = $window.sessionStorage.getItem('currentUser');
+        if(sessionUser && sessionUser != "undefined") {
+          sessionUser = JSON.parse(sessionUser);
+          $http.defaults.headers.common.Authorization = 'Token ' + sessionUser.token;
+          userHolder.currentUser = sessionUser;
+          return sessionUser;
+        }
       }
+
       return undefined;
   }
 

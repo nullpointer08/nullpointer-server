@@ -18,6 +18,7 @@ from django.contrib import admin
 from hisra_models import views
 from hisra_models.views import HisraChunkedUploadView, HisraChunkedUploadCompleteView
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -39,7 +40,7 @@ urlpatterns = [
 
     # GET /api/user/:username/playlist/:id
     # PUT /api/user/:username/playlist/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/playlist/(?P<id>[0-9]+)/?$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]*)/playlist/(?P<pk>[0-9]+)/?$',
         views.PlaylistDetail.as_view()),
 
     # GET /api/user/:username/device
@@ -47,17 +48,17 @@ urlpatterns = [
         views.DeviceList.as_view()),
 
     # GET /api/user/:username/device/:id
-    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<id>[a-zA-Z0-9_]+)/?$',
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<pk>[a-zA-Z0-9_]+)/?$',
         views.DeviceDetail.as_view()),
 
     # POST /api/user
-    url(r'^api/user/?$', views.UserList.as_view()),
+    # url(r'^api/user/?$', views.UserList.as_view()),
 
     # GET /api/user/:username
     url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/?$', views.UserDetail.as_view()),
 
     # GET /api/device/:deviceid/playlist
-    url(r'^api/device/(?P<id>[a-zA-Z0-9_]+)/playlist/?$',
+    url(r'^api/device/playlist/?$',
         views.DevicePlaylist.as_view()),
 
     # GET /media/:owner_id/:filename
@@ -70,8 +71,8 @@ urlpatterns = [
     url('^', include('django.contrib.auth.urls')),
 
     # /uploadfile/
-    url(r'^uploadfile/?$',
-        views.ChunkedUploadDemo.as_view(), name='chunked_upload'),
+    #url(r'^uploadfile/?$',
+    #    views.ChunkedUploadDemo.as_view(), name='chunked_upload'),
 
     url(r'^api/chunked_upload/?$',
         HisraChunkedUploadView.as_view(),
@@ -81,7 +82,7 @@ urlpatterns = [
         name='api_chunked_upload_complete'),
 
     # POST /api/authentication
-    url(r'^api/authentication/?$', views.AuthenticationView.as_view())
+    url(r'^api/authentication/?$', obtain_auth_token)
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

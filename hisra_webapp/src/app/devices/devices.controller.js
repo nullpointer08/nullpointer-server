@@ -6,10 +6,11 @@ angular.module('hisraWebapp')
 .controller('DevicesController', DevicesController);
 
 /* @ngInject */
-function DevicesController($scope, $location, Authentication, User, Device, MediaTypes) {
+function DevicesController($scope, $location, Authentication, User, Device, MediaTypes, Notification) {
   var vm = this;
 
-  vm.devices = [];
+  vm.deviceMap = {};
+  vm.playlistMap = {};
   vm.errorMessage = '';
 
   var user = Authentication.getCurrentUser();
@@ -17,41 +18,48 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
       return $location.path('/login');
   }
 
+  $scope.notifier = Notification.createNotifier();
+
   User.getDevices({username: user.username}).$promise
     .then(function (devices) {
-      vm.devices = devices;
-    });
-
-  var playlistMap = {};
-  User.getPlaylists({username: user.username}).$promise
-    .then(function(playlists) {
-      vm.playlists = playlists.map(function(playlist) {
-        // JSON parsing doesn't seem to accept single parentheses
-        var json = playlist.media_schedule_json.replace(/'/g, '"');
-        playlist.media_schedule = JSON.parse(json);
-        playlists.forEach(function(playlist) {
-          playlistMap[playlist.id] = playlist;
-        });
-        return playlist;
+      devices.map(function(device) {
+        vm.deviceMap[device.id] = device;
       });
     });
 
+  User.getPlaylists({username: user.username}).$promise
+    .then(function(playlists) {
+      playlists.map(function(playlist) {
+          vm.playlistMap[playlist.id] = playlist;
+          vm.playlistMap[playlist.id].media_schedule_json = JSON.parse(vm.playlistMap[playlist.id].media_schedule_json);
+        });
+    });
+
+
+
   $scope.mediaTypes = MediaTypes;
 
-  $scope.setDevicePlaylist = function(deviceId, playlistId) {
-    if(deviceId === undefined || playlistId === undefined) {
+  $scope.$watch('selectedDevice', function(newValue, oldValue) {
+    if(newValue !== undefined) {
+      console.log(newValue);
+      $scope.selectedPlaylist = vm.playlistMap[newValue.playlist];
+    }
+  });
+
+  $scope.setDevicePlaylist = function(device, playlist) {
+    if(device === undefined || playlist === undefined) {
       vm.errorMessage = 'You must select a device and a playlist';
       return;
     }
     vm.errorMessage = '';
     var reqParams = {
       username: user.username,
-      id: deviceId
+      id: device.id
     };
     Device.get(
       reqParams,
       function(device) {
-        updateDevice(device, playlistId, reqParams);
+        updateDevice(device, playlist.id, reqParams);
       },
       // Failure
       function() {
@@ -66,23 +74,13 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
     device.$update(
       reqParams,
       function() {
-        console.log("Updated device playlist");
+        $scope.notifier.showSuccess("Device playlist set");
       },
       function() {
-        console.log("Device playlist update failed");
-        vm.errorMessage = 'Could not update device playlist';
+        $scope.notifier.showFailure("Could not set device playlist");
       }
     );
   }
-
-  vm.getPlaylistDetail = function(playlistId, key) {
-    if(playlistId in playlistMap) {
-      if(key in playlistMap[playlistId]) {
-          return playlistMap[playlistId][key];
-      }
-    }
-    return '';
-  };
 }
 
 })();

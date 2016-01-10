@@ -6,11 +6,11 @@ angular.module('hisraWebapp')
 .controller('PlaylistsController', PlaylistController);
 
 /* @ngInject */
-function PlaylistController($location, Authentication, User) {
+function PlaylistController($location, $scope, Authentication, User, Playlist) {
   var vm = this;
 
   var user = Authentication.getCurrentUser();
-  if(user == undefined) {
+  if(user === undefined) {
       return $location.path('/login');
   }
   vm.playlists = [];
@@ -19,11 +19,32 @@ function PlaylistController($location, Authentication, User) {
     .then(function (playlists) {
       vm.playlists = playlists.map(function(playlist) {
         // JSON parsing doesn't seem to accept single parentheses
-        var json = playlist.media_schedule_json.replace(/'/g, '"');
-        playlist.media_schedule = JSON.parse(json);
+        var jsonSchedule = playlist.media_schedule_json;
+        playlist.media_schedule = JSON.parse(jsonSchedule);
         return playlist;
       });
     });
+
+  $scope.createNewPlaylist = function() {
+    var newPl = Playlist.save(
+      {username: user.username},
+      {
+        name: 'New playlist',
+        description: '',
+        media_schedule_json: '[]'
+      },
+      function() {
+        $location.path('/playlist/' + newPl.id);
+      },
+      function() {
+        console.log("Failed to create new playlist");
+      }
+    );
+  };
+
+  $scope.editPlaylist = function(playlist) {
+    $location.path('/playlist/' + playlist.id);
+  };
 }
 
 })();

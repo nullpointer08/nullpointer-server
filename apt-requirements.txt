@@ -1,8 +1,0 @@
-On a fresh install of Linux Mint 17.3, the following apt packages are necessary:
-
-postgresql
-nginx
-python-pip
-python-dev
-libpq-dev
-libffi-dev

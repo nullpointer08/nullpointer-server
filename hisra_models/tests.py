@@ -32,13 +32,13 @@ def set_basic_auth_header(client, username, password):
     client.credentials(HTTP_AUTHORIZATION='Basic ' + credentials)
 
 class UserTests(APITestCase):
-    '''
+    """
     Tests posting users and fetching users
-    '''
+    """
     def setUp(self):
-        '''
+        """
         Creates some test users
-        '''
+        """
         self.start_user_count = 10
         for i in range(0, self.start_user_count):
             username = 'user' + str(i)
@@ -46,7 +46,7 @@ class UserTests(APITestCase):
 
             User.objects.create_user(username=username, password=password)
         self.assertEqual(User.objects.count(), self.start_user_count)
-
+    '''
     def test_create_user(self):
         """
         Ensure we can create a new user
@@ -67,18 +67,18 @@ class UserTests(APITestCase):
         self.assertTrue(pass_ok)
 
     def test_create_user_bad_data(self):
-        '''
+        """
         Tests that we get 400 bad request for bad data
-        '''
+        """
         url = '/api/user'
         user = {'this': None, 'should': None, 'not': None, 'work': None}
         response = self.client.post(url, user, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
+    '''
     def test_find_user(self):
-        '''
+        """
         Test we can find a user
-        '''
+        """
         set_basic_auth_header(self.client, 'user0', 'password0')
         url = '/api/user/user0'
         response = self.client.get(url, format='json')
@@ -87,14 +87,13 @@ class UserTests(APITestCase):
         self.assertFalse('password' in response.data)
 
     def test_find_missing_user(self):
-        '''
+        """
         Tests that finding a missing user returns 403
-        '''
-        #TODO should we return 404 or 403?
+        """
         set_basic_auth_header(self.client, 'user0', 'password0')
         url = '/api/user/user_that_does_not_exist'
         response = self.client.get(url)
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class DeviceTest(APITestCase):
@@ -112,6 +111,7 @@ class DeviceTest(APITestCase):
         self.assertEquals(User.objects.count(), 1)
         self.assertEquals(Playlist.objects.count(), 1)
 
+    ''' devices added from django admin atm
     def test_add_device(self):
         url = '/api/user/' + self.username + '/device'
         device = {
@@ -133,6 +133,7 @@ class DeviceTest(APITestCase):
         }
         response = self.client.post(url, device, format='json')
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+    '''
 
     def contains_data(self, response_data, data):
         for key in data:
@@ -145,30 +146,24 @@ class DeviceTest(APITestCase):
                                           playlist=self.playlist,
                                           owner=self.owner)
         url = '/api/user/' + self.username + '/device/' + \
-              db_device.unique_device_id
+              str(db_device.id)
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         expected_data = DeviceSerializer(db_device).data
         self.assertTrue(resp_equals(expected_data, response.data))
 
     def test_get_missing_device(self):
-        url = '/api/user/' + self.username + '/device/' + 'missing_device'
+        url = '/api/user/' + self.username + '/device/155'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_all_devices_for_user(self):
-        devices = []
         for i in range(0, 10):
-            device = {
-                'unique_device_id': 'device_' + str(i),
-                'playlist': self.playlist.id
-            }
-            devices.append(device)
-
+            Device.objects.create(owner=self.owner,
+                                  unique_device_id='device_ {0}'.format(i),
+                                  playlist=self.playlist,
+                                  name='device')
         url = '/api/user/' + self.username + '/device'
-        for device in devices:
-            self.client.post(url, device, format='json')
-
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(len(response.data), 10)
@@ -484,8 +479,8 @@ class DevicePlaylist(APITestCase):
         set_basic_auth_header(self.client, self.username, self.password)
 
     def test_get_device_playlist(self):
-        url = '/api/device/' + self.device.unique_device_id + '/playlist'
-
+        url = '/api/device/playlist'
+        self.client.credentials(HTTP_AUTHORIZATION='Device {0}'.format(self.device.unique_device_id))
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
@@ -494,8 +489,15 @@ class DevicePlaylist(APITestCase):
         self.assertTrue(serializer.is_valid())
         self.assertTrue(resp_equals(expected, response.data))
 
-    def test_get_missing_device_playlist(self):
-        url = '/api/device/doesnotexist/playlist'
+    def test_get_device_playlist_no_auth(self):
+        url = '/api/device/playlist'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_playlist_from_device_without_playlist(self):
+        url = '/api/device/playlist'
+        Device.objects.create(unique_device_id='device_with_no_playlist', name='asdf', owner=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION='Device device_with_no_playlist')
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 

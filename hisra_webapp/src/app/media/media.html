@@ -29,8 +29,9 @@
 	<div>
 		<div class="row media-added__filter">
 			<span>
-				<span><label><input type="checkbox"> Show videos</label></span>
-				<span><label><input type="checkbox"> Show images</label></span>
+				<span><label><input type="checkbox" ng-model="visibilities.V"> Show videos</label></span>
+				<span><label><input type="checkbox" ng-model="visibilities.I"> Show images</label></span>
+        <span><label><input type="checkbox" ng-model="visibilities.W"> Show web pages</label></span>
 			</span>
 			<span class="media-added__filter-text">
 				<span><i></i></span>
@@ -48,7 +49,7 @@
 				<th>Actions</th>
 			</thead>
 
-			<tbody ng-repeat="media in allMedia|filter:filterParam">
+			<tbody ng-repeat="media in getVisibleMedia()|filter:filterParam">
 				<td>{{media.name}}</td>
 				<td>{{media.description}}</td>
 				<td>{{media.url}}</td>
@@ -71,4 +72,10 @@
 	    <input type="submit" value="Add media" ng-click="addExternalMedia(externalMedia)" style="width: 20"/>
 	  </form>
 	</div>
+</div>
+<div class="success-message" ng-show="notifier.isSuccessVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong></div>
+</div>
+<div class="failure-message" ng-show="notifier.isFailureVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideFailure()">×</button> <strong>{{notifier.getFailureMessage()}}</strong></div>
 </div>

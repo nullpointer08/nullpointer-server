@@ -1,13 +1,12 @@
 
 <div>
 	<h3>Your devices</h3>
-	<select ng-model="selectedDevice">
+	<select ng-model="selectedDevice" ng-options="device as device.name for (deviceId, device) in devices.deviceMap">
 			<option value="" disabled>Device</option>
-      <option ng-repeat="device in devices.devices" value="{{device.unique_device_id}}">{{device.unique_device_id}}</option>
   </select>
-	<select ng-model="selectedPlaylist">
+	<select ng-model="selectedPlaylist"
+          ng-options="playlist as playlist.name for (playlistId, playlist) in devices.playlistMap">
 			<option value="" disabled>Playlist</option>
-      <option ng-repeat="playlist in devices.playlists" value="{{playlist.id}}">{{playlist.name}}</option>
   </select>
 	<input type="submit" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)" value="Set Device Playlist" />
 </div>
@@ -24,11 +23,22 @@ table tr:nth-child(odd)	{
 table tr:nth-child(even) {
   background-color: #ffffff;
 }
+.success-message {
+  display: block;
+	background: #CCFFCC;
+	text-align: center;
+}
+.failure-message {
+  display: block;
+	background: #FFCCCC;
+	text-align: center;
+}
 </style>
+
 <div>
 	<h3>Playlist details</h3>
-	<b>Name:</b> {{devices.getPlaylistDetail(selectedPlaylist, 'name')}} <br>
-	<b>Description: </b> {{devices.getPlaylistDetail(selectedPlaylist, 'description')}} <br>
+	<b>Name:</b> {{selectedPlaylist.name}} <br>
+	<b>Description: </b> {{selectedPlaylist.description}} <br>
 	<b>Schedule:</b><br>
 	<table>
 		<tr>
@@ -38,7 +48,7 @@ table tr:nth-child(even) {
 			<th>Type</th>
 			<th>Display time</th>
 		</tr>
-		<tr ng-repeat="media in devices.getPlaylistDetail(selectedPlaylist, 'media_schedule')">
+		<tr ng-repeat="media in selectedPlaylist.media_schedule_json track by $index">
 			<td>{{media.name}}</td>
 			<td>{{media.description}}</td>
     	<td>{{ media.url }}</td>
@@ -46,4 +56,10 @@ table tr:nth-child(even) {
 			<td>{{ media.time }}</td>
   		</tr>
 	</table>
+</div>
+<div class="success-message" ng-show="notifier.isSuccessVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong></div>
+</div>
+<div class="failure-message" ng-show="notifier.isFailureVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideFailure()">×</button> <strong>{{notifier.getFailureMessage()}}</strong></div>
 </div>

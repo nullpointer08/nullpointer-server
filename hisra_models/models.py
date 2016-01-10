@@ -1,11 +1,16 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
-from magic import from_file
-from mimetypes import guess_type
-import os
-from urlparse import urljoin
 import logging
+import os
+from mimetypes import guess_type
+from urlparse import urljoin
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from jsonfield import JSONField
+from magic import from_file
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -13,20 +18,20 @@ logger.setLevel(logging.DEBUG)
 class MediaManager(models.Manager):
 
     @staticmethod
-    def create_media(uploaded_file, user):
-        old_file_path = uploaded_file.file.path
-        filename = uploaded_file.filename
+    def create_media(chunked_upload, user):
+        old_file_path = chunked_upload.file.path
+        filename = chunked_upload.filename
         new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
 
         if os.path.isfile(new_file_path):
-            filename = uploaded_file.upload_id + uploaded_file.filename
+            filename = chunked_upload.upload_id + chunked_upload.filename
             new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
 
         print "New file path %s" % new_file_path
         os.rename(old_file_path, new_file_path)
-        media = Media(owner=user, media_file=new_file_path, md5=uploaded_file.md5)
+        media = Media(owner=user, media_file=new_file_path, md5=chunked_upload.completed_md5)
         media.media_type = Media.determine_media_type(new_file_path)
-        media.name = uploaded_file.filename
+        media.name = filename
         media.save()
         media.url = urljoin(settings.MEDIA_URL, str(media.id))
         media.save()
@@ -43,7 +48,7 @@ class Media(models.Model):
         ('W', 'web_page'),
     )
 
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     media_file = models.CharField(max_length=256, blank=True)
     md5 = models.CharField(max_length=32, blank=True)
     url = models.CharField(max_length=256, blank=True)
@@ -52,6 +57,20 @@ class Media(models.Model):
     description = models.CharField(max_length=256, blank=True)
 
     objects = MediaManager()
+
+    @receiver(post_delete)
+    def delete_file(sender, instance, **kwargs):
+        if sender == Media:
+            try:
+                os.remove(instance.media_file)
+            except OSError as e:
+                pass
+            # if user has no more files remove dir as well.
+            # os.rmdir only removes empty dirs
+            try:
+                os.rmdir(os.path.dirname(instance.media_file))
+            except OSError as e:
+                pass
 
     @staticmethod
     def is_supported_media_type(filename):
@@ -89,20 +108,21 @@ class Media(models.Model):
 
 
 class Playlist(models.Model):
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=256)
-    description = models.CharField(max_length=256)
-    media_schedule_json = models.TextField()
+    description = models.CharField(max_length=256, blank=True)
+    media_schedule_json = JSONField()
 
     def __unicode__(self):
         return 'Playlist:[' + str(self.name) + ']'
 
 
 class Device(models.Model):
-    unique_device_id = models.CharField(primary_key=True, max_length=256,
+    unique_device_id = models.CharField(max_length=256,
                                         unique=True)
-    owner = models.ForeignKey(User, null=True, blank=True, default=None)
-    playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None)
+    name = models.CharField(max_length=256)
+    owner = models.ForeignKey(User, null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None, on_delete=models.SET_NULL)
 
     def __unicode__(self):
         return 'Device:[' + str(self.unique_device_id) + ']'

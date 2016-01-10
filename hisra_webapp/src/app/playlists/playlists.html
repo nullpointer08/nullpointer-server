@@ -1,6 +1,46 @@
+<style>
+table, th , td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+table tr:nth-child(odd)	{
+  background-color: #f1f1f1;
+}
+table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+.success-message {
+  display: block;
+	background: #CCFFCC;
+	text-align: center;
+}
+.failure-message {
+  display: block;
+	background: #FFCCCC;
+	text-align: center;
+}
+</style>
+
 <div>
-	<h3>Your playlists</h3>
-	<ul>
-		<li ng-repeat="playlist in playlists.playlists"><a href='#/playlist/{{playlist.id}}'>{{playlist.name}} - {{playlist.description}} - {{playlist.media_schedule.length}} items</a></li>
-	</ul>
+  <h3>Playlists</h3>
+    <table style="width:auto;" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+								<th>Items</th>
+								<th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="playlist in playlists.playlists" class="item">
+                <td>{{playlist.name}}</td>
+                <td>{{playlist.description}}</td>
+								<td>{{playlist.media_schedule.length}}</th>
+                <td><input type="submit" ng-click="editPlaylist(playlist)" value="Details"></td>
+            </tr>
+        </tbody>
+   </table>
 </div>
+<input type="submit" ng-click="createNewPlaylist()" value="New playlist">

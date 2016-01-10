@@ -23,32 +23,20 @@
     <!--[if lt IE 10]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
-<!--
-    <acme-navbar creation-date="main.creationDate"></acme-navbar>
-
-    <div layout="row">
-      <side-nav></side-nav>
-
-      <div ng-view></div>
-    </div>
-  -->
+    
+    <acme-navbar></acme-navbar>
+    
+    <!--
     <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
       <side-nav>
       </side-nav>
     </md-sidenav>  
-    
-    <div layout="column" class="relative" layout-fill role="main">
-      <!--
-      <md-button class="md-fab md-fab-bottom-right" aria-label="Add" ng-click="showAdd($event)">
-        <ng-md-icon icon="add"></ng-md-icon>
-      </md-button>
-     -->
-      <acme-navbar></acme-navbar>
+    -->
+    <div layout="row" flex role="main">
       
-      <md-content flex md-scroll-y>
-        <ui-view layout="column" layout-fill layout-padding ng-view>
-        </ui-view>
-      </md-content>
+      <side-nav></side-nav>
+      
+      <md-content flex ng-view></md-content>
     </div>
     <!-- build:js(src) scripts/vendor.js -->
     <!-- bower:js -->

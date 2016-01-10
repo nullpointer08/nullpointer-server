@@ -5,7 +5,7 @@
   .controller('MediaController', MediaController);
 
   /* @ngInject */
-  function MediaController($scope, Authentication, $cookieStore, $location, User, Media, BASE_URL, MediaTypes) {
+  function MediaController($scope, Authentication, $cookieStore, $location, User, Media, BASE_URL, MediaTypes, Notification) {
 
     var user = Authentication.getCurrentUser();
     if(user === undefined) {
@@ -15,7 +15,22 @@
     var vm = this;
     vm.BASE_URL = BASE_URL;
 
+    $scope.notifier = Notification.createNotifier();
+
     $scope.allMedia = [];
+    $scope.visibilities = {
+      I: true,
+      V: true,
+      W: true
+    };
+
+    $scope.visibleMedia = [];
+    $scope.getVisibleMedia = function() {
+      $scope.visibleMedia = $scope.allMedia.filter(function(media) {
+        return $scope.visibilities[media.media_type];
+      });
+      return $scope.visibleMedia;
+    };
 
     User.getMedia({username: user.username}).$promise
       .then(function (media) {
@@ -28,14 +43,14 @@
         {username: user.username, id: media.id},
         null,
         function() {
-          console.log("SUCCESS: Removed media from server");
-          console.log("MEDIA ID TO REMOVE: " + media.id);
+          $scope.notifier.showSuccess("Removed media from server");
           $scope.allMedia = $scope.allMedia.filter(function(m) {
             return m.id != media.id;
           });
+          $scope.getVisibleMedia(); // Update visible media
         },
         function() {
-          console.log("FAILURE: Could not remove media from server");
+          $scope.notifier.showFailure("Could not remove media from server");
         }
       );
     };
@@ -43,15 +58,16 @@
     $scope.externalMedia = {};
 
     $scope.addExternalMedia = function(externalMedia) {
-      Media.save(
+      var addedMedia = Media.save(
         {username: user.username},
         externalMedia,
         function() {
-          console.log("SUCCESS");
-          $scope.allMedia.push(externalMedia);
+          $scope.notifier.showSuccess("Media added");
+          $scope.allMedia.push(addedMedia);
+          $scope.getVisibleMedia(); // Updates visible media
         },
         function() {
-          console.log("FAILURE");
+          notifer.showFailure("Could not add media");
         }
       );
     };
@@ -95,7 +111,7 @@
         withCredentials: true
       },
       beforeSend: function(xhr) {
-        xhr.setRequestHeader('Authorization', 'Basic ' + user.authdata);
+        xhr.setRequestHeader('Authorization', 'Token ' + user.token);
       },
       add: function(e, data) { // Called before starting upload
         // If this is the second file you're uploading we need to remove the
@@ -114,7 +130,7 @@
       done: function (e, data) { // Called when the file has completely uploaded
         $.ajax({
           beforeSend: function(xhr){
-            xhr.setRequestHeader('Authorization', 'Basic ' + user.authdata);
+            xhr.setRequestHeader('Authorization', 'Token ' + user.token);
           },
           xhrFields: {
             withCredentials: true
@@ -127,7 +143,7 @@
           },
           dataType: "json",
           success: function(data) {
-            console.log("SUCCESS");
+            $scope.notifier.showSuccess("Created media");
           }
         });
       },
