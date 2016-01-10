@@ -27,14 +27,17 @@ def resp_equals(expected, got):
     return True
 
 
-def set_basic_auth_header(client, username, password):
-    credentials = base64.encodestring(username + ':' + password).strip()
-    client.credentials(HTTP_AUTHORIZATION='Basic ' + credentials)
+def authenticate(client, username, password):
+    response = client.post('/api/authentication', {'username': username, 'password': password})
+    if response.status_code == 200:
+        client.credentials(HTTP_AUTHORIZATION='Token ' + response.data['token'])
+
 
 class UserTests(APITestCase):
     """
     Tests posting users and fetching users
     """
+
     def setUp(self):
         """
         Creates some test users
@@ -46,40 +49,12 @@ class UserTests(APITestCase):
 
             User.objects.create_user(username=username, password=password)
         self.assertEqual(User.objects.count(), self.start_user_count)
-    '''
-    def test_create_user(self):
-        """
-        Ensure we can create a new user
-        """
-        url = '/api/user'
-        user = {'username': 'test_user', 'password': 'password123'}
-        response = self.client.post(url, user, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEquals(response.data['username'], user['username'])
-        self.assertFalse('password' in response.data)
-
-        self.assertEqual(User.objects.count(), self.start_user_count + 1)
-        users = User.objects.all().filter(username=user['username'])
-        self.assertEquals(len(users), 1)
-        self.assertEqual(users[0].username, user['username'])
-        pass_ok = hashers.check_password(user['password'], users[0].password)
-        self.assertTrue(pass_ok)
-
-    def test_create_user_bad_data(self):
-        """
-        Tests that we get 400 bad request for bad data
-        """
-        url = '/api/user'
-        user = {'this': None, 'should': None, 'not': None, 'work': None}
-        response = self.client.post(url, user, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    '''
     def test_find_user(self):
         """
         Test we can find a user
         """
-        set_basic_auth_header(self.client, 'user0', 'password0')
+        authenticate(self.client, 'user0', 'password0')
         url = '/api/user/user0'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
@@ -90,50 +65,25 @@ class UserTests(APITestCase):
         """
         Tests that finding a missing user returns 403
         """
-        set_basic_auth_header(self.client, 'user0', 'password0')
+        authenticate(self.client, 'user0', 'password0')
         url = '/api/user/user_that_does_not_exist'
         response = self.client.get(url)
         self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class DeviceTest(APITestCase):
-
     def setUp(self):
         self.username = 'testuser'
         self.password = 'testpass'
-        set_basic_auth_header(self.client, self.username, self.password)
         self.owner = User.objects.create_user(username=self.username,
                                               password=self.password)
+        authenticate(self.client, self.username, self.password)
         self.playlist = Playlist.objects.create(owner=self.owner,
                                                 name='test_playlist',
                                                 description='test_description',
                                                 media_schedule_json='{}')
         self.assertEquals(User.objects.count(), 1)
         self.assertEquals(Playlist.objects.count(), 1)
-
-    ''' devices added from django admin atm
-    def test_add_device(self):
-        url = '/api/user/' + self.username + '/device'
-        device = {
-            'unique_device_id': 'device_1',
-            'playlist': self.playlist.id
-        }
-        response = self.client.post(url, device, format='json')
-        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(self.contains_data(response.data, device))
-        db_device = Device.objects.get(pk=device['unique_device_id'])
-        self.assertEquals(db_device.playlist, self.playlist)
-        self.assertEquals(db_device.owner, self.owner)
-
-    def test_add_device_bad_data(self):
-        url = '/api/user/' + self.username + '/device'
-        device = {
-            'bad': 'data',
-            'should': 'fail'
-        }
-        response = self.client.post(url, device, format='json')
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
-    '''
 
     def contains_data(self, response_data, data):
         for key in data:
@@ -143,6 +93,7 @@ class DeviceTest(APITestCase):
 
     def test_get_device(self):
         db_device = Device.objects.create(unique_device_id='device_1',
+                                          name='Device 1',
                                           playlist=self.playlist,
                                           owner=self.owner)
         url = '/api/user/' + self.username + '/device/' + \
@@ -170,13 +121,12 @@ class DeviceTest(APITestCase):
 
 
 class PlaylistTest(APITestCase):
-
     def setUp(self):
         self.username = 'testuser'
         self.password = 'testpass'
         self.owner = User.objects.create_user(username=self.username,
                                               password=self.password)
-        set_basic_auth_header(self.client, self.username, self.password)
+        authenticate(self.client, self.username, self.password)
 
     def test_create_playlist(self):
         url = '/api/user/' + self.username + '/playlist'
@@ -244,10 +194,10 @@ class PlaylistTest(APITestCase):
 
     def test_get_playlist(self):
         playlist = Playlist.objects.create(
-            owner=self.owner,
-            name='Cool playlist',
-            description='All the best stuff',
-            media_schedule_json='{"fake_playlist_json": "true"}'
+                owner=self.owner,
+                name='Cool playlist',
+                description='All the best stuff',
+                media_schedule_json='{"fake_playlist_json": "true"}'
         )
 
         self.assertEquals(Playlist.objects.count(), 1)
@@ -265,10 +215,10 @@ class PlaylistTest(APITestCase):
 
     def test_put_playlist_update(self):
         playlist = Playlist.objects.create(
-            owner=self.owner,
-            name='Cool playlist',
-            description='All the best stuff',
-            media_schedule_json='{"fake_playlist_json": "true"}'
+                owner=self.owner,
+                name='Cool playlist',
+                description='All the best stuff',
+                media_schedule_json='{"fake_playlist_json": "true"}'
         )
         self.assertEquals(Playlist.objects.count(), 1)
 
@@ -291,10 +241,10 @@ class PlaylistTest(APITestCase):
 
     def test_put_playlist_update_bad_data(self):
         playlist = Playlist.objects.create(
-            owner=self.owner,
-            name='Cool playlist',
-            description='All the best stuff',
-            media_schedule_json='{"fake_playlist_json": "true"}'
+                owner=self.owner,
+                name='Cool playlist',
+                description='All the best stuff',
+                media_schedule_json='{"fake_playlist_json": "true"}'
         )
         self.assertEquals(Playlist.objects.count(), 1)
         url = '/api/user/' + self.username + '/playlist/' + str(playlist.id)
@@ -320,10 +270,10 @@ class PlaylistTest(APITestCase):
 
     def test_delete_playlist(self):
         playlist = Playlist.objects.create(
-            owner=self.owner,
-            name='Cool playlist',
-            description='All the best stuff',
-            media_schedule_json='{"fake_playlist_json": "true"}'
+                owner=self.owner,
+                name='Cool playlist',
+                description='All the best stuff',
+                media_schedule_json='{"fake_playlist_json": "true"}'
         )
         url = '/api/user/' + self.username + '/playlist/' + str(playlist.id)
         response = self.client.delete(url)
@@ -336,23 +286,22 @@ class PlaylistTest(APITestCase):
 
 
 class MediaTestBase(APITestCase):
-
     def setUp(self):
         self.username = 'testuser'
         self.password = 'testpassword'
         self.owner = User.objects.create_user(username=self.username,
                                               password=self.password)
         self.assertEquals(User.objects.count(), 1)
-        set_basic_auth_header(self.client, self.username, self.password)
+        authenticate(self.client, self.username, self.password)
 
     def test_post_new_media(self):
         url = '/api/user/' + self.username + '/media'
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            'media_type' : 'I',
-            #'name': 'sad face',
-            #'description': 'A big blue sad face',
-            #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+            'media_type': 'I',
+            # 'name': 'sad face',
+            # 'description': 'A big blue sad face',
+            # 'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
         }
         response = self.client.post(url, media, format='json')
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
@@ -375,9 +324,9 @@ class MediaTestBase(APITestCase):
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
             'media_type': 'I',
-            #'name': 'sad face',
-            #'description': 'A big blue sad face',
-            #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+            # 'name': 'sad face',
+            # 'description': 'A big blue sad face',
+            # 'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
         }
         response = self.client.post(url, media, format='json')
         self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -387,9 +336,9 @@ class MediaTestBase(APITestCase):
         media = {
             'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
             'media_type': 'I',
-            #'name': 'sad face',
-            #'description': 'A big blue sad face',
-            #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+            # 'name': 'sad face',
+            # 'description': 'A big blue sad face',
+            # 'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
         }
         response = self.client.post(url, media, format='json')
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
@@ -410,9 +359,9 @@ class MediaTestBase(APITestCase):
             media_item = {
                 'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
                 'media_type': 'I',
-                #'name': 'sad face',
-                #'description': 'A big blue sad face',
-                #'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+                # 'name': 'sad face',
+                # 'description': 'A big blue sad face',
+                # 'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
             }
             media.append(media_item)
 
@@ -433,12 +382,12 @@ class MediaTestBase(APITestCase):
 
     def test_get_media(self):
         media = Media.objects.create(
-            owner=self.owner,
-            url='http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-            media_type='I',
-            #name='sad face',
-            #description='A big blue sad face',
-            #md5_checksum='ac59c6b42a025514e5de073d697b2afb'
+                owner=self.owner,
+                url='http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
+                media_type='I',
+                # name='sad face',
+                # description='A big blue sad face',
+                # md5_checksum='ac59c6b42a025514e5de073d697b2afb'
         )
 
         self.assertEquals(Media.objects.count(), 1)
@@ -457,26 +406,25 @@ class MediaTestBase(APITestCase):
 
 
 class DevicePlaylist(APITestCase):
-
     def setUp(self):
         self.username = 'testuser'
         self.password = 'testpassword'
         self.user = User.objects.create_user(
-            username=self.username,
-            password=self.password
+                username=self.username,
+                password=self.password
         )
         self.playlist = Playlist.objects.create(
-            owner=self.user,
-            name='test name',
-            description='test description',
-            media_schedule_json='{"fake_json": "true"}'
+                owner=self.user,
+                name='test name',
+                description='test description',
+                media_schedule_json='{"fake_json": "true"}'
         )
         self.device = Device.objects.create(
-            owner=self.user,
-            unique_device_id='testdevice',
-            playlist=self.playlist
+                owner=self.user,
+                unique_device_id='testdevice',
+                playlist=self.playlist
         )
-        set_basic_auth_header(self.client, self.username, self.password)
+        authenticate(self.client, self.username, self.password)
 
     def test_get_device_playlist(self):
         url = '/api/device/playlist'
@@ -507,7 +455,7 @@ logger = logging.getLogger(__name__)
 
 def get_md5(filePath):
     m = md5()
-    with open(filePath,'rb') as f:
+    with open(filePath, 'rb') as f:
         while True:
             chunk = f.read(128)
             if not chunk:
@@ -516,16 +464,13 @@ def get_md5(filePath):
     return m.hexdigest()
 
 
-
 @override_settings(MEDIA_ROOT='/tmp/hisra_test_media_root')
 class MediaUploadTestCase(APITestCase):
-
-
     def setUp(self):
         self.username = 'testuser'
         self.password = 'testpassword'
         self.owner = User.objects.create_user(username=self.username,
-                                              password=self.password,id=2000000000)
+                                              password=self.password, id=2000000000)
         self.assertEquals(User.objects.count(), 1)
         self.test_file = 'test_media/kuva.jpg'
         original = open(self.test_file, "rb")
@@ -534,8 +479,8 @@ class MediaUploadTestCase(APITestCase):
 
     def test_post_file(self):
         logger.debug("MEDIA ROOT IS: %s", settings.MEDIA_ROOT)
-        set_basic_auth_header(self.client, self.username, self.password)
-        response = self.client.post('/api/chunked_upload/', {'the_file':self.upload_file})
+        authenticate(self.client, self.username, self.password)
+        response = self.client.post('/api/chunked_upload/', {'the_file': self.upload_file})
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
         dict_resp = json.loads(response.content)
@@ -567,7 +512,7 @@ class MediaUploadTestCase(APITestCase):
         logger.debug("Media id: %s", media.id)
         url = '/media/' + str(media.id)
 
-        set_basic_auth_header(self.client, self.username, self.password)
+        authenticate(self.client, self.username, self.password)
 
         response = self.client.get(url)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
@@ -582,7 +527,7 @@ class MediaUploadTestCase(APITestCase):
         Device.objects.create(unique_device_id='device_1', owner=self.owner)
         media = Media.objects.first()
         logger.debug("Media id: %s", media.id)
-        device_id =  'Device device_1'
+        device_id = 'Device device_1'
         self.client.credentials(HTTP_AUTHORIZATION=device_id)
         url = '/media/' + str(media.id)
         response = self.client.get(url)
