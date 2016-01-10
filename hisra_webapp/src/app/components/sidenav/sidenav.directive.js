@@ -20,10 +20,18 @@
     return directive;
 
       // @ngInject
-    function SideNavController(Authentication, User) {
+    function SideNavController(Authentication, User, webDevTec) {
       var sidenav = this;
       sidenav.title = 'SideNav';
+      sidenav.modules = [];
       sidenav.getLogin = getLogin;
+      sidenav.getModules = getWebDevTec;
+      
+      activate();
+      
+      function activate() {
+        getWebDevTec();
+      }
       
       function getLogin() {
         var user = Authentication.getCurrentUser();
@@ -32,6 +40,14 @@
         } else {
           return true;
         }
+      }
+      
+      function getWebDevTec() {
+        sidenav.modules = webDevTec.getTec();
+  
+        // angular.forEach(vm.modules, function(mod) {
+        //   mod.rank = Math.random();
+        // });
       }
     }
   }
