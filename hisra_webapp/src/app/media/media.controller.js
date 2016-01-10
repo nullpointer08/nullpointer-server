@@ -24,10 +24,12 @@
       W: true
     };
 
+    $scope.visibleMedia = [];
     $scope.getVisibleMedia = function() {
-      return $scope.allMedia.filter(function(media) {
+      $scope.visibleMedia = $scope.allMedia.filter(function(media) {
         return $scope.visibilities[media.media_type];
       });
+      return $scope.visibleMedia;
     };
 
     User.getMedia({username: user.username}).$promise
@@ -45,6 +47,7 @@
           $scope.allMedia = $scope.allMedia.filter(function(m) {
             return m.id != media.id;
           });
+          $scope.getVisibleMedia(); // Update visible media
         },
         function() {
           $scope.notifier.showFailure("Could not remove media from server");
@@ -55,12 +58,13 @@
     $scope.externalMedia = {};
 
     $scope.addExternalMedia = function(externalMedia) {
-      Media.save(
+      var addedMedia = Media.save(
         {username: user.username},
         externalMedia,
         function() {
           $scope.notifier.showSuccess("Media added");
-          $scope.allMedia.push(externalMedia);
+          $scope.allMedia.push(addedMedia);
+          $scope.getVisibleMedia(); // Updates visible media
         },
         function() {
           notifer.showFailure("Could not add media");
