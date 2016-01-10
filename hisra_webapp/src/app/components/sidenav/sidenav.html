@@ -1,5 +1,6 @@
 <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" ng-show="sidenav.getLogin()">
 <md-toolbar class="md-tall md-hue-2">
+  
     <span flex></span>
     <div layout="column" class="md-toolbar-tools-bottom inset">
       <span></span>
@@ -18,7 +19,9 @@
   <md-divider></md-divider>
   <md-item>
     <md-item-content layout="row" layout-align="start center">
-      <md-button ng-href="#/account">Account</md-button>
+      <md-button hide-gt-md ng-click="sidenav.close()">
+        <md-icon class="material-icons">close</md-icon> Close Navigation
+      </md-button>
     </md-item-content>
   </md-item>
 </md-list>

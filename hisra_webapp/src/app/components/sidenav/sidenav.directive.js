@@ -20,12 +20,13 @@
     return directive;
 
       // @ngInject
-    function SideNavController(Authentication, User, webDevTec) {
+    function SideNavController(Authentication, User, webDevTec, $mdSidenav) {
       var sidenav = this;
       sidenav.title = 'SideNav';
       sidenav.modules = [];
       sidenav.getLogin = getLogin;
       sidenav.getModules = getWebDevTec;
+      sidenav.close = closeNav;
       
       activate();
       
@@ -44,6 +45,14 @@
       
       function getWebDevTec() {
         sidenav.modules = webDevTec.getTec();
+      }
+      
+      function closeNav() {
+        $mdSidenav('left')
+          .close()
+          .then(function(){
+            $log.debug('closed');
+          });
       }
     }
   }
