@@ -134,13 +134,13 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
         return super(MediaDetail, self).perform_destroy(instance)
 
     def remove_media_from_playlist(self, media, db_playlist):
-        media_schedule = json.loads(db_playlist.media_schedule_json.replace("'", '"'))
+        media_schedule = json.loads(db_playlist.media_schedule_json)
         new_schedule = []
         for item in media_schedule:
             if 'id' in item and item['id'] == media.id:
                 continue
             new_schedule.append(item)
-        media_schedule_json = json.dumps(new_schedule).replace('"', '\'')
+        media_schedule_json = json.dumps(new_schedule)
         db_playlist.media_schedule_json = media_schedule_json
         db_playlist.save()
 
