@@ -23,6 +23,16 @@ table tr:nth-child(odd)	{
 table tr:nth-child(even) {
   background-color: #ffffff;
 }
+.success-message {
+  display: block;
+	background: #CCFFCC;
+	text-align: center;
+}
+.failure-message {
+  display: block;
+	background: #FFCCCC;
+	text-align: center;
+}
 </style>
 
 <div>
@@ -46,4 +56,10 @@ table tr:nth-child(even) {
 			<td>{{ media.time }}</td>
   		</tr>
 	</table>
+</div>
+<div class="success-message" ng-show="notifier.isSuccessVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong></div>
+</div>
+<div class="failure-message" ng-show="notifier.isFailureVisible()">
+        <button type="button" class="close" data-ng-click="notifier.hideFailure()">×</button> <strong>{{notifier.getFailureMessage()}}</strong></div>
 </div>

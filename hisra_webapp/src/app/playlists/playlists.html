@@ -29,6 +29,7 @@ table tr:nth-child(even) {
             <tr>
                 <th>Name</th>
                 <th>Description</th>
+								<th>Items</th>
 								<th></th>
             </tr>
         </thead>
@@ -36,7 +37,8 @@ table tr:nth-child(even) {
             <tr ng-repeat="playlist in playlists.playlists" class="item">
                 <td>{{playlist.name}}</td>
                 <td>{{playlist.description}}</td>
-                <td><input type="submit" ng-click="editPlaylist(playlist)" value="Edit"></td>
+								<td>{{playlist.media_schedule.length}}</th>
+                <td><input type="submit" ng-click="editPlaylist(playlist)" value="Details"></td>
             </tr>
         </tbody>
    </table>

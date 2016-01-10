@@ -6,7 +6,7 @@ angular.module('hisraWebapp')
 .controller('DevicesController', DevicesController);
 
 /* @ngInject */
-function DevicesController($scope, $location, Authentication, User, Device, MediaTypes) {
+function DevicesController($scope, $location, Authentication, User, Device, MediaTypes, Notification) {
   var vm = this;
 
   vm.deviceMap = {};
@@ -17,6 +17,8 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
   if(user === undefined) {
       return $location.path('/login');
   }
+
+  $scope.notifier = Notification.createNotifier();
 
   User.getDevices({username: user.username}).$promise
     .then(function (devices) {
@@ -29,7 +31,7 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
     .then(function(playlists) {
       playlists.map(function(playlist) {
           vm.playlistMap[playlist.id] = playlist;
-          vm.playlistMap[playlist.id].media_schedule_json = JSON.parse(vm.playlistMap[playlist.id].media_schedule_json)
+          vm.playlistMap[playlist.id].media_schedule_json = JSON.parse(vm.playlistMap[playlist.id].media_schedule_json);
         });
     });
 
@@ -38,7 +40,7 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
   $scope.mediaTypes = MediaTypes;
 
   $scope.$watch('selectedDevice', function(newValue, oldValue) {
-    if(newValue != undefined) {
+    if(newValue !== undefined) {
       console.log(newValue);
       $scope.selectedPlaylist = vm.playlistMap[newValue.playlist];
     }
@@ -72,11 +74,10 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
     device.$update(
       reqParams,
       function() {
-        console.log("Updated device playlist");
+        $scope.notifier.showSuccess("Device playlist set");
       },
       function() {
-        console.log("Device playlist update failed");
-        vm.errorMessage = 'Could not update device playlist';
+        $scope.notifier.showFailure("Could not set device playlist");
       }
     );
   }

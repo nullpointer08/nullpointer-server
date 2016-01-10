@@ -5,7 +5,7 @@
   .controller('MediaController', MediaController);
 
   /* @ngInject */
-  function MediaController($scope, Authentication, $cookieStore, $location, User, Media, BASE_URL, MediaTypes) {
+  function MediaController($scope, Authentication, $cookieStore, $location, User, Media, BASE_URL, MediaTypes, Notification) {
 
     var user = Authentication.getCurrentUser();
     if(user === undefined) {
@@ -14,6 +14,8 @@
 
     var vm = this;
     vm.BASE_URL = BASE_URL;
+
+    $scope.notifier = Notification.createNotifier();
 
     $scope.allMedia = [];
     $scope.visibilities = {
@@ -24,9 +26,7 @@
 
     $scope.getVisibleMedia = function() {
       return $scope.allMedia.filter(function(media) {
-        var vis = $scope.visibilities[media.media_type];
-        console.log(media.media_type + " is visible: " + vis);
-        return vis;
+        return $scope.visibilities[media.media_type];
       });
     };
 
@@ -41,14 +41,13 @@
         {username: user.username, id: media.id},
         null,
         function() {
-          console.log("SUCCESS: Removed media from server");
-          console.log("MEDIA ID TO REMOVE: " + media.id);
+          $scope.notifier.showSuccess("Removed media from server");
           $scope.allMedia = $scope.allMedia.filter(function(m) {
             return m.id != media.id;
           });
         },
         function() {
-          console.log("FAILURE: Could not remove media from server");
+          $scope.notifier.showFailure("Could not remove media from server");
         }
       );
     };
@@ -60,11 +59,11 @@
         {username: user.username},
         externalMedia,
         function() {
-          console.log("SUCCESS");
+          $scope.notifier.showSuccess("Media added");
           $scope.allMedia.push(externalMedia);
         },
         function() {
-          console.log("FAILURE");
+          notifer.showFailure("Could not add media");
         }
       );
     };
@@ -140,7 +139,7 @@
           },
           dataType: "json",
           success: function(data) {
-            console.log("SUCCESS");
+            $scope.notifier.showSuccess("Created media");
           }
         });
       },
