@@ -1,4 +1,4 @@
-<div ng-show="sidenav.getLogin()">
+<md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" ng-show="sidenav.getLogin()">
 <md-toolbar class="md-tall md-hue-2">
     <span flex></span>
     <div layout="column" class="md-toolbar-tools-bottom inset">
@@ -16,18 +16,10 @@
   </md-item>
   
   <md-divider></md-divider>
-  <!--
-  <md-item ng-repeat="item in admin">
-    <a>
-      <md-item-content md-ink-ripple layout="row" layout-align="start center">
-        <div class="inset">
-          <ng-md-icon icon="{{item.icon}}"></ng-md-icon>
-        </div>
-        <div class="inset">{{item.title}}
-        </div>
-      </md-item-content>
-    </a>
+  <md-item>
+    <md-item-content layout="row" layout-align="start center">
+      <md-button ng-href="#/account">Account</md-button>
+    </md-item-content>
   </md-item>
-  -->
 </md-list>
-</div>
+</md-sidenav>

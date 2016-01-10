@@ -44,10 +44,6 @@
       
       function getWebDevTec() {
         sidenav.modules = webDevTec.getTec();
-  
-        // angular.forEach(vm.modules, function(mod) {
-        //   mod.rank = Math.random();
-        // });
       }
     }
   }

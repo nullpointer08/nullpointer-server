@@ -21,10 +21,11 @@
     return directive;
 
     /** @ngInject */
-    function NavbarController(moment, User, Authentication) {
+    function NavbarController(moment, User, Authentication, $mdSidenav) {
       var vm = this;
 
       vm.getLogin = getLogin;
+      vm.toggleSidenav = toggleSidenav;
 
       vm.getUsername = function () {
           var user = Authentication.getCurrentUser();
@@ -45,6 +46,14 @@
         } else {
           return true;
         }
+      }
+      
+      function toggleSidenav() {
+        $mdSidenav('left')
+          .toggle()
+          .then(function(){
+            $log.debug('toggled');
+          });
       }
     }
   }
