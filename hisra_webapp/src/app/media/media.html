@@ -1,27 +1,3 @@
-<style>
-table, th , td  {
-  border: 1px solid grey;
-  border-collapse: collapse;
-  padding: 5px;
-}
-table tr:nth-child(odd)	{
-  background-color: #f1f1f1;
-}
-table tr:nth-child(even) {
-  background-color: #ffffff;
-}
-.success-message {
-  display: block;
-	background: #CCFFCC;
-	text-align: center;
-}
-.failure-message {
-  display: block;
-	background: #FFCCCC;
-	text-align: center;
-}
-</style>
-
 <div layout="column">
 
 	<md-card class="media-add__droparea">
@@ -34,7 +10,11 @@ table tr:nth-child(even) {
 		</md-card-title>
 
 		<input name="the_file" id="media-add__file" type="file" style="display: none;"/>
-
+		
+		<div layout="row" layout-sm="column" layout-align="space-around">
+    		<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+  		</div>
+		
 		<md-card-actions>
 			<md-button ng-click="media.openFileBrowser()" class="md-fab md-fab-top-right md-primary" aria-label="Add Media">
 				<md-icon class="material-icons">add</md-icon>

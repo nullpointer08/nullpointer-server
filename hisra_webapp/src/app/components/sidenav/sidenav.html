@@ -1,4 +1,5 @@
-<md-toolbar class="md-tall md-hue-2" ng-show="sidenav.getLogin">
+<div ng-show="sidenav.getLogin()">
+<md-toolbar class="md-tall md-hue-2">
     <span flex></span>
     <div layout="column" class="md-toolbar-tools-bottom inset">
       <span></span>
@@ -6,23 +7,15 @@
     </div>
 </md-toolbar>
 <md-list>
-  <!--
-  <md-item ng-repeat="item in menu">
-    <a>
-      <md-item-content md-ink-ripple layout="row" layout-align="start center">
-        <div class="inset">
-          <ng-md-icon icon="{{item.icon}}"></ng-md-icon>
-        </div>
-        <div class="inset">{{item.title}}
-        </div>
-      </md-item-content>
-    </a>
+  <md-subheader>Management</md-subheader>
+  <md-item ng-repeat="module in sidenav.modules | orderBy:'rank'">
+    <md-item-content layout="row" layout-align="start center">
+      <md-button ng-href="{{ module.url }}">{{ module.description }}</md-button>
+    </md-item-content>
+     
   </md-item>
-  -->
-  <md-item>hello</md-item>
   
   <md-divider></md-divider>
-  <md-subheader>Management</md-subheader>
   <!--
   <md-item ng-repeat="item in admin">
     <a>
@@ -37,3 +30,4 @@
   </md-item>
   -->
 </md-list>
+</div>

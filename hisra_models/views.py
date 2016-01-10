@@ -72,6 +72,7 @@ class MediaDownloadView(APIView):
 
         return response
 
+
 class ApiViewAuthenticationMixin(object):
     @method_decorator(api_view(['POST']))
     @method_decorator(authentication_classes(TokenAuthentication))
@@ -80,7 +81,9 @@ class ApiViewAuthenticationMixin(object):
     def dispatch(self, *args, **kwargs):
         return super(ApiViewAuthenticationMixin, self).dispatch(*args, **kwargs)
 
+
 class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
+
     def is_valid_chunked_upload_request(self, **attrs):
         user = attrs['user']
         filename = attrs['filename']
@@ -97,6 +100,7 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
                 detail='Authentication credentials were not correct'
             )
         return super(HisraChunkedUploadView, self).is_valid_chunked_upload(request, chunked_upload)
+
 
 class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCompleteView):
     def on_completion(self, chunked_upload, request):
@@ -145,7 +149,6 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
         db_playlist.save()
 
 
-
 class PlaylistList(generics.ListCreateAPIView):
     queryset = Playlist.objects.all()
     permission_classes = (IsOwnerPermission,)
@@ -164,7 +167,6 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
 class DeviceList(generics.ListAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-
     permission_classes = (IsOwnerPermission,)
 
     # Devices added and removed in Django admin for now
@@ -173,7 +175,6 @@ class DeviceList(generics.ListAPIView):
 class DeviceDetail(generics.RetrieveUpdateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-
     permission_classes = (IsOwnerPermission,)
 
 
