@@ -167,7 +167,6 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
 class DeviceList(generics.ListAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-
     permission_classes = (IsOwnerPermission,)
 
     # Devices added and removed in Django admin for now
@@ -176,7 +175,6 @@ class DeviceList(generics.ListAPIView):
 class DeviceDetail(generics.RetrieveUpdateAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-
     permission_classes = (IsOwnerPermission,)
 
 
