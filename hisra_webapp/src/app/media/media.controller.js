@@ -16,6 +16,19 @@
     vm.BASE_URL = BASE_URL;
 
     $scope.allMedia = [];
+    $scope.visibilities = {
+      I: true,
+      V: true,
+      W: true
+    };
+
+    $scope.getVisibleMedia = function() {
+      return $scope.allMedia.filter(function(media) {
+        var vis = $scope.visibilities[media.media_type];
+        console.log(media.media_type + " is visible: " + vis);
+        return vis;
+      });
+    };
 
     User.getMedia({username: user.username}).$promise
       .then(function (media) {

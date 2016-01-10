@@ -39,8 +39,9 @@ table tr:nth-child(even) {
 	<div>
 		<div class="row media-added__filter">
 			<span>
-				<span><label><input type="checkbox"> Show videos</label></span>
-				<span><label><input type="checkbox"> Show images</label></span>
+				<span><label><input type="checkbox" ng-model="visibilities.V"> Show videos</label></span>
+				<span><label><input type="checkbox" ng-model="visibilities.I"> Show images</label></span>
+        <span><label><input type="checkbox" ng-model="visibilities.W"> Show web pages</label></span>
 			</span>
 			<span class="media-added__filter-text">
 				<span><i></i></span>
@@ -58,7 +59,7 @@ table tr:nth-child(even) {
 				<th>Actions</th>
 			</thead>
 
-			<tbody ng-repeat="media in allMedia|filter:filterParam">
+			<tbody ng-repeat="media in getVisibleMedia()|filter:filterParam">
 				<td>{{media.name}}</td>
 				<td>{{media.description}}</td>
 				<td>{{media.url}}</td>
