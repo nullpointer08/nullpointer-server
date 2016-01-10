@@ -95,7 +95,7 @@
         withCredentials: true
       },
       beforeSend: function(xhr) {
-        xhr.setRequestHeader('Authorization', 'Basic ' + user.authdata);
+        xhr.setRequestHeader('Authorization', 'Token ' + user.token);
       },
       add: function(e, data) { // Called before starting upload
         // If this is the second file you're uploading we need to remove the
@@ -114,7 +114,7 @@
       done: function (e, data) { // Called when the file has completely uploaded
         $.ajax({
           beforeSend: function(xhr){
-            xhr.setRequestHeader('Authorization', 'Basic ' + user.authdata);
+            xhr.setRequestHeader('Authorization', 'Token ' + user.token);
           },
           xhrFields: {
             withCredentials: true

@@ -10,17 +10,19 @@ from django.http import HttpResponse
 from django.views.generic.base import TemplateView
 
 from rest_framework import generics, status
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from chunked_upload.exceptions import ChunkedUploadError
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from .models import Media, Playlist, Device
 from .permissions import IsOwnerPermission, DeviceAuthentication
 from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer
+from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
@@ -29,7 +31,7 @@ logger.setLevel(logging.DEBUG)
 
 class MediaDownloadView(APIView):
 
-    authentication_classes = (BasicAuthentication, DeviceAuthentication)
+    authentication_classes = (TokenAuthentication, DeviceAuthentication)
 
     permission_classes = (IsOwnerPermission,)
 
@@ -70,31 +72,15 @@ class MediaDownloadView(APIView):
 
         return response
 
-
-# temporary for testing
-class ChunkedUploadDemo(TemplateView):
-    template_name = 'chunked_upload_demo.html'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(ChunkedUploadDemo, self).dispatch(*args, **kwargs)
-
-
 class ApiViewAuthenticationMixin(object):
-    authentication_classes = (BasicAuthentication, SessionAuthentication)
-
-    def authenticate(self, request):
-        request = Request(request=request, authenticators=[auth() for auth in self.authentication_classes])
-        if not request.user.is_authenticated:
-            raise ChunkedUploadError(status=401, detail="Authorization required")
-
+    @method_decorator(api_view(['POST']))
+    @method_decorator(authentication_classes(TokenAuthentication))
+    @method_decorator(permission_classes(IsAuthenticated,))
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(ApiViewAuthenticationMixin, self).dispatch(*args, **kwargs)
 
 class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
-
-    def check_permissions(self, request):
-        self.authenticate(request)
-        super(HisraChunkedUploadView,self).check_permissions(request)
-
     def is_valid_chunked_upload_request(self, **attrs):
         user = attrs['user']
         filename = attrs['filename']
@@ -112,12 +98,7 @@ class HisraChunkedUploadView(ApiViewAuthenticationMixin, ChunkedUploadView):
             )
         return super(HisraChunkedUploadView, self).is_valid_chunked_upload(request, chunked_upload)
 
-
 class HisraChunkedUploadCompleteView(ApiViewAuthenticationMixin, ChunkedUploadCompleteView):
-
-    def check_permissions(self, request):
-        self.authenticate(request)
-
     def on_completion(self, chunked_upload, request):
         try:
             Media.objects.create_media(chunked_upload, request.user)
@@ -217,17 +198,3 @@ class DevicePlaylist(APIView):
             return Response('No playlist found', status.HTTP_404_NOT_FOUND)
         serializer = PlaylistSerializer(device.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class AuthenticationView(APIView):
-
-    def post(self, request):
-        """
-        POST /api/authentication
-        """
-        if request.user.is_authenticated:
-            return Response({"success": True}, status=status.HTTP_200_OK)
-        return Response(
-            {"success": False},
-            status=status.HTTP_401_UNAUTHORIZED
-        )

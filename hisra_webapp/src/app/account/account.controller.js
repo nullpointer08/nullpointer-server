@@ -7,7 +7,7 @@ angular.module('hisraWebapp')
 /* @ngInject */
 function AccountController($scope, User, Authentication, $location) {
   var loggedAs = Authentication.getCurrentUser();
-  if(loggedAs == undefined) {
+  if(loggedAs == undefined) {
         return $location.path('/login');
   }
 

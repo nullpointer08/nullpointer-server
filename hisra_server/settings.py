@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'chunked_upload',
     'hisra_models',
 )
@@ -99,7 +100,7 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     )
 }
 
@@ -149,7 +150,7 @@ STATICFILES_DIRS = (
 MEDIA_ROOT = '/home/hannu/hisra-media/'
 MEDIA_URL = 'http://192.168.1.60:8000/media/'
 
-ALLOWED_ORIGIN = '*'
+ALLOWED_ORIGIN = 'http://localhost:3000'
 
 # CHUNKED UPLOAD SETTINGS
 CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)

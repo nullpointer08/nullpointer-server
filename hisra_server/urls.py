@@ -18,6 +18,7 @@ from django.contrib import admin
 from hisra_models import views
 from hisra_models.views import HisraChunkedUploadView, HisraChunkedUploadCompleteView
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -70,8 +71,8 @@ urlpatterns = [
     url('^', include('django.contrib.auth.urls')),
 
     # /uploadfile/
-    url(r'^uploadfile/?$',
-        views.ChunkedUploadDemo.as_view(), name='chunked_upload'),
+    #url(r'^uploadfile/?$',
+    #    views.ChunkedUploadDemo.as_view(), name='chunked_upload'),
 
     url(r'^api/chunked_upload/?$',
         HisraChunkedUploadView.as_view(),
@@ -81,7 +82,7 @@ urlpatterns = [
         name='api_chunked_upload_complete'),
 
     # POST /api/authentication
-    url(r'^api/authentication/?$', views.AuthenticationView.as_view())
+    url(r'^api/authentication/?$', obtain_auth_token)
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
