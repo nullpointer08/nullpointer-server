@@ -1,13 +1,16 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
-from magic import from_file
+import logging
+import os
 from mimetypes import guess_type
+from urlparse import urljoin
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-import os
-from urlparse import urljoin
-import logging
+from jsonfield import JSONField
+from magic import from_file
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -35,15 +38,6 @@ class MediaManager(models.Manager):
         return media
 
 
-@receiver(post_delete)
-def something_deleted(sender, instance, **kwargs):
-    """
-    For debugging deletes
-    """
-    logger.debug(sender)
-    logger.debug(instance)
-
-
 class Media(models.Model):
     VIDEO = 'V'
     IMAGE = 'I'
@@ -54,7 +48,7 @@ class Media(models.Model):
         ('W', 'web_page'),
     )
 
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     media_file = models.CharField(max_length=256, blank=True)
     md5 = models.CharField(max_length=32, blank=True)
     url = models.CharField(max_length=256, blank=True)
@@ -112,9 +106,9 @@ class Media(models.Model):
     def __unicode__(self):
         return 'Media:[' + str(self.id) + ']'
 
-from jsonfield import JSONField
+
 class Playlist(models.Model):
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=256, blank=True)
     media_schedule_json = JSONField()
@@ -127,8 +121,8 @@ class Device(models.Model):
     unique_device_id = models.CharField(max_length=256,
                                         unique=True)
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(User, null=True, blank=True, default=None)
-    playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None)
+    owner = models.ForeignKey(User, null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None, on_delete=models.SET_NULL)
 
     def __unicode__(self):
         return 'Device:[' + str(self.unique_device_id) + ']'
