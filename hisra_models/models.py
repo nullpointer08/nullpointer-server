@@ -27,7 +27,6 @@ class MediaManager(models.Manager):
             filename = chunked_upload.upload_id + chunked_upload.filename
             new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
 
-        print "New file path %s" % new_file_path
         os.rename(old_file_path, new_file_path)
         media = Media(owner=user, media_file=new_file_path, md5=chunked_upload.completed_md5)
         media.media_type = Media.determine_media_type(new_file_path)

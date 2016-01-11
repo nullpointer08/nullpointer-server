@@ -61,6 +61,15 @@ class UserTests(APITestCase):
         self.assertEquals(response.data['username'], 'user0')
         self.assertFalse('password' in response.data)
 
+    def test_find_user_wrong_auth(self):
+        """
+        Test we can find a user
+        """
+        authenticate(self.client, 'user0', 'password0')
+        url = '/api/user/user1'
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_find_missing_user(self):
         """
         Tests that finding a missing user returns 403
@@ -103,21 +112,54 @@ class DeviceTest(APITestCase):
         expected_data = DeviceSerializer(db_device).data
         self.assertTrue(resp_equals(expected_data, response.data))
 
+    def test_get_device_wrong_auth(self):
+        db_device = Device.objects.create(unique_device_id='device_1',
+                                          name='Device 1',
+                                          playlist=self.playlist,
+                                          owner=self.owner)
+        user2 = User.objects.create_user(username='other',
+                                              password='other')
+        db_device2 = Device.objects.create(unique_device_id='device_2',
+                                          name='Device 2',
+                                          playlist=self.playlist,
+                                          owner=user2)
+        url = '/api/user/' + user2.username + '/device/' + \
+              str(db_device2.id)
+        response = self.client.get(url, format='json')
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_get_missing_device(self):
         url = '/api/user/' + self.username + '/device/155'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_all_devices_for_user(self):
-        for i in range(0, 10):
+    def test_get_all_devices_for_user_and_non_of_other_users_devices(self):
+        for i in range(0, 5):
             Device.objects.create(owner=self.owner,
                                   unique_device_id='device_ {0}'.format(i),
                                   playlist=self.playlist,
                                   name='device')
+
+        # Make sure not to get other users devices.
+        user2 = User.objects.create_user(username='other',
+                                              password='other')
+        for i in range(0, 10):
+            Device.objects.create(unique_device_id='other_ {0}'.format(i),
+                                          name='Device 2',
+                                          playlist=self.playlist,
+                                          owner=user2)
+
+        for i in range(5, 10):
+            Device.objects.create(owner=self.owner,
+                                  unique_device_id='device_ {0}'.format(i),
+                                  playlist=self.playlist,
+                                  name='device')
+            
         url = '/api/user/' + self.username + '/device'
         response = self.client.get(url, format='json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         self.assertEquals(len(response.data), 10)
+        self.assertEquals(len(Device.objects.all()),20)
 
 
 class PlaylistTest(APITestCase):
