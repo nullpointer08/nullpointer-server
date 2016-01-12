@@ -38,13 +38,38 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
 
 
   $scope.mediaTypes = MediaTypes;
-
+  $scope.selectedDevice = null;
   $scope.$watch('selectedDevice', function(newValue, oldValue) {
+    $scope.selectedDevice = newValue;
     if(newValue !== undefined) {
       console.log(newValue);
       $scope.selectedPlaylist = vm.playlistMap[newValue.playlist];
     }
   });
+
+  $scope.refreshConfirmed = function() {
+    if(!$scope.selectedDevice) {
+      return;
+    }
+    var device = Device.get(
+      {username: user.username, id: $scope.selectedDevice.id},
+      function() {
+        $scope.selectedDevice.playlist = device.playlist;
+        $scope.selectedDevice.confirmed_playlist = device.confirmed_playlist;
+        $scope.notifier.showSuccess('Refresh complete');
+      },
+      function() {
+        $scope.notifier.showFailure('Could not fetch device info');
+      }
+    );
+  };
+
+  $scope.isConfirmed = function(playlist) {
+    if (!playlist || !$scope.selectedDevice) {
+      return '';
+    }
+    return $scope.selectedDevice.confirmed_playlist == playlist.id;
+  };
 
   $scope.setDevicePlaylist = function(device, playlist) {
     if(device === undefined || playlist === undefined) {

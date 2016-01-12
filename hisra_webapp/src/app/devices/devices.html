@@ -39,6 +39,7 @@ table tr:nth-child(even) {
 	<h3>Playlist details</h3>
 	<b>Name:</b> {{selectedPlaylist.name}} <br>
 	<b>Description: </b> {{selectedPlaylist.description}} <br>
+	<b>Confirmed in use by device:</b> {{isConfirmed(selectedPlaylist)}} <input type="submit" value="Refresh" ng-click="refreshConfirmed()"/><br>
 	<b>Schedule:</b><br>
 	<table>
 		<tr>
