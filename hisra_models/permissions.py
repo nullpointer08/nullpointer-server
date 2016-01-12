@@ -21,7 +21,7 @@ class IsOwnerPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user is None:
             return False
-        if isinstance(obj, User) and obj == request.user:
+        if obj == request.user:
             return True
         return obj.owner == request.user
 
