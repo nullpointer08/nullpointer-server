@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from hisra_models.models import Media, Playlist, Device
+from hisra_models.models import Media, Playlist, Device, DeviceStatus
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -38,4 +38,8 @@ class DeviceSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.id')
     class Meta:
         model = Device
-        fields = ('name', 'playlist', 'owner','id')
+        fields = ('name', 'playlist', 'owner', 'id', 'confirmed_playlist')
+
+class DeviceStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceStatus

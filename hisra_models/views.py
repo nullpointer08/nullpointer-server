@@ -20,7 +20,7 @@ from chunked_upload.exceptions import ChunkedUploadError
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
 from .models import Media, Playlist, Device
 from .permissions import IsOwnerPermission, DeviceAuthentication
-from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer
+from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer, DeviceStatusSerializer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -191,3 +191,66 @@ class DevicePlaylist(APIView):
             return Response('No playlist found', status.HTTP_404_NOT_FOUND)
         serializer = PlaylistSerializer(device.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DeviceConfirmedPlaylist(APIView):
+    authentication_classes = (DeviceAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request):
+        if 'confirmed_playlist' not in request.data:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data='confirmed_playlist missing'
+            )
+        try:
+            pl = Playlist.objects.get(pk=request.data['confirmed_playlist'])
+        except Playlist.DoesNotExist:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data='Provided playlist does not exist'
+            )
+        device = request.auth
+        print pl
+        device.confirmed_playlist = pl
+        device.save()
+        return Response(status=status.HTTP_200_OK)
+
+class StatusList(APIView):
+    authentication_classes =  (DeviceAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        db_events = []
+        for event in request.data:
+            if self.is_valid(event):
+                db_events.append(self.convert_to_db_form(event, request))
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = DeviceStatusSerializer(data=db_events, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
+
+    def is_valid(self, event):
+        fields = ('type', 'category', 'description', 'time', 'device_id')
+        for field in fields:
+            if field not in event:
+                return False
+        return True
+
+    def convert_to_db_form(self, event, request):
+        db_event = event
+        type_int = 0
+        type_str = db_event['type']
+        if type_str == 'success':
+            type_int = 1
+        elif type_str == 'error':
+            type_int = 0
+        db_event['type'] = type_int
+        db_event['device'] = request.auth.id
+        del db_event['device_id']
+        return db_event

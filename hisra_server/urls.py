@@ -82,7 +82,13 @@ urlpatterns = [
         name='api_chunked_upload_complete'),
 
     # POST /api/authentication
-    url(r'^api/authentication/?$', obtain_auth_token)
+    url(r'^api/authentication/?$', obtain_auth_token),
+
+    # POST /api/status
+    url(r'^api/status/?$', views.StatusList.as_view()),
+
+    # PUT /api/device/confirmedplaylist
+    url(r'^api/device/confirmedplaylist/?$', views.DeviceConfirmedPlaylist.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
