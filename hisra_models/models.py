@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from magic import from_file
 from mimetypes import guess_type
+from jsonfield import JSONField
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from rest_framework import serializers
@@ -25,7 +26,6 @@ class MediaManager(models.Manager):
             filename = chunked_upload.upload_id + chunked_upload.filename
             new_file_path = os.path.join(os.path.dirname(old_file_path), filename)
 
-        print "New file path %s" % new_file_path
         os.rename(old_file_path, new_file_path)
         media = Media(owner=user, media_file=new_file_path, md5=chunked_upload.completed_md5)
         media.media_type = Media.determine_media_type(new_file_path)
@@ -34,15 +34,6 @@ class MediaManager(models.Manager):
         media.url = urljoin(settings.MEDIA_URL, str(media.id))
         media.save()
         return media
-
-
-@receiver(post_delete)
-def something_deleted(sender, instance, **kwargs):
-    """
-    For debugging deletes
-    """
-    logger.debug(sender)
-    logger.debug(instance)
 
 
 class Media(models.Model):
@@ -55,7 +46,7 @@ class Media(models.Model):
         ('W', 'web_page'),
     )
 
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     media_file = models.CharField(max_length=256, blank=True)
     md5 = models.CharField(max_length=32, blank=True)
     url = models.CharField(max_length=256, blank=True)
@@ -68,7 +59,10 @@ class Media(models.Model):
     @receiver(post_delete)
     def delete_file(sender, instance, **kwargs):
         if sender == Media:
-            os.remove(instance.media_file)
+            try:
+                os.remove(instance.media_file)
+            except OSError as e:
+                pass
             # if user has no more files remove dir as well.
             # os.rmdir only removes empty dirs
             try:
@@ -110,9 +104,9 @@ class Media(models.Model):
     def __unicode__(self):
         return 'Media:[' + str(self.id) + ']'
 
-from jsonfield import JSONField
+
 class Playlist(models.Model):
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=256, blank=True)
     media_schedule_json = JSONField()
@@ -125,9 +119,9 @@ class Device(models.Model):
     unique_device_id = models.CharField(max_length=256,
                                         unique=True)
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(User, null=True, blank=True, default=None)
-    playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None)
-    confirmed_playlist = models.ForeignKey(Playlist, related_name='confirmed_playlist', null=True, blank=True, default=None)
+    owner = models.ForeignKey(User, null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    confirmed_playlist = models.ForeignKey(Playlist, related_name='confirmed_playlist', null=True, blank=True, default=None, on_delete=models.SET_NULL)
 
     def __unicode__(self):
         return 'Device:[' + str(self.unique_device_id) + ']'
