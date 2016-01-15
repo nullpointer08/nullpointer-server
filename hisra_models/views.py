@@ -18,7 +18,7 @@ from rest_framework.views import APIView
 
 from chunked_upload.exceptions import ChunkedUploadError
 from chunked_upload.views import ChunkedUploadView, ChunkedUploadCompleteView
-from .models import Media, Playlist, Device
+from .models import Media, Playlist, Device, DeviceStatus
 from .permissions import IsOwnerPermission, DeviceAuthentication
 from .serializers import PlaylistSerializer, DeviceSerializer, UserSerializer, MediaSerializer, DeviceStatusSerializer
 
@@ -118,7 +118,7 @@ class MediaDetail(generics.RetrieveDestroyAPIView):
 
     def perform_destroy(self, instance):
         owner = instance.owner
-        playlists = Playlist.objects.filter(owner=owner.id)
+        playlists = Playlist.objects.filter(owner=owner)
         for playlist in playlists:
             self.remove_media_from_playlist(instance, playlist)
         return super(MediaDetail, self).perform_destroy(instance)
@@ -178,6 +178,7 @@ class UserDetail(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     lookup_field = 'username'
 
+
 class DevicePlaylist(APIView):
     authentication_classes = (DeviceAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -192,11 +193,6 @@ class DevicePlaylist(APIView):
         serializer = PlaylistSerializer(device.playlist)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class DeviceConfirmedPlaylist(APIView):
-    authentication_classes = (DeviceAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
     def put(self, request):
         if 'confirmed_playlist' not in request.data:
             return Response(
@@ -207,50 +203,33 @@ class DeviceConfirmedPlaylist(APIView):
             pl = Playlist.objects.get(pk=request.data['confirmed_playlist'])
         except Playlist.DoesNotExist:
             return Response(
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_404_NOT_FOUND,
                 data='Provided playlist does not exist'
             )
+        if request.user != pl.owner:
+            return Response(
+                status=status.HTTP_403_FORBIDDEN,
+                data='Provided playlist does not belong to the owner of this device'
+            )
+
         device = request.auth
-        print pl
         device.confirmed_playlist = pl
         device.save()
         return Response(status=status.HTTP_200_OK)
 
-class StatusList(APIView):
-    authentication_classes =  (DeviceAuthentication,)
+
+class StatusList(generics.ListCreateAPIView):
+    authentication_classes =  (DeviceAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = DeviceStatusSerializer
 
-    def post(self, request):
-        db_events = []
-        for event in request.data:
-            if self.is_valid(event):
-                db_events.append(self.convert_to_db_form(event, request))
-            else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        many = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data, many=many)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-        serializer = DeviceStatusSerializer(data=db_events, many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
-
-    def is_valid(self, event):
-        fields = ('type', 'category', 'description', 'time', 'device_id')
-        for field in fields:
-            if field not in event:
-                return False
-        return True
-
-    def convert_to_db_form(self, event, request):
-        db_event = event
-        type_int = 0
-        type_str = db_event['type']
-        if type_str == 'success':
-            type_int = 1
-        elif type_str == 'error':
-            type_int = 0
-        db_event['type'] = type_int
-        db_event['device'] = request.auth.id
-        del db_event['device_id']
-        return db_event
+    def perform_create(self, serializer):
+        serializer.save(device=self.request.auth)

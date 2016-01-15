@@ -21,7 +21,6 @@ class MediaSerializer(serializers.ModelSerializer):
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
-
     owner = serializers.ReadOnlyField(source='owner.id')
     media_url = serializers.SerializerMethodField()
 
@@ -34,12 +33,17 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
 
 class DeviceSerializer(serializers.ModelSerializer):
-
     owner = serializers.ReadOnlyField(source='owner.id')
+
     class Meta:
         model = Device
         fields = ('name', 'playlist', 'owner', 'id', 'confirmed_playlist')
 
+
 class DeviceStatusSerializer(serializers.ModelSerializer):
+    device = serializers.ReadOnlyField(source='device.id')
+
     class Meta:
         model = DeviceStatus
+        fields = ('id', 'device', 'type', 'category', 'description', 'time')
+

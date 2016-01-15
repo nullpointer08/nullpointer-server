@@ -27,6 +27,10 @@ class IsOwnerPermission(permissions.BasePermission):
 
 
 class DeviceAuthentication(authentication.BaseAuthentication):
+    """
+    Authenticates user based on unique_device_id token
+    Sets request.user to device's owner and request.auth to device
+    """
     def authenticate(self, request):
 
         auth = authentication.get_authorization_header(request).split()

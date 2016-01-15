@@ -110,6 +110,7 @@ class Playlist(models.Model):
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=256, blank=True)
     media_schedule_json = JSONField()
+    updated = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         return 'Playlist:[' + str(self.name) + ']'
@@ -121,15 +122,20 @@ class Device(models.Model):
     name = models.CharField(max_length=256)
     owner = models.ForeignKey(User, null=True, blank=True, default=None, on_delete=models.SET_NULL)
     playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None, on_delete=models.SET_NULL)
-    confirmed_playlist = models.ForeignKey(Playlist, related_name='confirmed_playlist', null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    confirmed_playlist = models.ForeignKey(Playlist, related_name='confirmed_playlist',
+                                           null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    updated = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return 'Device:[' + str(self.unique_device_id) + ']'
+        return 'Device:[' + str(self.name) + ']'
 
 
 class DeviceStatus(models.Model):
-    device = models.ForeignKey(Device)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE)
     type = models.IntegerField()
     category = models.CharField(max_length=20)
     time = models.DateTimeField()
     description = models.CharField(max_length=128)
+
+    def __unicode__(self):
+        return 'DeviceStatus:[' + str(self.id) + ']'
