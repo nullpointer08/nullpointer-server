@@ -8,7 +8,9 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.dateparse import parse_datetime
 
+from rest_framework import exceptions as drf_exceptions
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -153,6 +155,14 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Playlist.objects.filter(owner=self.request.user)
 
+    def perform_update(self, serializer):
+        devices = Device.objects.filter(playlist=serializer.instance.id)
+        for device in devices:
+            device.confirmed_playlist = None
+            device.save()
+        serializer.save()
+
+
 
 class DeviceList(generics.ListAPIView):
     serializer_class = DeviceSerializer
@@ -169,6 +179,11 @@ class DeviceDetail(generics.RetrieveUpdateAPIView):
 
     def get_queryset(self):
         return Device.objects.filter(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.playlist != serializer.instance.confirmed_playlist:
+            serializer.instance.confirmed_playlist = None
+        serializer.save()
 
 
 class UserDetail(generics.RetrieveUpdateAPIView):
@@ -194,42 +209,53 @@ class DevicePlaylist(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request):
-        if 'confirmed_playlist' not in request.data:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data='confirmed_playlist missing'
-            )
+        if 'confirmed_playlist' not in request.data or 'update_time' not in request.data:
+            raise drf_exceptions.ParseError('Request does not contain necessary information')
         try:
-            pl = Playlist.objects.get(pk=request.data['confirmed_playlist'])
+            pl = Playlist.objects.get(pk=request.data['confirmed_playlist'], owner=request.user)
         except Playlist.DoesNotExist:
-            return Response(
-                status=status.HTTP_404_NOT_FOUND,
-                data='Provided playlist does not exist'
-            )
-        if request.user != pl.owner:
-            return Response(
-                status=status.HTTP_403_FORBIDDEN,
-                data='Provided playlist does not belong to the owner of this device'
-            )
+            raise drf_exceptions.NotFound('Playlist does not exist')
 
+        update_time = parse_datetime(request.data['update_time'])
         device = request.auth
+
+        if device.confirmed_playlist == pl and device.confirmed_playlist_update_time == update_time:
+            return Response(status=status.HTTP_200_OK)
+
         device.confirmed_playlist = pl
+        device.confirmed_playlist_update_time = update_time
         device.save()
+        if pl.updated > update_time:
+            return Response(status=status.HTTP_428_PRECONDITION_REQUIRED)
         return Response(status=status.HTTP_200_OK)
 
 
-class StatusList(generics.ListCreateAPIView):
+class StatusList(generics.ListAPIView):
+    serializer_class = DeviceStatusSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        if self.request.user.username != self.kwargs['username']:
+            raise drf_exceptions.AuthenticationFailed('Not authorized to view other users device statistics.')
+        try:
+            device = Device.objects.get(owner=self.request.user, id=self.kwargs['pk'])
+        except Device.DoesNotExist:
+            raise drf_exceptions.NotFound('User has no device with id {0}'.format(self.kwargs['pk']))
+        return DeviceStatus.objects.filter(device=device)
+
+
+class StatusPost(generics.CreateAPIView):
     authentication_classes =  (DeviceAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
     serializer_class = DeviceStatusSerializer
 
-    def create(self, request, *args, **kwargs):
-        many = isinstance(request.data, list)
-        serializer = self.get_serializer(data=request.data, many=many)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get_serializer(self, *args, **kwargs):
+        """
+        Device always posts a list so we need to override this method to pass the many=True argument to constructor
+        """
+        serializer_class = self.get_serializer_class()
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(many=True, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(device=self.request.auth)

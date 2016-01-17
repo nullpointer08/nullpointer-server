@@ -51,15 +51,19 @@ urlpatterns = [
     url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<pk>[a-zA-Z0-9_]+)/?$',
         views.DeviceDetail.as_view()),
 
-    # POST /api/user
-    # url(r'^api/user/?$', views.UserList.as_view()),
+    # GET /api/user/:username/device/:id/statistics
+    url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/device/(?P<pk>[a-zA-Z0-9_]+)/statistics/?$',
+        views.StatusList.as_view()),
 
     # GET /api/user/:username
     url(r'^api/user/(?P<username>[a-zA-Z0-9_]+)/?$', views.UserDetail.as_view()),
 
-    # GET /api/device/:deviceid/playlist
+    # GET /api/device/playlist
     url(r'^api/device/playlist/?$',
         views.DevicePlaylist.as_view()),
+
+    # POST /api/status
+    url(r'^api/device/status/?$', views.StatusPost.as_view()),
 
     # GET /media/:owner_id/:filename
     url(r'^media/(?P<owner_id>[a-zA-Z0-9_]+)/(?P<filename>.*)$', views.MediaDownloadView.as_view()),
@@ -84,8 +88,6 @@ urlpatterns = [
     # POST /api/authentication
     url(r'^api/authentication/?$', obtain_auth_token),
 
-    # POST /api/status
-    url(r'^api/device/status/?$', views.StatusList.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

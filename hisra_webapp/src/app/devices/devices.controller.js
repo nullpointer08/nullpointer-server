@@ -41,7 +41,7 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
   $scope.selectedDevice = null;
   $scope.$watch('selectedDevice', function(newValue, oldValue) {
     $scope.selectedDevice = newValue;
-    if(newValue !== undefined) {
+    if(newValue != undefined) {
       console.log(newValue);
       $scope.selectedPlaylist = vm.playlistMap[newValue.playlist];
     }
@@ -56,6 +56,7 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
       function() {
         $scope.selectedDevice.playlist = device.playlist;
         $scope.selectedDevice.confirmed_playlist = device.confirmed_playlist;
+        $scope.selectedDevice.confirmed_playlist_update_time = device.confirmed_playlist_update_time;
         $scope.notifier.showSuccess('Refresh complete');
       },
       function() {
@@ -68,7 +69,8 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
     if (!playlist || !$scope.selectedDevice) {
       return '';
     }
-    return $scope.selectedDevice.confirmed_playlist == playlist.id;
+    return ($scope.selectedDevice.confirmed_playlist == playlist.id &&
+            $scope.selectedDevice.confirmed_playlist_update_time == playlist.updated);
   };
 
   $scope.setDevicePlaylist = function(device, playlist) {

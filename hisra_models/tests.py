@@ -33,6 +33,10 @@ def authenticate(client, username, password):
         client.credentials(HTTP_AUTHORIZATION='Token ' + response.data['token'])
 
 
+def authenticate_device(client, unique_device_id):
+    client.credentials(HTTP_AUTHORIZATION='Device {0}'.format(unique_device_id))
+
+
 class UserTests(APITestCase):
     """
     Tests posting users and fetching users
@@ -527,9 +531,9 @@ class MediaUploadTestCase(APITestCase):
 
         dict_resp = json.loads(response.content)
         upload_id = dict_resp['upload_id']
-        logger.debug(upload_id)
+        logger.debug('upload id: {0}'.format(upload_id))
         md5_checksum = get_md5(self.test_file)
-        logger.debug(md5_checksum)
+        logger.debug('test md5_checksum: {0}'.format(md5_checksum))
         data = {
             'upload_id': upload_id,
             'md5': md5_checksum
@@ -601,3 +605,82 @@ class MediaUploadTestCase(APITestCase):
 
     def tearDown(self):
         shutil.rmtree('/tmp/hisra_test_media_root')
+
+
+class DeviceConfirmationTestCase(APITestCase):
+    def setUp(self):
+        self.username = 'testuser'
+        self.password = 'testpass'
+        self.owner = User.objects.create_user(username=self.username,
+                                              password=self.password)
+        media_schedule_json = '{"fake_playlist" : "true"}'
+        self.playlist = Playlist.objects.create(name="Test Playlist", owner=self.owner, media_schedule_json = media_schedule_json)
+        self.device = Device.objects.create(unique_device_id="device", name="Test Device", owner=self.owner, playlist=self.playlist)
+
+    def put_confirmation_from_device(self, response):
+        data = {
+            "confirmed_playlist":response.data['id'],
+            "update_time":response.data['updated']
+        }
+        authenticate_device(self.client, self.device.unique_device_id)
+        return self.client.put(
+                '/api/device/playlist',
+                data=data
+        )
+
+    def test_device_confirmation(self):
+
+        playlist = {
+            'id': self.playlist.id,
+            'name': 'Cool playlist',
+            'description': 'All the best stuff',
+            'media_schedule_json': '{"fake_playlist" : "true"}'
+        }
+
+        # get current playlist to device
+        authenticate_device(self.client, self.device.unique_device_id)
+        playlist_from_server_to_device = self.client.get('/api/device/playlist/')
+        self.assertEquals(playlist_from_server_to_device.status_code, status.HTTP_200_OK)
+
+        # update current playlist
+        authenticate(self.client, self.username, self.password)
+        update_playlist_response = self.client.put(
+                '/api/user/testuser/playlist/{0}'.format(self.playlist.id), playlist, format='json')
+        self.assertEquals(update_playlist_response.status_code, status.HTTP_200_OK)
+
+        # put confirmation from device that old playlist was taken to use
+        playlist_confirmation_response_428 = self.put_confirmation_from_device(playlist_from_server_to_device)
+        self.assertEquals(playlist_confirmation_response_428.status_code, status.HTTP_428_PRECONDITION_REQUIRED)
+
+        # fetch updated playlist to device
+        playlist_from_server_to_device = self.client.get('/api/device/playlist/')
+        self.assertEquals(playlist_from_server_to_device.status_code, status.HTTP_200_OK)
+
+        # put confirmation for updated playlist
+        playlist_confirmation_response_200 = self.put_confirmation_from_device(playlist_from_server_to_device)
+        self.assertEquals(playlist_confirmation_response_200.status_code, status.HTTP_200_OK)
+
+        # update playlist again
+        authenticate(self.client, self.username, self.password)
+        update_playlist_response = self.client.put(
+                '/api/user/testuser/playlist/{0}'.format(self.playlist.id), playlist, format='json')
+        self.assertEquals(update_playlist_response.status_code, status.HTTP_200_OK)
+
+        # check device confirmed playlist was set to None in the progress
+        self.assertEquals(self.device.confirmed_playlist, None)
+
+        # try to put with the old data
+        new_playlist_confirmation_response_428 = self.put_confirmation_from_device(playlist_from_server_to_device)
+        self.assertEquals(new_playlist_confirmation_response_428.status_code,
+                          status.HTTP_428_PRECONDITION_REQUIRED)
+        # confirmed playlist should not be set
+        self.assertEquals(self.device.confirmed_playlist, None)
+
+        # fetch updated playlist to device
+        playlist_from_server_to_device = self.client.get('/api/device/playlist/')
+        self.assertEquals(playlist_from_server_to_device.status_code, status.HTTP_200_OK)
+
+        # finally put with current data again
+        new_playlist_confirmation_response_200 = self.put_confirmation_from_device(playlist_from_server_to_device)
+        self.assertEquals(new_playlist_confirmation_response_200.status_code,
+                          status.HTTP_200_OK)

@@ -124,7 +124,7 @@ class Device(models.Model):
     playlist = models.ForeignKey(Playlist, null=True, blank=True, default=None, on_delete=models.SET_NULL)
     confirmed_playlist = models.ForeignKey(Playlist, related_name='confirmed_playlist',
                                            null=True, blank=True, default=None, on_delete=models.SET_NULL)
-    updated = models.DateTimeField(auto_now=True)
+    confirmed_playlist_update_time = models.DateTimeField(default=None, null=True, blank=True)
 
     def __unicode__(self):
         return 'Device:[' + str(self.name) + ']'

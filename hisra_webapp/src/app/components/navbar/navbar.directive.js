@@ -47,12 +47,12 @@
           return true;
         }
       }
-      
+
       function toggleSidenav() {
         $mdSidenav('left')
           .toggle()
           .then(function(){
-            $log.debug('toggled');
+            //$log.debug('toggled');
           });
       }
     }

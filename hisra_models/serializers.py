@@ -26,7 +26,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Playlist
-        fields = ('id', 'owner', 'media_url', 'name', 'description', 'media_schedule_json')
+        fields = ('id', 'owner', 'media_url', 'updated', 'name', 'description', 'media_schedule_json')
 
     def get_media_url(self, obj):
         return settings.MEDIA_URL
@@ -37,7 +37,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Device
-        fields = ('name', 'playlist', 'owner', 'id', 'confirmed_playlist')
+        fields = ('name', 'playlist', 'owner', 'id', 'confirmed_playlist', 'confirmed_playlist_update_time')
 
 
 class DeviceStatusSerializer(serializers.ModelSerializer):
