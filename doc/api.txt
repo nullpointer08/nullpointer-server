@@ -532,9 +532,19 @@ Errors:
 URL parameters:
   N/A
 Accepts JSON:
-  <TODO>
+  {
+    "type": 0,
+    "category": "Connection",
+    "time": "2016-01-19 10:32:59+02",
+    "description": "Wrong status from server while fetching playlist: 502"
+  }
 Returns JSON:
   <TODO>
+Notes:
+  The "type" parameter can be 0 (error) or 1 (success).
+  The "category" parameter can be at most 20 characters
+  The "time" parameter uses a '%Y-%m-%d %H:%M:%S' format
+  The "description" parameter can be at most 128 characters
 
 ---------------------------------------------
 GET /api/user/:username/device/:id/statistics
@@ -551,6 +561,118 @@ Errors:
 URL parameters:
   N/A
 Accepts JSON:
-  <TODO>
+  N/A
 Returns JSON:
+  [
+    {
+      "id":34,
+      "device_id":1,
+      "device_name":"New name",
+      "type":0,
+      "category":"Connection",
+      "description":"Wrong status from server while fetching playlist: 502",
+      "time":"2016-01-19T09:45:03Z"
+    },
+    ...
+  ]
+
+------------------------------
+GET /media/:owner_id/:filename
+------------------------------
+Description:
   <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+-------------
+GET /media/id
+-------------
+Description:
+  <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+-------------------------
+POST /api/chunked_upload/
+-------------------------
+Description:
+  <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+----------------------------------
+POST /api/chunked_upload_complete/
+----------------------------------
+Description:
+  <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+------------------------
+POST /api/authentication
+------------------------
+Description:
+  Used by the web client (browser) to authenticate upon login.
+  Based on Token Authentication.
+  See http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication
+Authentication:
+  N/A
+Status:
+  200 OK
+Errors:
+  400 BAD REQUEST when username or password are missing or otherwise incorrect JSON is sent
+URL parameters:
+  N/A
+Accepts JSON:
+  {
+    "username": "testy",
+    "password": "pass"
+  }
+Returns JSON:
+  {
+    "token": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b"
+  }
