@@ -220,6 +220,7 @@ class DevicePlaylist(APIView):
         device = request.auth
 
         if device.confirmed_playlist == pl and device.confirmed_playlist_update_time == update_time:
+            logger.debug('No need to update device, because all data has been updated already')
             return Response(status=status.HTTP_200_OK)
 
         device.confirmed_playlist = pl
