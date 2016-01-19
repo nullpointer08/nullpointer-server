@@ -20,6 +20,7 @@ function DeviceFactory($resource, BASE_URL) {
   });
 }
 
+/*@ngInject*/
 function StatisticsFactory($resource, BASE_URL) {
   return $resource(BASE_URL + '/api/user/:username/device/:id/statistics', {
     id: '@id'

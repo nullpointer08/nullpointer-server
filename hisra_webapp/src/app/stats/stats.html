@@ -1,3 +1,23 @@
-<span ng-repeat="stat in statistics">
-{{stat}} <br>
-</span>
+<div>
+<select ng-model="selectedDevice" ng-options="device as device.name for device in devices">
+    <option value="" disabled>Device</option>
+</select>
+</div>
+
+<div class="media-added__media">
+  <table style="width:auto;" class="table table-bordered">
+    <thead>
+      <th>Type</th>
+      <th>Category</th>
+      <th>Description</th>
+      <th>Timestamp</th>
+    </thead>
+
+    <tbody ng-repeat="stat in getSelectedStats()">
+      <td>{{getStatTypeString(stat)}}</td>
+      <td>{{stat.category}}</td>
+      <td>{{stat.description}}</td>
+      <td>{{stat.time}}</td>
+    </tbody>
+  </table>
+</div>
