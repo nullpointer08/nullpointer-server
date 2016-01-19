@@ -1,5 +1,31 @@
-A prototype of the HISRA web api.
-First see the HISRA data model UML
+This is a description of the Hisra JSON API.
+It shows available URLs, parameters, status codes,
+errors and example JSON.
+
+--------------------
+List of URL patterns
+--------------------
+GET /api/user/:username/media
+POST /api/user/:username/media
+GET /api/user/:username/media/:id
+DELETE /api/user/:username/media/:id
+GET /api/user/:username/playlist
+POST /api/user/:username/playlist
+GET /api/user/:username/playlist/:id
+PUT /api/user/:username/playlist/:id
+GET /api/user/:username/device
+GET /api/user/:username/device/:id
+GET /api/user/:username/device/:id/statistics
+GET /api/user/:username
+GET /api/device/playlist
+POST /api/device/status
+GET /media/:owner_id/:filename
+GET /media/id
+POST /api/chunked_upload/
+POST /api/chunked_upload_complete/
+POST /api/authentication
+
+
 -----------------------------
 Media:
 -----------------------------
@@ -8,12 +34,13 @@ GET /api/user/:username/media
 -----------------------------
 Description:
   Returns all media belonging to the user
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
   404 NOT FOUND if user does not exist
+  401 UNAUTHORIZED if the user is not authenticated
 URL parameters:
   username: ([a-zA-Z0-9_]+)
 Accepts JSON:
@@ -21,27 +48,36 @@ Accepts JSON:
 Returns JSON:
   [
     {
-      'description': u'A big blue sad face',
-      'url': u'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-      'mediatype': 'P',
-      'md5_checksum': u'ac59c6b42a025514e5de073d697b2afb',
-      'owner': 12,
-      'id': 13,
-      'name': u'sad face'
+      "id":1,
+      "owner":2,
+      "url":"http://bbc.co.uk",
+      "media_type":"W",
+      "md5":"",
+      "name":"BBC",
+      "description":"BBC"
     },
     ...
   ]
-
+Notes:
+  The "media_type" parameter can be one of the following:
+    'I': Image
+    'W': Web page
+    'V': Video
+  The "md5" parameter is the md5 hash of the media file. It is only 
+  provided for media uploaded to the server. It is left empty for
+  all externally hosted media and web pages.
+  
 ---------------------------------
 GET /api/user/:username/media/:id
 ---------------------------------
 Description:
   Returns the media with the given id
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
+  401 UNAUTHORIZED if the user is not authenticated
   404 NOT FOUND if the user or media does not exist
 URL parameters:
   username: ([a-zA-Z0-9_]+)
@@ -51,62 +87,72 @@ Accepts JSON:
 Returns JSON:
   200 OK
   {
-    'description': u'A big blue sad face',
-    'url': u'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-    'mediatype': 'P',
-    'md5_checksum': u'ac59c6b42a025514e5de073d697b2afb',
-    'owner': 12,
-    'id': 13,
-    'name': u'sad face'
-  }
+    "id":1,
+    "owner":2,
+    "url":"http://bbc.co.uk",
+    "media_type":"W",
+    "md5":"",
+    "name":"BBC",
+    "description":"BBC"
+  } 
+Notes:
+  The "media_type" parameter can be one of the following:
+    'I': Image
+    'W': Web page
+    'V': Video
+  The "md5" parameter is the md5 hash of the media file. It is only 
+  provided for media uploaded to the server. It is left empty for
+  all externally hosted media and web pages.
 
 ------------------------------
 POST /api/user/:username/media
 ------------------------------
 Description:
   Creates a new media for the user
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   201 CREATED
 Errors:
   400 BAD REQUEST if the request JSON is not valid
-  404 NOT FOUND if the user does not exist
+  403 FORBIDDEN if the user does not exist 
+  403 FORBIDDEN if the user is not authenticated
 URL parameters:
   username: ([a-zA-Z0-9_]+)
 Accepts JSON:
   {
-    'url': 'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-    'mediatype': 'P',
-    'name': 'sad face',
-    'description': 'A big blue sad face',
-    'md5_checksum': 'ac59c6b42a025514e5de073d697b2afb'  # fake
+    "name":"cheese",
+    "description":"test description",
+    "media_type" : "W",
+    "url": "http://wikipedia.org/"
   }
 Returns JSON:
   {
-    'description': u'A big blue sad face',
-    'url': u'http://cdn3.volusion.com/sbcpn.tjpek/v/vspfiles/photos/FACE001C-2.jpg',
-    'mediatype': 'P',
-    'md5_checksum': u'ac59c6b42a025514e5de073d697b2afb',
-    'owner': 12,
-    'id': 13,
-    'name': u'sad face'
-  }
+    "id":3,
+    "owner":2,
+    "url":"http://wikipedia.org/",
+    "media_type":"W",
+    "md5":"",
+    "name":"wiki",
+    "description":"test description"
+  } 
 
 ------------------------------------
 DELETE /api/user/:username/media/:id
 ------------------------------------
 Description:
   Deletes an existing media
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
-  200 OK
+  204 NO CONTENT
 URL parameters:
   username: ([a-zA-Z0-9_]+)
   id: ([0-9]+)
 Errors:
-  404 NOT FOUND if the user or media does not exist
+  404 NOT FOUND if the media does not exist
+  403 FORBIDDEN if the user does not exist
+  401 UNAUTHORIZED if the user is not authenticated
 Accepts JSON:
   N/A
 Returns JSON:
@@ -120,12 +166,13 @@ GET /api/user/:username/playlist
 --------------------------------
 Description:
   Returns all the playlists of the user
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
-  404 NOT FOUND if the user does not exist
+  403 FORBIDDEN if the user does not exist
+  401 UNAUTHORIZED if the user is not authenticated
 URL parameters:
   username: ([a-zA-Z0-9_]+)
 Accepts JSON:
@@ -133,26 +180,38 @@ Accepts JSON:
 Returns JSON:
   [
     {
-      'owner': 21,
-      'description': u'All the best stuff',
-      'media_schedule_json': u'{"fake_playlist_json": "true"}',
-      'id': 17,
-      'name': u'Cool playlist'
+      "id":1,
+      "owner":2,
+      "media_url":"http://drajala.ddns.net:8000/media/",
+      "updated":"2016-01-19T10:23:45.871654Z",
+      "name":"BBC",
+      "description":"BBC",
+      "media_schedule_json":"[{\"name\": \"BBC\", \"url\": \"http://bbc.co.uk\", \"description\": \"BBC\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
     },
     ...
   ]
+Notes:
+  The "media_url" parameter is used by the Raspberry Pi client to determine
+  whether a piece of media in the media schedule is stored on the backend 
+  server. This is necessary to determine whether the media's md5 hash
+  should be expected (media stored on the backend server have md5 hashes available).
+  The "media_schedule_json" parameter is an escaped JSON string which contains
+  the playlist's media in the order in which it should be displayed by
+  the Raspberry Pi client.
 
 ------------------------------------
 GET /api/user/:username/playlist/:id
 ------------------------------------
 Description:
   Returns the playlist with the given id
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
-  404 NOT FOUND if the user or playlist does not exist
+  404 NOT FOUND if the playlist does not exist
+  403 FORBIDDEN if the user does not exist
+  401 UNAUTHORIZED if the user is not authenticated
 URL parameters:
   username: ([a-zA-Z0-9_]+)
   id: ([0-9]+)
@@ -160,24 +219,38 @@ Accepts JSON:
   N/A
 Returns JSON:
   {
-    'owner': 21,
-    'description': u'All the best stuff',
-    'media_schedule_json': u'{"fake_playlist_json": "true"}',
-    'id': 17,
-    'name': u'Cool playlist'
+    "id":1,
+    "owner":2,
+    "media_url":"http://drajala.ddns.net:8000/media/",
+    "updated":"2016-01-19T10:23:45.871654Z",
+    "name":"BBC",
+    "description":"BBC",
+    "media_schedule_json":"[{\"name\": \"BBC\", \"url\": \"http://bbc.co.uk\", \"description\": \"BBC\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
   }
+Notes:
+  The "media_url" parameter is used by the Raspberry Pi client to determine
+  whether a piece of media in the media schedule is stored on the backend 
+  server. This is necessary to determine whether the media's md5 hash
+  should be expected (media stored on the backend server have md5 hashes available).
+  The "media_schedule_json" parameter is an escaped JSON string which contains
+  the playlist's media in the order in which it should be displayed by
+  the Raspberry Pi client.
+  The "updated" parameter is a timestamp used by the Raspberry Pi client
+  to determine whether the playlist has been updated since the last time
+  it was downloaded.
 
 ---------------------------------
 POST /api/user/:username/playlist
 ---------------------------------
 Description:
   Creates a new playlist for the user
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   201 CREATED
 Errors:
-  404 NOT FOUND if the user does not exist
+  403 FORBIDDEN if the user does not exist
+  401 UNAUTHORIZED if the user is not authorized
   400 BAD REQUEST if the JSON is faulty
 URL parameters:
   username: ([a-zA-Z0-9_]+)
@@ -185,24 +258,37 @@ Accepts JSON:
   {
     'name': 'Cool playlist',
     'description': 'All the best stuff',
-    'media_schedule_json': '{"fake_playlist" : "true"}'
+    "media_schedule_json":"[{\"name\": \"BBC\", \"url\": \"http://bbc.co.uk\", \"description\": \"BBC\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
   }
 Returns JSON:
   {
-    'owner': 15,
-    'description': u'All the best stuff',
-    'media_schedule_json': u'{"fake_playlist" : "true"}',
-    'id': 6,
-    'name': u'Cool playlist'
-  }
+    "id":3,
+    "owner":2,
+    "media_url":"http://drajala.ddns.net:8000/media/",
+    "updated":"2016-01-19T10:58:04.129968Z",
+    "name":"Cool playlist",
+    "description":"All the best stuff",
+    "media_schedule_json":"[{\"name\": \"BBC\", \"url\": \"http://bbc.co.uk\", \"description\": \"BBC\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
+  } 
+Notes:
+  The "media_url" parameter is used by the Raspberry Pi client to determine
+  whether a piece of media in the media schedule is stored on the backend 
+  server. This is necessary to determine whether the media's md5 hash
+  should be expected (media stored on the backend server have md5 hashes available).
+  The "media_schedule_json" parameter is an escaped JSON string which contains
+  the playlist's media in the order in which it should be displayed by
+  the Raspberry Pi client.
+  The "updated" parameter is a timestamp used by the Raspberry Pi client
+  to determine whether the playlist has been updated since the last time
+  it was downloaded.
 
 ------------------------------------
 PUT /api/user/:username/playlist/:id
 ------------------------------------
 Description:
   Updates an existing playlist for the user
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
@@ -214,31 +300,44 @@ URL parameters:
 Accepts JSON:
   # Any field can be missing
   {
-    'name': new_name,
-    'description': new_description,
-    'media_schedule_json': new_json
+    "name":"New name",
+    "description": "New Description",
+    "media_schedule_json": "[{\"name\": \"Wiki\", \"url\": \"http://wikipedia.org\", \"description\": \"Wiki\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
   }
 Returns JSON:
   # All the fields provided above are updated in the response
   {
-    'owner': 22,
-    'description': u'New description',
-    'media_schedule_json': u'{"new_playlist":"true"}',
-    'id': 18,
-    'name': u'New name'
+    "id":3,
+    "owner":2,
+    "media_url":"http://drajala.ddns.net:8000/media/",
+    "updated":"2016-01-19T11:06:59.696705Z",
+    "name":"New name",
+    "description":"New Description",
+    "media_schedule_json":"[{\"name\": \"Wiki\", \"url\": \"http://wikipedia.org\", \"description\": \"Wiki\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
   }
+Notes:
+  The "media_url" parameter is used by the Raspberry Pi client to determine
+  whether a piece of media in the media schedule is stored on the backend 
+  server. This is necessary to determine whether the media's md5 hash
+  should be expected (media stored on the backend server have md5 hashes available).
+  The "media_schedule_json" parameter is an escaped JSON string which contains
+  the playlist's media in the order in which it should be displayed by
+  the Raspberry Pi client.
+  The "updated" parameter is a timestamp used by the Raspberry Pi client
+  to determine whether the playlist has been updated since the last time
+  it was downloaded.
 
 ----------------------------------------
  DELETE /api/user/:username/playlist/:id
 ----------------------------------------
 Description:
   Deletes a playlist
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
-  204 NO Content
+  204 NO CONTENT
 Errors:
-  404 NOT FOUND if playlist does not exist
+  404 NOT FOUND if playlist or user does not exist
   401 UNAUTHORIZED if not authenticated as playlist owner
 Accepts JSON:
   N/A
@@ -253,12 +352,13 @@ GET /api/user/:username/device
 ------------------------------
 Description:
   Returns all devices owned by the user
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
   404 NOT FOUND if user does not exist
+  401 UNAUTHORIZED if the user is not authenticated as the device owner
 URL parameters:
   username: ([a-zA-Z0-9_]+)
 Accepts JSON:
@@ -266,24 +366,33 @@ Accepts JSON:
 Returns JSON:
   [
     {
-      'owner': 4,
-      'playlist': 4,
-      'unique_device_id': u'device_1'
+      "name":"BestDevice",
+      "playlist":1,
+      "owner":2,
+      "id":1,
+      "confirmed_playlist":1,
+      "confirmed_playlist_update_time":"2016-01-19T10:23:45.871654Z"
     },
     ...
   ]
+Notes:
+  The "confirmed_playlist" parameter is the playlist ID which the Raspberry Pi
+  client has confirmed as being currently in use.
+  The "confirmed_playlist_update_time" is the time when the playlist was
+  last confirmed.
 
 ----------------------------------
 GET /api/user/:username/device/:id
 ----------------------------------
 Description:
   Returns details of a device
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
   404 NOT FOUND if user or device does not exist
+  401 UNAUTHORIZED if the user is not authenticated as the device owner
 URL parameters:
   username: ([a-zA-Z0-9_]+)
   id: ([a-zA-Z0-9_]+)
@@ -291,62 +400,55 @@ Accepts JSON:
   N/A
 Returns JSON:
   {
-    'owner': 4,
-    'playlist': 4,
-    'unique_device_id': u'device_1'
+    "name":"BestDevice",
+    "playlist":1,
+    "owner":2,
+    "id":1,
+    "confirmed_playlist":1,
+    "confirmed_playlist_update_time":"2016-01-19T10:23:45.871654Z"
   }
-
--------------------------------
-POST /api/user/:username/device
--------------------------------
-Description:
-  Adds a device for the user
-Authorization:
-  BasicAuth, SessionAuth
-Status:
-  201 CREATED
-Errors:
-  404 NOT FOUND if user does not exist
-  400 BAD REQUEST if JSON is faulty
-URL parameters:
-  username: ([a-zA-Z0-9_]+)
-Accepts JSON:
-  {
-    'unique_device_id': 'device_1',
-    'playlist': '1' # Playlist ID
-  }
-Returns JSON:
-  {
-    'owner': 1,
-    'playlist': 1,
-    'unique_device_id': u'device_1'
-  }
+Notes:
+  The "confirmed_playlist" parameter is the playlist ID which the Raspberry Pi
+  client has confirmed as being currently in use.
+  The "confirmed_playlist_update_time" is the time when the playlist was
+  last confirmed.
 
 ----------------------------------
 PUT /api/user/:username/device/:id
 ----------------------------------
 Description:
-  Updates the device playlist
-Authorization:
-  BasicAuth, SessionAuth
+  Used to set the device playlist and confirmed playlist
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
   404 NOT FOUND if user or device does not exist
+  401 UNAUTHORIZED if not authorized as the device owner
   400 BAD REQUEST if the JSON is faulty
 URL parameters:
   username: ([a-zA-Z0-9_]+)
   id: ([a-zA-Z0-9_]+)
 Accepts JSON:
   {
-    'playlist': '2' # Playlist ID
+    "name":"New name",
+    "playlist_id": 1,
+    "confirmed_playlist_id": 1
   }
 Returns JSON:
   {
-    'owner': 1,
-    'playlist': 2,
-    'unique_device_id': u'device_1'
+    "name":"New name",
+    "playlist":1,
+    "owner":2,
+    "id":1,
+    "confirmed_playlist":1,
+    "confirmed_playlist_update_time":"2016-01-19T10:23:45.871654Z"
   }
+Notes:
+  The "confirmed_playlist" parameter is the playlist ID which the Raspberry Pi
+  client has confirmed as being currently in use.
+  The "confirmed_playlist_update_time" is the time when the playlist was
+  last confirmed.
 
 -----------------------
 Users:
@@ -356,72 +458,221 @@ GET /api/user/:username
 -----------------------
 Description:
   Returns some details for the user
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  TokenAuthentication
 Status:
   200 OK
 Errors:
   404 NOT FOUND if the user does not exist
+  401 UNAUTHORIZED if not authorized as the user in question
 URL parameters:
   username: ([a-zA-Z0-9_]+)
 Accepts JSON:
   N/A
 Returns JSON:
   {
-    'username': u'user0',
-    'id': 56
+    "id":2,
+    "username":"testy",
+    "first_name":"Donald",
+    "last_name":"Duck",
+    "email":"dd@whatever.com"
   }
 
---------------
-POST /api/user
---------------
-Description:
-  Creates an new user
-Authorization:
-  BasicAuth, SessionAuth
-Status:
-  201 CREATED
-Errors:
-  400 BAD REQUEST
-URL parameters:
-  N/A
-Accepts JSON:
-  {
-    'username': 'test_user',
-    'password': 'password123'
-  }
-Returns JSON:
-  {
-    'username': u'test_user',
-    'id': 56
-  }
 
 ----------------------------------
-GET /api/device/:deviceid/playlist
+Devices:
+----------------------------------
+----------------------------------
+GET /api/device/playlist
 ----------------------------------
 Description:
   Used by a device to fetch its own playlist.
-  This is a temporary solution before authentication is implemented
-Authorization:
-  BasicAuth, SessionAuth
+Authentication:
+  DeviceAuthentication
 Status:
   200 OK
 Errors:
-  404 NOT FOUND if the device does not exist or if the playlist is not set
+  404 NOT FOUND if no playlist is found for the device
+  403 FORBIDDEN if no device authentication provided
 URL parameters:
-  deviceid: ([a-zA-Z0-9_]+)
+  N/A
 Accepts JSON:
   N/A
 Returns JSON:
   {
-    "id": 1,
-    "owner": 1,
-    "name": "Cool playlist",
-    "description": "All the best stuff",
-    "media_schedule_json": "{\"playlist\": \"goes_here\"}"
+    "id":1,
+    "owner":2,
+    "media_url":"http://drajala.ddns.net:8000/media/",
+    "updated":"2016-01-19T10:23:45.871654Z",
+    "name":"BBC",
+    "description":"BBC",
+    "media_schedule_json":"[{\"name\": \"BBC\", \"url\": \"http://bbc.co.uk\", \"description\": \"BBC\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
   }
+Notes:
+  The "media_url" parameter is used by the Raspberry Pi client to determine
+  whether a piece of media in the media schedule is stored on the backend 
+  server. This is necessary to determine whether the media's md5 hash
+  should be expected (media stored on the backend server have md5 hashes available).
+  The "media_schedule_json" parameter is an escaped JSON string which contains
+  the playlist's media in the order in which it should be displayed by
+  the Raspberry Pi client.
 
+----------------
+POST /api/device/status
+----------------
+Description:
+  Used by the device to post status information
+Authentication:
+  DeviceAuthentication
+Status:
+  201 CREATED
+Errors:
+  404 NOT FOUND if the device does not exist
+  403 FORBIDDEN if no device authentication provided
+URL parameters:
+  N/A
+Accepts JSON:
+  {
+    "type": 0,
+    "category": "Connection",
+    "time": "2016-01-19 10:32:59+02",
+    "description": "Wrong status from server while fetching playlist: 502"
+  }
+Returns JSON:
+  <TODO>
+Notes:
+  The "type" parameter can be 0 (error) or 1 (success).
+  The "category" parameter can be at most 20 characters
+  The "time" parameter uses a '%Y-%m-%d %H:%M:%S' format
+  The "description" parameter can be at most 128 characters
 
-Optional (nice to have, not a requirement):
-------------------------------------
-GET /api/device/:deviceid/statistics
+---------------------------------------------
+GET /api/user/:username/device/:id/statistics
+---------------------------------------------
+Description:
+  Returns a list of statistics from the given device
+Authentication:
+  TokenAuthentication
+Status:
+  200 OK
+Errors:
+  404 NOT FOUND if the device or user does not exist
+  403 FORBIDDEN if no device authentication provided
+URL parameters:
+  N/A
+Accepts JSON:
+  N/A
+Returns JSON:
+  [
+    {
+      "id":34,
+      "device_id":1,
+      "device_name":"New name",
+      "type":0,
+      "category":"Connection",
+      "description":"Wrong status from server while fetching playlist: 502",
+      "time":"2016-01-19T09:45:03Z"
+    },
+    ...
+  ]
+
+------------------------------
+GET /media/:owner_id/:filename
+------------------------------
+Description:
+  <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+-------------
+GET /media/id
+-------------
+Description:
+  <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+-------------------------
+POST /api/chunked_upload/
+-------------------------
+Description:
+  <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+----------------------------------
+POST /api/chunked_upload_complete/
+----------------------------------
+Description:
+  <TODO>
+Authentication:
+  <TODO>
+Status:
+  <TODO>
+Errors:
+  <TODO>
+URL parameters:
+  <TODO>
+Accepts data:
+  <TODO>
+Returns data:
+  <TODO>
+Notes:
+  <TODO>
+------------------------
+POST /api/authentication
+------------------------
+Description:
+  Used by the web client (browser) to authenticate upon login.
+  Based on Token Authentication.
+  See http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication
+Authentication:
+  N/A
+Status:
+  200 OK
+Errors:
+  400 BAD REQUEST when username or password are missing or otherwise incorrect JSON is sent
+URL parameters:
+  N/A
+Accepts JSON:
+  {
+    "username": "testy",
+    "password": "pass"
+  }
+Returns JSON:
+  {
+    "token": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b"
+  }

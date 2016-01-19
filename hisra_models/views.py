@@ -233,7 +233,7 @@ class DevicePlaylist(APIView):
 
 class StatusList(generics.ListAPIView):
     serializer_class = DeviceStatusSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsOwnerPermission,)
 
     def get_queryset(self):
         if self.request.user.username != self.kwargs['username']:

@@ -41,9 +41,9 @@ class DeviceSerializer(serializers.ModelSerializer):
 
 
 class DeviceStatusSerializer(serializers.ModelSerializer):
-    device = serializers.ReadOnlyField(source='device.id')
+    device_id = serializers.ReadOnlyField(source='device.id')
+    device_name = serializers.ReadOnlyField(source='device.name')
 
     class Meta:
         model = DeviceStatus
-        fields = ('id', 'device', 'type', 'category', 'description', 'time')
-
+        fields = ('id', 'device_id', 'device_name', 'type', 'category', 'description', 'time')
