@@ -4,10 +4,21 @@
 angular.module('hisraWebapp')
   .controller('StatsController', StatsController);
 
-function StatsController(/*User*/) {
-  // var vm = this;
+function StatsController(Authentication, $location, Device, Statistics, $scope) {
+  var user = Authentication.getCurrentUser();
+  if(user === undefined) {
+    $location.path('/login');
+  }
 
-  // TODO
+  $scope.statistics = Statistics.query(
+    {username: user.username, id: 1},
+    function() {
+      console.dir($scope.statistics);
+    },
+    function() {
+
+    }
+  );
 }
 
 })();

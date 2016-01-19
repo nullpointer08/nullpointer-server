@@ -6,7 +6,8 @@
 
 angular.module('hisraWebapp')
 
-.factory('Device', DeviceFactory);
+.factory('Device', DeviceFactory)
+.factory('Statistics', StatisticsFactory);
 
 /*@ngInject*/
 function DeviceFactory($resource, BASE_URL) {
@@ -18,4 +19,11 @@ function DeviceFactory($resource, BASE_URL) {
     }
   });
 }
+
+function StatisticsFactory($resource, BASE_URL) {
+  return $resource(BASE_URL + '/api/user/:username/device/:id/statistics', {
+    id: '@id'
+  });
+}
+
 })();
