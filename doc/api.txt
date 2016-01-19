@@ -1,5 +1,31 @@
-A prototype of the HISRA web api.
-First see the HISRA data model UML
+This is a description of the Hisra JSON API.
+It shows available URLs, parameters, status codes,
+errors and example JSON.
+
+--------------------
+List of URL patterns
+--------------------
+GET /api/user/:username/media
+POST /api/user/:username/media
+GET /api/user/:username/media/:id
+DELETE /api/user/:username/media/:id
+GET /api/user/:username/playlist
+POST /api/user/:username/playlist
+GET /api/user/:username/playlist/:id
+PUT /api/user/:username/playlist/:id
+GET /api/user/:username/device
+GET /api/user/:username/device/:id
+GET /api/user/:username/device/:id/statistics
+GET /api/user/:username
+GET /api/device/playlist
+POST /api/device/status
+GET /media/:owner_id/:filename
+GET /media/id
+POST /api/chunked_upload/
+POST /api/chunked_upload_complete/
+POST /api/authentication
+
+
 -----------------------------
 Media:
 -----------------------------
@@ -433,7 +459,7 @@ GET /api/user/:username
 Description:
   Returns some details for the user
 Authentication:
-  BasicAuth, SessionAuth
+  TokenAuthentication
 Status:
   200 OK
 Errors:
@@ -453,36 +479,78 @@ Returns JSON:
   }
 
 
------------------------
-Devices:
------------------------
-
 ----------------------------------
-GET /api/device/:deviceid/playlist
+Devices:
+----------------------------------
+----------------------------------
+GET /api/device/playlist
 ----------------------------------
 Description:
   Used by a device to fetch its own playlist.
-  This is a temporary solution before authentication is implemented
 Authentication:
-  BasicAuth, SessionAuth
+  DeviceAuthentication
 Status:
   200 OK
 Errors:
-  404 NOT FOUND if the device does not exist or if the playlist is not set
+  404 NOT FOUND if no playlist is found for the device
+  403 FORBIDDEN if no device authentication provided
 URL parameters:
-  deviceid: ([a-zA-Z0-9_]+)
+  N/A
 Accepts JSON:
   N/A
 Returns JSON:
   {
-    "id": 1,
-    "owner": 1,
-    "name": "Cool playlist",
-    "description": "All the best stuff",
-    "media_schedule_json": "{\"playlist\": \"goes_here\"}"
+    "id":1,
+    "owner":2,
+    "media_url":"http://drajala.ddns.net:8000/media/",
+    "updated":"2016-01-19T10:23:45.871654Z",
+    "name":"BBC",
+    "description":"BBC",
+    "media_schedule_json":"[{\"name\": \"BBC\", \"url\": \"http://bbc.co.uk\", \"description\": \"BBC\", \"time\": 20, \"owner\": 2, \"media_type\": \"W\", \"id\": 1, \"md5\": \"\"}]"
   }
+Notes:
+  The "media_url" parameter is used by the Raspberry Pi client to determine
+  whether a piece of media in the media schedule is stored on the backend 
+  server. This is necessary to determine whether the media's md5 hash
+  should be expected (media stored on the backend server have md5 hashes available).
+  The "media_schedule_json" parameter is an escaped JSON string which contains
+  the playlist's media in the order in which it should be displayed by
+  the Raspberry Pi client.
 
+----------------
+POST /api/device/status
+----------------
+Description:
+  Used by the device to post status information
+Authentication:
+  DeviceAuthentication
+Status:
+  201 CREATED
+Errors:
+  404 NOT FOUND if the device does not exist
+  403 FORBIDDEN if no device authentication provided
+URL parameters:
+  N/A
+Accepts JSON:
+  <TODO>
+Returns JSON:
+  <TODO>
 
-Optional (nice to have, not a requirement):
-------------------------------------
-GET /api/device/:deviceid/statistics
+---------------------------------------------
+GET /api/user/:username/device/:id/statistics
+---------------------------------------------
+Description:
+  Returns a list of statistics from the given device
+Authentication:
+  TokenAuthentication
+Status:
+  200 OK
+Errors:
+  404 NOT FOUND if the device or user does not exist
+  403 FORBIDDEN if no device authentication provided
+URL parameters:
+  N/A
+Accepts JSON:
+  <TODO>
+Returns JSON:
+  <TODO>
