@@ -14,6 +14,7 @@
 
     var vm = this;
     vm.BASE_URL = BASE_URL;
+    vm.loading = false;
 
     $scope.notifier = Notification.createNotifier();
 
@@ -39,6 +40,8 @@
 
     $scope.mediaTypes = MediaTypes;
     $scope.removeMedia = function(media) {
+        
+      vm.loading = false;
       Media.delete(
         {username: user.username, id: media.id},
         null,
@@ -58,15 +61,18 @@
     $scope.externalMedia = {};
 
     $scope.addExternalMedia = function(externalMedia) {
+        
       var addedMedia = Media.save(
         {username: user.username},
         externalMedia,
         function() {
+          vm.loading = true;
           $scope.notifier.showSuccess("Media added");
           $scope.allMedia.push(addedMedia);
           $scope.getVisibleMedia(); // Updates visible media
         },
         function() {
+          vm.loading = true;
           notifer.showFailure("Could not add media");
         }
       );

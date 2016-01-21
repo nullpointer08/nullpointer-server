@@ -12,7 +12,7 @@
 		<input name="the_file" id="media-add__file" type="file" style="display: none;"/>
 		
 		<div layout="row" layout-sm="column" layout-align="space-around">
-    		<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    		<md-progress-circular md-mode="indeterminate" ng-if="media.loading"></md-progress-circular>
   		</div>
 		
 		<md-card-actions>
