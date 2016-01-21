@@ -1,11 +1,10 @@
-<div class="col-md-6 col-md-offset-3">
-    <h2>{{vm.user.username}}</h2>
-    <form novalidate class="simple-form">
+<div layout-padding layout="column" layout-align="start start">
+  <h2>{{vm.user.username}}</h2>
+  <form novalidate class="simple-form">
     First name: {{vm.user.first_name}}<br />
     Last name: {{vm.user.last_name}}<br />
     Email: {{vm.user.email}}<br />
   </form>
-</div>
-<div class="col-md-6 col-md-offset-3">
-    <input type="submit" ng-click="logout()" value="Logout" />
+  
+  <md-button class="md-primary md-raised" ng-click="logout()"><md-icon class="md-icons">exit_to_app</md-icon> Logout</md-button>
 </div>

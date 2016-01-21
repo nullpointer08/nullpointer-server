@@ -22,7 +22,7 @@ table tr:nth-child(even) {
 }
 </style>
 
-<div>
+<div layout-padding>
   <h3>Playlists</h3>
     <table style="width:auto;" class="table table-bordered">
         <thead>
@@ -42,5 +42,5 @@ table tr:nth-child(even) {
             </tr>
         </tbody>
    </table>
+   <input type="submit" ng-click="createNewPlaylist()" value="New playlist">
 </div>
-<input type="submit" ng-click="createNewPlaylist()" value="New playlist">
