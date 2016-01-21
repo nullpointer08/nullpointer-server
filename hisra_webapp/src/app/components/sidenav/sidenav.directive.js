@@ -22,7 +22,7 @@
       // @ngInject
     function SideNavController(Authentication, User, webDevTec, $mdSidenav) {
       var sidenav = this;
-      sidenav.title = 'SideNav';
+      sidenav.title = 'Hisra Management';
       sidenav.modules = [];
       sidenav.getLogin = getLogin;
       sidenav.getModules = getWebDevTec;

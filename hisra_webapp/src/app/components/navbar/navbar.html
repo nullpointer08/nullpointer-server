@@ -6,7 +6,38 @@
     {{vm.title}}
   </md-button>
   
+  
+  <span>
+  <md-menu md-position-mode="target-right target">
+    <md-button aria-label="Account" ng-click="$mdOpenMenu($event)">
+            
+      <md-icon class="material-icons">account_circle</md-icon>
+      
+      {{vm.getUsername()}}
+    </md-button>
+    <md-menu-content width="4" >
+      <md-menu-item>
+        <md-button href="#/account" ng-click="$mdCloseMenu($event)">
+          <div layout="row">
+            <md-icon class="material-icons">rowing</md-icon>
+            Account
+          </div>
+        </md-button>
+      </md-menu-item>
+      <md-menu-item>
+        <md-button href="#/login" ng-click="$mdCloseMenu($event)">
+          <div layout="row">
+            <md-icon class="material-icons">exit_to_app</md-icon>
+            Logout
+          </div>
+        </md-button>
+      </md-menu-item>
+    </md-menu-content>
+  </md-menu>
+  </span>
+</md-toolbar>
+        <!--
   <md-button aria-label="Account" href="#/account">
     <md-icon class="material-icons">account_circle</md-icon>
     {{vm.getUsername()}}
-  </md-button>
+  </md-button>-->

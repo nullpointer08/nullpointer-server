@@ -1,6 +1,8 @@
 <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" ng-show="sidenav.getLogin()">
-<md-toolbar class="md-tall md-hue-2">
-  
+<md-toolbar hide-gt-md class="md-tall md-hue-2">
+    <md-button class="content-left" hide-gt-md ng-click="sidenav.close()" flex>
+      <md-icon class="material-icons">close</md-icon> Close Navigation
+    </md-button>
     <span flex></span>
     <div layout="column" class="md-toolbar-tools-bottom inset">
       <span></span>
@@ -10,7 +12,7 @@
 <md-list>
   <md-item hide-gt-md>
     <md-item-content layout="row" layout-align="start center" style="width: 100%">
-      <md-button ng-href="#/" flex>
+      <md-button class="content-left" ng-href="#/" flex>
         <md-icon class="material-icons">home</md-icon> Home
       </md-button>
     </md-item-content>
@@ -21,18 +23,9 @@
   <md-subheader>Management</md-subheader>
   <md-item ng-repeat="module in sidenav.modules | orderBy:'rank'" style="width: 100%">
     <md-item-content layout="row" layout-align="start center">
-      <md-button class="content-right" ng-href="{{ module.url }}" flex>{{ module.description }}</md-button>
+      <md-button class="content-left" ng-href="{{ module.url }}" flex>{{ module.description }}</md-button>
     </md-item-content>
      
-  </md-item>
-  
-  <md-divider hide-gt-md></md-divider>
-  <md-item>
-    <md-item-content layout="row" layout-align="start center" style="width: 100%">
-      <md-button hide-gt-md ng-click="sidenav.close()" flex>
-        <md-icon class="material-icons">close</md-icon> Close Navigation
-      </md-button>
-    </md-item-content>
   </md-item>
 </md-list>
 </md-sidenav>
