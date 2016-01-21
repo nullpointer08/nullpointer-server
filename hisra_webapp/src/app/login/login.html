@@ -1,8 +1,16 @@
-<div class="col-md-6 col-md-offset-3">
-    <h2>Login</h2>
+
+
+<div id="login-page" layout="column" layout-padding layout-align="center center">
+    <h2 class="md-display-3">Login</h2>
     <form novalidate class="simple-form">
-    	<label>Username: <input type="text" ng-model="user.username" /></label>
-    	<label>Password: <input type="password" ng-model="user.password" /></label>
-    	<input type="submit" ng-click="login.login(user)" value="Login" />
+        <md-input-container>
+            <label>Username</label>
+            <input type="text" ng-model="user.username" autofocus/>
+        </md-input-container>
+        <md-input-container>
+            <label>Password</label>
+            <input type="password" ng-model="user.password"/>
+        </md-input-container>
+    	<md-button layout="row" layout-align="start center" class="md-primary md-raised" ng-click="login.login(user)">Login</md-button>
   	</form>
 </div>

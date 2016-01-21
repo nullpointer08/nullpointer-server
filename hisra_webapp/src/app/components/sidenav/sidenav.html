@@ -1,4 +1,4 @@
-<md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" ng-show="sidenav.getLogin()">
+<md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" ng-show="sidenav.getLogin()">
 <md-toolbar class="md-tall md-hue-2">
   
     <span flex></span>
@@ -9,7 +9,7 @@
 </md-toolbar>
 <md-list>
   <md-subheader>Management</md-subheader>
-  <md-item ng-repeat="module in sidenav.modules | orderBy:'rank'">
+  <md-item ng-repeat="module in sidenav.modules | orderBy:'rank'" flex>
     <md-item-content layout="row" layout-align="start center">
       <md-button ng-href="{{ module.url }}">{{ module.description }}</md-button>
     </md-item-content>
