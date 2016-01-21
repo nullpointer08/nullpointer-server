@@ -13,6 +13,7 @@
         <md-button class="md-primary md-raised" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)">Set Device Playlist</md-button>
     </div>
     <div style="color:#FF0000">{{devices.errorMessage}}</div>
+    <!--
     <style>
     table, th , td  {
     border: 1px solid grey;
@@ -36,14 +37,14 @@
         text-align: center;
     }
     </style>
-
+-->
     <div>
         <h3>Playlist details</h3>
         <b>Name:</b> {{selectedPlaylist.name}} <br>
         <b>Description: </b> {{selectedPlaylist.description}} <br>
         <b>Confirmed in use by device:</b> {{isConfirmed(selectedPlaylist)}} <input type="submit" value="Refresh" ng-click="refreshConfirmed()"/><br>
         <b>Schedule:</b><br>
-        <table>
+        <table class="table table-hover table-mc-light-blue">
             <tr>
                 <th>Name</th>
                 <th>Description</th>

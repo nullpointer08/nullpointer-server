@@ -15,6 +15,7 @@
       'ngMaterial',
       'toastr',
       'ngResource',
-      'ui.sortable']);
+      'ui.sortable',
+      'md.data.table']);
 
 })();
