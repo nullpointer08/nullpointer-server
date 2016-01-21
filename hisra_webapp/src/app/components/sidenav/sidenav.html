@@ -8,28 +8,28 @@
     </div>
 </md-toolbar>
 <md-list>
-  <md-item>
-    <md-item-content layout="row" layout-align="start center">
-      <md-button hide-gt-md ng-href="#/">
+  <md-item hide-gt-md>
+    <md-item-content layout="row" layout-align="start center" style="width: 100%">
+      <md-button ng-href="#/" flex>
         <md-icon class="material-icons">home</md-icon> Home
       </md-button>
     </md-item-content>
   </md-item>
   
-  <md-divider></md-divider>
+  <md-divider hide-gt-md></md-divider>
   
   <md-subheader>Management</md-subheader>
-  <md-item ng-repeat="module in sidenav.modules | orderBy:'rank'" flex>
+  <md-item ng-repeat="module in sidenav.modules | orderBy:'rank'" style="width: 100%">
     <md-item-content layout="row" layout-align="start center">
-      <md-button ng-href="{{ module.url }}">{{ module.description }}</md-button>
+      <md-button class="content-right" ng-href="{{ module.url }}" flex>{{ module.description }}</md-button>
     </md-item-content>
      
   </md-item>
   
-  <md-divider></md-divider>
+  <md-divider hide-gt-md></md-divider>
   <md-item>
-    <md-item-content layout="row" layout-align="start center">
-      <md-button hide-gt-md ng-click="sidenav.close()">
+    <md-item-content layout="row" layout-align="start center" style="width: 100%">
+      <md-button hide-gt-md ng-click="sidenav.close()" flex>
         <md-icon class="material-icons">close</md-icon> Close Navigation
       </md-button>
     </md-item-content>
