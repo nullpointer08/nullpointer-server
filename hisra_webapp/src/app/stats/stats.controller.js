@@ -16,30 +16,32 @@ function StatsController(Authentication, $location, User, Device, Statistics, $s
     $scope.devices = devices;
   });
 
-  var statMap = {};
-  Statistics.query(
-    {username: user.username, id: 1},
-    function() {
-      console.log("SUCCESS");
-    },
-    function() {
-      console.log("FAILURE TO FETCH STATS");
-    }
-  ).$promise.then(function(statistics) {
-    statistics.forEach(function(stats) {
-      if(statMap[stats.device_id] === undefined) {
-        statMap[stats.device_id] = [];
-      }
-      statMap[stats.device_id].push(stats);
-    });
-  });
-
   $scope.getSelectedStats = function() {
     if(!$scope.selectedDevice) {
       return [];
     }
-    return statMap[$scope.selectedDevice.id];
+    return getAndCacheStats($scope.selectedDevice);
   };
+
+  var statMap = {};
+
+  function getAndCacheStats(device) {
+    var stats = statMap[device.id];
+    if(stats) {
+      return stats;
+    }
+    stats = Statistics.query(
+       {username: user.username, id: device.id},
+       function() {
+         console.log("SUCCESS fetching stats");
+       },
+       function() {
+         console.log("FAILURE fetching stats");
+       }
+    );
+    statMap[device.id] = stats;
+    return stats;
+  }
 
   $scope.getStatTypeString = function(stat) {
     if(stat.type === 0) {
