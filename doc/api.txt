@@ -193,8 +193,8 @@ Returns JSON:
 Notes:
   The "media_url" parameter is used by the Raspberry Pi client to determine
   whether a piece of media in the media schedule is stored on the backend 
-  server. This is necessary to determine whether the media's md5 hash
-  should be expected (media stored on the backend server have md5 hashes available).
+  server. This is necessary to determine whether the device should send 
+  authorization headers or not.
   The "media_schedule_json" parameter is an escaped JSON string which contains
   the playlist's media in the order in which it should be displayed by
   the Raspberry Pi client.
@@ -230,8 +230,8 @@ Returns JSON:
 Notes:
   The "media_url" parameter is used by the Raspberry Pi client to determine
   whether a piece of media in the media schedule is stored on the backend 
-  server. This is necessary to determine whether the media's md5 hash
-  should be expected (media stored on the backend server have md5 hashes available).
+  server. This is necessary to determine whether the device should send 
+  authorization headers or not.
   The "media_schedule_json" parameter is an escaped JSON string which contains
   the playlist's media in the order in which it should be displayed by
   the Raspberry Pi client.
@@ -273,8 +273,8 @@ Returns JSON:
 Notes:
   The "media_url" parameter is used by the Raspberry Pi client to determine
   whether a piece of media in the media schedule is stored on the backend 
-  server. This is necessary to determine whether the media's md5 hash
-  should be expected (media stored on the backend server have md5 hashes available).
+  server. This is necessary to determine whether the device should send 
+  authorization headers or not.
   The "media_schedule_json" parameter is an escaped JSON string which contains
   the playlist's media in the order in which it should be displayed by
   the Raspberry Pi client.
@@ -318,8 +318,8 @@ Returns JSON:
 Notes:
   The "media_url" parameter is used by the Raspberry Pi client to determine
   whether a piece of media in the media schedule is stored on the backend 
-  server. This is necessary to determine whether the media's md5 hash
-  should be expected (media stored on the backend server have md5 hashes available).
+  server. This is necessary to determine whether the device should send 
+  authorization headers or not.
   The "media_schedule_json" parameter is an escaped JSON string which contains
   the playlist's media in the order in which it should be displayed by
   the Raspberry Pi client.
@@ -378,8 +378,7 @@ Returns JSON:
 Notes:
   The "confirmed_playlist" parameter is the playlist ID which the Raspberry Pi
   client has confirmed as being currently in use.
-  The "confirmed_playlist_update_time" is the time when the playlist was
-  last confirmed.
+  The "confirmed_playlist_update_time" is the "updated" timestamp of the confirmed playlist
 
 ----------------------------------
 GET /api/user/:username/device/:id
@@ -410,8 +409,7 @@ Returns JSON:
 Notes:
   The "confirmed_playlist" parameter is the playlist ID which the Raspberry Pi
   client has confirmed as being currently in use.
-  The "confirmed_playlist_update_time" is the time when the playlist was
-  last confirmed.
+  The "confirmed_playlist_update_time" is the "updated" timestamp of the confirmed playlist
 
 ----------------------------------
 PUT /api/user/:username/device/:id
@@ -447,8 +445,7 @@ Returns JSON:
 Notes:
   The "confirmed_playlist" parameter is the playlist ID which the Raspberry Pi
   client has confirmed as being currently in use.
-  The "confirmed_playlist_update_time" is the time when the playlist was
-  last confirmed.
+  The "confirmed_playlist_update_time" is the "updated" timestamp of the confirmed playlist
 
 -----------------------
 Users:
@@ -539,7 +536,7 @@ Accepts JSON:
     "description": "Wrong status from server while fetching playlist: 502"
   }
 Returns JSON:
-  <TODO>
+  []
 Notes:
   The "type" parameter can be 0 (error) or 1 (success).
   The "category" parameter can be at most 20 characters
@@ -579,79 +576,119 @@ Returns JSON:
 ------------------------------
 GET /media/:owner_id/:filename
 ------------------------------
+-- DEPRECATED --
 Description:
-  <TODO>
+  Returns a file based on name and owner id. 
 Authentication:
-  <TODO>
+  TokenAuthentication, DeviceAuthentication
 Status:
-  <TODO>
+  200 OK
 Errors:
-  <TODO>
+  404 NOT FOUND if media not found.
+  403 FORBIDDEN if owner_id and authorization do not match
+  401 UNAUTHORIZED if no/incorrect authentication provided  
 URL parameters:
-  <TODO>
+  N/A
 Accepts data:
-  <TODO>
+  N/A
 Returns data:
-  <TODO>
+  Media file is returned from web server with headers:
+    Accept-Ranges: bytes
+    Connection: keep-alive
+    Content-Disposition: attachment; filename=kuva.jpg
+    Content-Length: 450078
+    Content-MD5: ee152a9b68f4402a2f49c7765cd6c85f
+    Content-Type: image/jpeg
+    Date: Fri, 22 Jan 2016 10:57:52 GMT
+    ETag: "56922ce8-6de1e"
+    Last-Modified: Sun, 10 Jan 2016 10:05:28 GMT
+    Server: nginx/1.4.6 (Ubuntu)
+
 Notes:
-  <TODO>
+  DEPRECATED, should use /media/:media_id
 -------------
 GET /media/id
 -------------
 Description:
-  <TODO>
+  Returns a file based on media id. 
 Authentication:
-  <TODO>
+  TokenAuthentication, DeviceAuthentication
 Status:
-  <TODO>
+  200 OK
 Errors:
-  <TODO>
+  404 NOT FOUND if media not found.
+  403 FORBIDDEN if not authenticated user's media
+  401 UNAUTHORIZED if no/incorrect authentication provided  
 URL parameters:
-  <TODO>
+  N/A
 Accepts data:
-  <TODO>
+  N/A
 Returns data:
-  <TODO>
-Notes:
-  <TODO>
+  Media file is returned from web server with headers:
+    Accept-Ranges: bytes
+    Connection: keep-alive
+    Content-Disposition: attachment; filename=kuva.jpg
+    Content-Length: 450078
+    Content-MD5: ee152a9b68f4402a2f49c7765cd6c85f
+    Content-Type: image/jpeg
+    Date: Fri, 22 Jan 2016 10:57:52 GMT
+    ETag: "56922ce8-6de1e"
+    Last-Modified: Sun, 10 Jan 2016 10:05:28 GMT
+    Server: nginx/1.4.6 (Ubuntu)
+
 -------------------------
 POST /api/chunked_upload/
 -------------------------
 Description:
-  <TODO>
+  Starts/continues a chunked upload
 Authentication:
-  <TODO>
+  TokenAuthentication
 Status:
-  <TODO>
+  200 OK
 Errors:
-  <TODO>
+  400 BAD REQUEST
+  401 UNAUTHORIZED
+  403 FORBIDDEN
+  404 NOT FOUND only when continuing an upload
+  409 CONFLICT user already has media with same filename
+  415 UNSUPPORTED MEDIA TYPE only videos and images supported
 URL parameters:
-  <TODO>
+  N/A
 Accepts data:
-  <TODO>
+   form data with chunk of the file
+   if upload has already been started it can be resumed by including upload id returned from last POST
 Returns data:
-  <TODO>
+  {
+    'upload_id': 5236j456io546jio4,
+    'offset': 4000,
+    'expires': '2016-01-19 14:30'
+  }
 Notes:
-  <TODO>
+  Upload id is used to identify partial upload
+  offset tells how many bytes have been uploaded
+  expires tells when the partial upload will expire
 ----------------------------------
 POST /api/chunked_upload_complete/
 ----------------------------------
 Description:
-  <TODO>
+  Used to inform the server a file has been completely uploaded
 Authentication:
-  <TODO>
+  TokenAuthentication
 Status:
-  <TODO>
+  200 OK
 Errors:
-  <TODO>
+  400 BAD REQUEST
+  401 UNAUTHORIZED
+  403 FORBIDDEN
+  404 NOT FOUND
+  500 INTERNAL SERVER ERROR - when something fails with creating media
 URL parameters:
-  <TODO>
+  N/A
 Accepts data:
-  <TODO>
+  
 Returns data:
-  <TODO>
-Notes:
-  <TODO>
+  {'message': "You successfully uploaded filename.mp4 (500000 bytes)!"}
+
 ------------------------
 POST /api/authentication
 ------------------------

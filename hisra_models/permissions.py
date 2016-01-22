@@ -16,6 +16,8 @@ class IsOwnerPermission(permissions.BasePermission):
             return False
         if 'username' in view.kwargs:
             return request.user.username == view.kwargs['username']
+        if 'owner_id' in view.kwargs:
+            return request.user.id == view.kwargs['owner_id']
         return True
 
     def has_object_permission(self, request, view, obj):
