@@ -1,8 +1,10 @@
 from rest_framework import permissions, exceptions
 from rest_framework import authentication
-from models import Device
+
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import User
+
+from models import DeviceStatus, Device
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,8 @@ class IsOwnerPermission(permissions.BasePermission):
             return False
         if obj == request.user:
             return True
+        if isinstance(obj, DeviceStatus):
+            return obj.device.owner == request.user
         return obj.owner == request.user
 
 

@@ -155,15 +155,6 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Playlist.objects.filter(owner=self.request.user)
 
-    def perform_update(self, serializer):
-        devices = Device.objects.filter(playlist=serializer.instance.id)
-        for device in devices:
-            device.confirmed_playlist = None
-            device.save()
-        serializer.save()
-
-
-
 class DeviceList(generics.ListAPIView):
     serializer_class = DeviceSerializer
     permission_classes = (IsOwnerPermission,)
@@ -246,7 +237,7 @@ class StatusList(generics.ListAPIView):
 
 
 class StatusPost(generics.CreateAPIView):
-    authentication_classes =  (DeviceAuthentication, TokenAuthentication)
+    authentication_classes =  (DeviceAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = DeviceStatusSerializer
 

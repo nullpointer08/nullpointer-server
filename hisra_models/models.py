@@ -112,6 +112,13 @@ class Playlist(models.Model):
     media_schedule_json = JSONField()
     updated = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        super(Playlist, self).save(*args,**kwargs)
+        devices = Device.objects.filter(playlist=self.id)
+        for device in devices:
+            device.confirmed_playlist = None
+            device.save()
+
     def __unicode__(self):
         return 'Playlist:[' + str(self.name) + ']'
 
