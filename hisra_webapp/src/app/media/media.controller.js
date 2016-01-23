@@ -66,14 +66,15 @@
         {username: user.username},
         externalMedia,
         function() {
-          vm.loading = true;
+          
           $scope.notifier.showSuccess("Media added");
           $scope.allMedia.push(addedMedia);
-          $scope.getVisibleMedia(); // Updates visible media
+          $scope.getVisibleMedia().$promise
+            .then(function(vm) { vm.loading = true; }); // Updates visible media
         },
         function() {
-          vm.loading = true;
-          notifer.showFailure("Could not add media");
+          notifer.showFailure("Could not add media").$promise
+            .then(function(vm) { vm.loading = false; });;
         }
       );
     };

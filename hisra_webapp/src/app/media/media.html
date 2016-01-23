@@ -1,6 +1,6 @@
 <div layout="column" layout-padding>
 
-	<md-card class="media-add__droparea">
+	<md-card class="media-add__droparea" layout="column" layout-align="center center">
 		<md-card-title>
 			<md-card-header-text>
 				<span class="md-title">Add media by dragging and dropping it here</span>
@@ -15,16 +15,16 @@
     		<md-progress-circular md-mode="indeterminate" ng-if="media.loading"></md-progress-circular>
   		</div>
 		
-		<md-card-actions>
-			<md-button ng-click="media.openFileBrowser()" class="md-fab md-fab-top-right md-primary" aria-label="Add Media">
-				<md-icon class="material-icons">add</md-icon>
-				<md-tooltip>
-					Add Media
-				</md-tooltip>
-			</md-button>
-		</md-card-actions>
 	</md-card>
-
+    <div layout="column" layout-align="start end">
+        <md-button ng-click="media.openFileBrowser()" class="md-fab md-primary" aria-label="Add Media">
+            <md-icon class="material-icons">add</md-icon>
+            <md-tooltip>
+                Add Media
+            </md-tooltip>
+        </md-button>
+    </div>
+    
 	<h3>Added media</h3>
 	<div>
 		<div class="row media-added__filter">
@@ -52,8 +52,8 @@
                 </tr>
 			</thead>
 
-			<tbody md-body ng-repeat="media in getVisibleMedia()|filter:filterParam">
-                <tr md-row>
+			<tbody md-body>
+                <tr md-row ng-repeat="media in getVisibleMedia()|filter:filterParam">
                     <td md-cell>{{media.name}}</td>
                     <td md-cell>{{media.description}}</td>
                     <td md-cell>{{media.url}}</td>
