@@ -1,6 +1,8 @@
 <div layout="column" layout-padding>
 
-	<md-card class="media-add__droparea" layout="column" layout-align="center center">
+	<md-card class="media-add__droparea md-accent"
+     layout="column" layout-align="center center"
+     md-theme="altTheme" class="md-hue-4">
 		<md-card-title>
 			<md-card-header-text>
 				<span class="md-title">Add media by dragging and dropping it here</span>
@@ -28,11 +30,11 @@
 	<h3>Added media</h3>
 	<div>
 		<div class="row media-added__filter">
-			<span>
-				<span><label><input type="checkbox" ng-model="visibilities.V"> Show videos</label></span>
-				<span><label><input type="checkbox" ng-model="visibilities.I"> Show images</label></span>
-        <span><label><input type="checkbox" ng-model="visibilities.W"> Show web pages</label></span>
-			</span>
+			
+            <md-checkbox ng-model="visibilities.V"><label>Show videos</label></md-checkbox>
+            <md-checkbox ng-model="visibilities.I"><label> Show images</label></md-checkbox>
+            <md-checkbox ng-model="visibilities.W"><label> Show web pages</label></md-checkbox>
+			
 			<span class="media-added__filter-text">
 				<span><i></i></span>
 				<input ng-model="filterParam" type="text" placeholder="Filter media">

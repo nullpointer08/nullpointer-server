@@ -1,46 +1,24 @@
-<style>
-table, th , td  {
-  border: 1px solid grey;
-  border-collapse: collapse;
-  padding: 5px;
-}
-table tr:nth-child(odd)	{
-  background-color: #f1f1f1;
-}
-table tr:nth-child(even) {
-  background-color: #ffffff;
-}
-.success-message {
-  display: block;
-	background: #CCFFCC;
-	text-align: center;
-}
-.failure-message {
-  display: block;
-	background: #FFCCCC;
-	text-align: center;
-}
-</style>
-
 <div layout-padding>
   <h3>Playlists</h3>
-    <table style="width:auto;" class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-								<th>Items</th>
-								<th></th>
+  <md-table-container>
+    <table md-table>
+        <thead md-head>
+            <tr md-row>
+                <th md-column>Name</th>
+                <th md-column>Description</th>
+                <th md-column>Items</th>
+                <th md-column></th>
             </tr>
         </thead>
-        <tbody>
-            <tr ng-repeat="playlist in playlists.playlists" class="item">
-                <td>{{playlist.name}}</td>
-                <td>{{playlist.description}}</td>
-								<td>{{playlist.media_schedule.length}}</th>
-                <td><input type="submit" ng-click="editPlaylist(playlist)" value="Details"></td>
+        <tbody md-body>
+            <tr md-row ng-repeat="playlist in playlists.playlists" class="item">
+                <td md-cell>{{playlist.name}}</td>
+                <td md-cell>{{playlist.description}}</td>
+                <td md-cell>{{playlist.media_schedule.length}}</td>
+                <td md-cell><md-button class="md-primary" ng-click="editPlaylist(playlist)">Details</md-button></td>
             </tr>
         </tbody>
    </table>
-   <input type="submit" ng-click="createNewPlaylist()" value="New playlist">
+   </md-table-container>
+   <md-button class="md-primary md-raised" ng-click="createNewPlaylist()">New playlist</md-button>
 </div>
