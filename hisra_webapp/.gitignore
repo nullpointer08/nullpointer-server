@@ -5,4 +5,4 @@ coverage/
 .idea/
 .tmp/
 venv/
-dist/maps/
+dist/

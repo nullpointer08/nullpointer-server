@@ -1,14 +1,15 @@
 First startup of a fresh install of Linux Mint 17.3:
 
-# Git install and clone repo
-sudo apt-get install git
-mkdir -p ~/work/hisra
-cd ~/work/hisra
+# APT package installation 
+sudo apt-get install -y git postgresql postgresql-client postgresql-contrib postgresql-server-dev-9.3 python-dev libpq-dev libffi-dev nginx
+
+# Clone project from github
+navigate to folder where you want to place the project( cloning creates a subfolder nullpointer-server )
 git clone https://github.com/nullpointer08/nullpointer-server.git
 cd nullpointer-server
 
-# Virtualenvwrapper installation
-sudo apt-get install python-pip
+
+# Virtualenvwrapper installation (OPTIONAL)
 sudo pip install virtualenvwrapper
 nano ~/.profile
     Add these lines and save:
@@ -19,13 +20,12 @@ source ~/.profile
 mkvirtualenv env1
 workon env1
 
-# APT package installation
-sudo apt-get install -y postgresql postgresql-client postgresql-contrib postgresql-server-dev-9.3 python-dev python-django python-psycopg2 libpq-dev libffi-dev nginx
-
-# Pip package installation (make sure you are working on the right virtual env)
+# Pip package installation 
 sudo pip install -r requirements.txt
 
 # Database setup
+NOTE: You can replace hisra_db, django_user and password with anything you like. 
+      Just remember to set it in django settings.py as well (covered in a later step)
 sudo su - postgres
 createdb hisra_db
 createuser django_user
@@ -45,10 +45,15 @@ python manage.py test
 
 # Configure nginx
 nano hisra_server_nginx.conf
-    Change the following to whatever you want:
-	- path to static files, e.g. /srv/hisra/static
-	- path to media folder, e.g. /srv/hisra/media
-	- path to uwsgi_params (included in repo), /home/user/work/hisra/nullpointer-server/uwsgi_params
+    Change the following:
+	- server_name for both webapp and django
+	- path to webapp/dist e.g. root /home/user/nullpointer-server/hisra_webapp/dist
+	NOTE: if you are in development you can comment out the whole webapp server block
+	NOTE2: if you don't know what you are doing just use the project folders and update the start of the paths
+	- path to static files, e.g. /home/user/nullpointer-server/static
+	- path to media folder, e.g. /home/user/nullpointer-server/media
+	- path to uwsgi_params (included in repo), /home/user/nullpointer-server/uwsgi_params
+
 
 # Create a symlink to nginx sites_enabled, so nginx uses this config file
 sudo ln -s /home/dano/work/hisra/nullpointer-server/hisra_server_nginx.conf /etc/nginx/sites-enabled/
@@ -58,24 +63,33 @@ nano hisra_server/settings.py
     Make sure the MEDIA_ROOT and STATIC_ROOT are the same as in hisra_server_nginx.conf,
     Also make sure MEDIA_URL points to where the media can be accessed by the client.
     Make sure that ALLOWED_ORIGIN points to the origin of the angular web client e.g.:
-	STATIC_ROOT = '/srv/hisra/static'
-	MEDIA_ROOT = '/srv/hisra/media'
-	MEDIA_RUL = 'http://drajala.ddns.net:8000/media/'
+	STATIC_ROOT = '/home/user/nullpointer-server/static'
+	MEDIA_ROOT = '/home/user/nullpointer-server/media'
+	MEDIA_URL = 'http://localhost:8000/media/'
+	DEBUG = False or True depending if you are in development or deployment
 	ALLOWED_ORIGIN = '*' # Allows every origin, fine for testing
+    
+	NOTE: if you used the default project_folder/nullpointer-server/static and media you don't need to replace these two.
+	
+	NOTE2: If you chose different database user, name or password replace them to DATABASES > default
 
 # Collect static files
 python manage.py collectstatic
 
+# NOTE: make sure www-data user has access rights(chmod 755 for directories, chmod 644 for files) to folders static_root and media_root
+#       If you used the default folders and only replaced your username you can add www-data to your username's group
+sudo gpasswd -a www-data username
+
 # Start serving the API with nginx
 sudo service nginx restart # Reads the new config
-./nginx_start.sh
+./nginx_start.sh &
 Test to see if there is any activity, e.g.
 with your browser go to http://localhost:8000/admin
 
-# [OPTIONAL] Create an admin user for django and some test data
+# Create an admin user for django and some test data
 python manage.py createsuperuser
 Open your browser and got to http://localhost:8000/admin
-Use the UI to create some test data
+Use the UI to create devices and users
 
 # Install Node.js (needed for the webapp)
 Follow the instructions at:
@@ -97,8 +111,18 @@ sudo npm install -g gulp
 nano src/app/config.js
 Edit the 'BASE_URL' constant to point to where the backend is served, e.g. http://localhost:8000
 
-# Start the webapp
+# (DEVELOPMENT) Start the webapp
 gulp serve
 This should open your browser to the webapp. If the backend API is running, it should
 fetch information from it.
+
+# (DEPLOYMENT)
+gulp
+(Optional) Copy nullpointer-server/hisra_webapp/dist to a directory you would like to share it from
+Return to hisra_server_nginx.conf file and set the path to webapp dist folder e.g.
+root /home/user/nullpointer-server/hisra_webapp/dist;
+sudo nginx service restart
+./nginx_start.sh &
+NOTE: if you ran this command earlier you should kill the old process from background first.
+
 

@@ -96,8 +96,6 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-        # Doesn't work with token auth
-        # 'rest_framework.renderers.BrowsableAPIRenderer',
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -142,16 +140,16 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")  # os.path.join(BASE_DIR, "static/")
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-   os.path.join(BASE_DIR, "hisra_webapp/dist/"),
-)
-
+# If you change static root to somewhere else uncomment the lines below
+#STATICFILES_DIRS = (
+#   os.path.join(BASE_DIR, 'static/'),
+#)
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
-MEDIA_URL = 'http://192.168.1.60:8000/media/'
+MEDIA_URL = 'http://localhost:8000/media/'
 
-ALLOWED_ORIGIN = 'http://192.168.1.60:3000'
+ALLOWED_ORIGIN = '*'
 
 # CHUNKED UPLOAD SETTINGS
 CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)
