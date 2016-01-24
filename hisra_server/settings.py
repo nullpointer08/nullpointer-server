@@ -142,16 +142,16 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-STATIC_ROOT = "/tmp/hisra/static"  # os.path.join(BASE_DIR, "static/")
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")  # os.path.join(BASE_DIR, "static/")
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
-   os.path.join(BASE_DIR, 'static/'),
+   os.path.join(BASE_DIR, "hisra_webapp/dist/"),
 )
 
-MEDIA_ROOT = '/home/hannu/hisra-media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 MEDIA_URL = 'http://192.168.1.60:8000/media/'
 
-ALLOWED_ORIGIN = 'http://localhost:3000'
+ALLOWED_ORIGIN = 'http://192.168.1.60:3000'
 
 # CHUNKED UPLOAD SETTINGS
 CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)
