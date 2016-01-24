@@ -3,23 +3,14 @@
     <form name="devicesForm">
         <h3>Your devices</h3>
         
-        <md-input-container class="md-block">
-            <md-select ng-model="selectedDevice" name="selectedDevice" placeholder="Device">
-                <md-option disabled>Device</md-option>
-                <md-option ng-repeat="device in devices.deviceMap">{{device.name}}</md-option>
-            </md-select>
-            
-            <div class="error" ng-messages="devicesForm.deviceSelection.$error">
-                <div ng-message="noselection">{{devices.errorMessage}}</div>
-            </div>
-        </md-input-container>
+        <select ng-model="selectedDevice" ng-options="device as device.name for (deviceId, device) in devices.deviceMap">
+            <option value="" disabled>Device</option>
+        </select>
         
-        <md-input-container class="md-block">
-            <md-select ng-model="selectedPlaylist" placeholder="Playlist">
-                <md-option disabled>Playlist</md-option>
-                <md-option ng-repeat="playlist in devices.playlistMap">{{playlist.name}}</md-option>
-            </md-select>
-        </md-input-container>
+        <select ng-model="selectedPlaylist"
+         ng-options="playlist as playlist.name for (playlistId, playlist) in devices.playlistMap">
+            <option value="" disabled>Playlist</option>
+        </select>
         <md-button class="md-raised" ng-click="devices.clearSelections()">Clear Selections</md-button>
         <md-button class="md-primary md-raised" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)">Set Device Playlist</md-button>
         
