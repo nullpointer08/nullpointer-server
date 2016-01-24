@@ -29,21 +29,24 @@
     
 	<h3>Added media</h3>
 	<div>
-		<div class="row media-added__filter">
+		<div class="media-added__filter">
 			
             <md-checkbox ng-model="visibilities.V"><label>Show videos</label></md-checkbox>
             <md-checkbox ng-model="visibilities.I"><label> Show images</label></md-checkbox>
             <md-checkbox ng-model="visibilities.W"><label> Show web pages</label></md-checkbox>
-			
-			<span class="media-added__filter-text">
-				<span><i></i></span>
-				<input ng-model="filterParam" type="text" placeholder="Filter media">
-			</span>
+		</div>
+        <div>
+            <md-input-container style="width: 100%">
+                <span class="media-added__filter-text">
+                    <label>Filter media</label>
+                    <input ng-model="filterParam" type="text" placeholder="Filter media">
+                </span>
+            </md-input-container>
 		</div>
 	</div>
 	<div class="media-added__media">
         <md-table-container>
-		<table md-table style="width:auto;" class="table table-bordered">
+		<table md-table>
 			<thead md-head>
                 <tr md-row>
                     <th md-column>Name</th>
@@ -60,7 +63,10 @@
                     <td md-cell>{{media.description}}</td>
                     <td md-cell>{{media.url}}</td>
                     <td md-cell>{{mediaTypes.labelFor(media.media_type)}}</td>
-                    <td md-cell><button ng-click="removeMedia(media)">Remove</button></td>
+                    <td md-cell>
+                        <md-button class="md-warn" ng-click="removeMedia(media)">
+                            <md-icon class="md-icons">clear</md-icon>Remove
+                        </md-button></td>
                 </tr>
 			</tbody>
 		</table>
@@ -68,17 +74,27 @@
 	</div>
 
 	<div>
-		<h3>Add external media</h3>
-	  <form>
-	    Name: <input type="text" ng-model="externalMedia.name"/><br>
-	    Description: <input type="text" ng-model="externalMedia.description"/><br>
-	    URL: <input type="text" ng-model="externalMedia.url"/><br>
-			Type:
-				<select ng-model="externalMedia.media_type">
-      		<option ng-repeat="option in mediaTypes.types" value="{{option.fieldName}}">{{option.label}}</option>
-    		</select><br>
-	    <input type="submit" value="Add media" ng-click="addExternalMedia(externalMedia)" style="width: 20"/>
-	  </form>
+        <h3>Add external media</h3>
+        <form layout="column">
+        <md-input-container>
+            <label>Name:</label>
+            <input type="text" ng-model="externalMedia.name"/>
+        </md-input-container>
+        <md-input-container>
+            <label>Description:</label>
+            <input type="text" ng-model="externalMedia.description"/>
+        </md-input-container>
+        <md-input-container>
+            <label>URL:</label>
+            <input type="text" ng-model="externalMedia.url"/>
+        </md-input-container>
+        <label>Type:</label>
+        <md-select ng-model="externalMedia.media_type">
+            <md-option disabled>Select Type</md-option>
+            <md-option ng-repeat="option in mediaTypes.types" value="{{option.fieldName}}">{{option.label}}</md-option>
+        </md-select>
+        <md-button class="md-raised md-primary" type="submit" ng-click="addExternalMedia(externalMedia)">Add media</md-button>
+        </form>
 	</div>
 </div>
 <div class="success-message" ng-show="notifier.isSuccessVisible()">

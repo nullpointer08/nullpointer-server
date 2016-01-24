@@ -12,6 +12,7 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
   vm.deviceMap = {};
   vm.playlistMap = {};
   vm.errorMessage = '';
+  vm.clearSelections = clearSelections;
 
   var user = Authentication.getCurrentUser();
   if(user === undefined) {
@@ -107,6 +108,11 @@ function DevicesController($scope, $location, Authentication, User, Device, Medi
         $scope.notifier.showFailure("Could not set device playlist");
       }
     );
+  }
+  
+  function clearSelections() {
+      $scope.selectedDevice = null;
+      $scope.selectedPlaylist = null;
   }
 }
 

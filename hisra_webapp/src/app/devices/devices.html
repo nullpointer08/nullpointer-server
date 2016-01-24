@@ -1,43 +1,30 @@
 
 <div layout-padding>
-    <div>
+    <form name="devicesForm">
         <h3>Your devices</h3>
-        <md-select ng-model="selectedDevice" placeholder="Device">
-            <md-option disabled>Device</md-option>
-            <md-option ng-repeat="device in devices.deviceMap">{{device.name}}</md-option>
-        </md-select>
-        <md-select ng-model="selectedPlaylist" placeholder="Playlist">
-            <md-option disabled>Playlist</md-option>
-            <md-option ng-repeat="playlist in devices.playlistMap">{{playlist.name}}</md-option>
-        </md-select>
+        
+        <md-input-container class="md-block">
+            <md-select ng-model="selectedDevice" name="selectedDevice" placeholder="Device">
+                <md-option disabled>Device</md-option>
+                <md-option ng-repeat="device in devices.deviceMap">{{device.name}}</md-option>
+            </md-select>
+            
+            <div class="error" ng-messages="devicesForm.deviceSelection.$error">
+                <div ng-message="noselection">{{devices.errorMessage}}</div>
+            </div>
+        </md-input-container>
+        
+        <md-input-container class="md-block">
+            <md-select ng-model="selectedPlaylist" placeholder="Playlist">
+                <md-option disabled>Playlist</md-option>
+                <md-option ng-repeat="playlist in devices.playlistMap">{{playlist.name}}</md-option>
+            </md-select>
+        </md-input-container>
+        <md-button class="md-raised" ng-click="devices.clearSelections()">Clear Selections</md-button>
         <md-button class="md-primary md-raised" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)">Set Device Playlist</md-button>
-    </div>
-    <div style="color:#FF0000">{{devices.errorMessage}}</div>
-    <!--
-    <style>
-    table, th , td  {
-    border: 1px solid grey;
-    border-collapse: collapse;
-    padding: 5px;
-    }
-    table tr:nth-child(odd)	{
-    background-color: #f1f1f1;
-    }
-    table tr:nth-child(even) {
-    background-color: #ffffff;
-    }
-    .success-message {
-    display: block;
-        background: #CCFFCC;
-        text-align: center;
-    }
-    .failure-message {
-    display: block;
-        background: #FFCCCC;
-        text-align: center;
-    }
-    </style>
--->
+        
+        <div style="color: #F00">{{devices.errorMessage}}</div>
+    </form>
     <div>
         <h3>Playlist details</h3>
         <b>Name:</b> {{selectedPlaylist.name}} <br>
