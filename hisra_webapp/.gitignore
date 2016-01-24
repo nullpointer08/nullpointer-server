@@ -4,5 +4,5 @@ coverage/
 .sass-cache/
 .idea/
 .tmp/
-dist/
 venv/
+dist/maps/
