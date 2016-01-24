@@ -3,14 +3,17 @@
     <form name="devicesForm">
         <h3>Your devices</h3>
         
+        <md-input-container>
         <select ng-model="selectedDevice" ng-options="device as device.name for (deviceId, device) in devices.deviceMap">
             <option value="" disabled>Device</option>
         </select>
-        
+        </md-input-container>
+        <md-input-container>
         <select ng-model="selectedPlaylist"
          ng-options="playlist as playlist.name for (playlistId, playlist) in devices.playlistMap">
             <option value="" disabled>Playlist</option>
         </select>
+        </md-input-container>
         <md-button class="md-raised" ng-click="devices.clearSelections()">Clear Selections</md-button>
         <md-button class="md-primary md-raised" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)">Set Device Playlist</md-button>
         

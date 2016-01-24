@@ -1,4 +1,4 @@
-<div layout="column" layout-padding>
+<md-content layout="column" layout-padding style="height: 100%">
 
 	<md-card class="media-add__droparea md-accent"
      layout="column" layout-align="center center"
@@ -26,7 +26,6 @@
             </md-tooltip>
         </md-button>
     </div>
-    
 	<h3>Added media</h3>
 	<div>
 		<div class="media-added__filter">
@@ -75,31 +74,30 @@
 
 	<div>
         <h3>Add external media</h3>
-        <form layout="column">
-        <md-input-container>
-            <label>Name:</label>
-            <input type="text" ng-model="externalMedia.name"/>
-        </md-input-container>
-        <md-input-container>
-            <label>Description:</label>
-            <input type="text" ng-model="externalMedia.description"/>
-        </md-input-container>
-        <md-input-container>
-            <label>URL:</label>
-            <input type="text" ng-model="externalMedia.url"/>
-        </md-input-container>
-        <label>Type:</label>
-        <md-select ng-model="externalMedia.media_type">
-            <md-option disabled>Select Type</md-option>
-            <md-option ng-repeat="option in mediaTypes.types" value="{{option.fieldName}}">{{option.label}}</md-option>
-        </md-select>
-        <md-button class="md-raised md-primary" type="submit" ng-click="addExternalMedia(externalMedia)">Add media</md-button>
+        <form layout="column" layout-align="start start">
+            <md-input-container>
+                <label>Name:</label>
+                <input type="text" ng-model="externalMedia.name"/>
+            </md-input-container>
+            <md-input-container>
+                <label>Description:</label>
+                <input type="text" ng-model="externalMedia.description"/>
+            </md-input-container>
+            <md-input-container>
+                <label>URL:</label>
+                <input type="text" ng-model="externalMedia.url"/>
+            </md-input-container>
+            <label>Type:</label>
+            <md-select ng-model="externalMedia.media_type" flex layout-align="start center">
+                <md-option disabled>Select Type</md-option>
+                <md-option ng-repeat="option in mediaTypes.types" value="{{option.fieldName}}">{{option.label}}</md-option>
+            </md-select>
+            <md-button class="md-raised md-primary" type="submit" ng-click="addExternalMedia(externalMedia)">Add media</md-button>
         </form>
 	</div>
-</div>
-<div class="success-message" ng-show="notifier.isSuccessVisible()">
-        <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong></div>
-</div>
-<div class="failure-message" ng-show="notifier.isFailureVisible()">
-        <button type="button" class="close" data-ng-click="notifier.hideFailure()">×</button> <strong>{{notifier.getFailureMessage()}}</strong></div>
-</div>
+    <div class="success-message" ng-show="notifier.isSuccessVisible()">
+            <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong></div>
+    </div>
+    <div class="failure-message" ng-show="notifier.isFailureVisible()">
+            <button type="button" class="close" data-ng-click="notifier.hideFailure()">×</button> <strong>{{notifier.getFailureMessage()}}</strong></div>
+</md-content>
