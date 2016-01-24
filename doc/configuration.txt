@@ -1,0 +1,36 @@
+This document describes the most basic configuration changes needed to get the
+frontend and backend to work. For a more expansive installation instruction, see
+install-instructions.txt.
+
+-------
+Backend
+-------
+The configuration of the backend consists of the following files:
+
+hisra_server/settings.py:
+  This is a regular Django settings file. The following settings should be
+  changed for a minimal working example.
+
+  STATIC_ROOT: the path where static files are found on the disk
+  STATIC_URL: the URL where the static files are stored on disk
+  MEDIA_ROOT: the folder where files uploaded to the server are stored
+  MEDIA_URL: the URL from where files uploaded to the server are served from
+  ALLOWED_ORIGIN: the allowed origins set for CORS headers. This should be set
+      to the origin of the web back end.
+
+hisra_server_nginx_config.conf:
+  This is the nginx configuration. The most important configurable items are:
+
+  location /protected: set the 'alias' to point to the location where the media
+      files are stored on disk (same location as MEDIA_ROOT in settings.py)
+  location /static: set the 'alias' to point to the location where static files
+      are stored on disk. (same as STATIC_ROOT in settings.py)
+  location /: set 'include' to include the uwsgi_params file included in the
+      repository.
+
+--------
+Frontend
+--------
+The only item to be configured in the front end is the 'BASE_URL' parameter in
+the 'hisra_webapp/src/app/config.js' file. This should be set to point to the
+backend server's URL, for example http://drajala.ddns.net:8000
