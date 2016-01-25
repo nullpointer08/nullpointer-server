@@ -16,6 +16,7 @@
       'toastr',
       'ngResource',
       'ui.sortable',
-      'md.data.table']);
+      'md.data.table',
+      'pascalprecht.translate']);
 
 })();

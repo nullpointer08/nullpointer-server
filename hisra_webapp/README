@@ -13,3 +13,8 @@
 
 [1]: https://docs.google.com/document/d/1XXMvReO8-Awi1EZXAXS4PzDzdNvV6pGcuaF4Q9821Es/pub
 [2]: https://github.com/johnpapa/angular-styleguide
+
+
+# Translations #
+
+Translations for templates have been provided through [angular-translate](http://angular-translate.github.io/docs/#/guide). See link for guide on adding new languages. Translations data is curently in `services/translate.js`.

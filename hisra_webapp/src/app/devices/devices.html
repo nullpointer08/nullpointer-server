@@ -1,40 +1,40 @@
 
 <div layout-padding>
     <form name="devicesForm">
-        <h3>Your devices</h3>
-        
+        <h3>{{ 'YOURDEV' | translate }}</h3>
+
         <md-input-container>
         <select ng-model="selectedDevice" ng-options="device as device.name for (deviceId, device) in devices.deviceMap">
-            <option value="" disabled>Device</option>
+            <option value="" disabled>{{ 'DEVICE' | translate}}</option>
         </select>
         </md-input-container>
         <md-input-container>
         <select ng-model="selectedPlaylist"
          ng-options="playlist as playlist.name for (playlistId, playlist) in devices.playlistMap">
-            <option value="" disabled>Playlist</option>
+            <option value="" disabled>{{ 'PLAYLIST' | translate }}</option>
         </select>
         </md-input-container>
-        <md-button class="md-raised" ng-click="devices.clearSelections()">Clear Selections</md-button>
-        <md-button class="md-primary md-raised" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)">Set Device Playlist</md-button>
-        
+        <md-button class="md-raised" ng-click="devices.clearSelections()">{{ 'CLEARSELECT' | translate }}</md-button>
+        <md-button class="md-primary md-raised" ng-click="setDevicePlaylist(selectedDevice, selectedPlaylist)">{{ 'SETDEVPLAYLIST' | translate }}</md-button>
+
         <div style="color: #F00">{{devices.errorMessage}}</div>
     </form>
     <div>
-        <h3>Playlist details</h3>
-        <b>Name:</b> {{selectedPlaylist.name}} <br>
-        <b>Description: </b> {{selectedPlaylist.description}} <br>
-        <b>Confirmed in use by device:</b> {{isConfirmed(selectedPlaylist)}} <input type="submit" value="Refresh" ng-click="refreshConfirmed()"/><br>
-        <b>Schedule:</b><br>
-        
+        <h3>{{ 'PLAYLISTDETAIL' | translate }}</h3>
+        <b>{{ 'NAME' | translate }}:</b> {{selectedPlaylist.name}} <br>
+        <b>{{ 'DESCRIPTION' | translate }}: </b> {{selectedPlaylist.description}} <br>
+        <b>{{ 'CONFIRMINUSE' | translate }}:</b> {{isConfirmed(selectedPlaylist)}} <input type="submit" value="Refresh" ng-click="refreshConfirmed()"/><br>
+        <b>{{ 'SCHEDULE' | translate }}:</b><br>
+
         <md-table-container>
             <table md-table class="table table-hover table-mc-light-blue">
                 <thead md-head>
                     <tr md-row>
-                        <th md-column>Name</th>
-                        <th md-column>Description</th>
-                        <th md-column>URL</th>
-                        <th md-column>Type</th>
-                        <th md-column>Display time</th>
+                        <th md-column>{{ 'NAME' | translate }}</th>
+                        <th md-column>{{ 'DESCRIPTION' | translate }}</th>
+                        <th md-column>{{ 'URL' | translate }}</th>
+                        <th md-column>{{ 'TYPE': | translate }}</th>
+                        <th md-column>{{ 'DISPTIME' | translate }}</th>
                     </tr>
                 </thead>
                 <tbody md-body>

@@ -1,17 +1,17 @@
 <div layout-padding>
 <div>
 <select ng-model="selectedDevice" ng-options="device as device.name for device in devices">
-    <option value="" disabled>Device</option>
+    <option value="" disabled>{{ 'DEVICE' | translate }}</option>
 </select>
 </div>
 
 <div class="media-added__media">
   <table style="width:auto;" class="table table-bordered">
     <thead>
-      <th>Type</th>
-      <th>Category</th>
-      <th>Description</th>
-      <th>Timestamp</th>
+      <th>{{ 'TYPE' | translate }}</th>
+      <th>{{ 'CATEGORY' | translate }}</th>
+      <th>{{ 'DESCRIPTION' | translate }}</th>
+      <th>{{ 'TIMESTAMP' | translate }}</th>
     </thead>
 
     <tbody ng-repeat="stat in getSelectedStats()">

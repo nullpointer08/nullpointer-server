@@ -5,39 +5,39 @@
      md-theme="altTheme" class="md-hue-4">
 		<md-card-title>
 			<md-card-header-text>
-				<span class="md-title">Add media by dragging and dropping it here</span>
+				<span class="md-title">{{ 'UPLOADHINT' | translate }}</span>
 				<br/>
-				<span class="md-subhead">or press the "add" button</span>
+				<span class="md-subhead">{{ 'UPLOADHINT2' | translate }}</span>
 			</md-card-header-text>
 		</md-card-title>
 
 		<input name="the_file" id="media-add__file" type="file" style="display: none;"/>
-		
+
 		<div layout="row" layout-sm="column" layout-align="space-around">
     		<md-progress-circular md-mode="indeterminate" ng-if="media.loading"></md-progress-circular>
   		</div>
-		
+
 	</md-card>
     <div layout="column" layout-align="start end">
         <md-button ng-click="media.openFileBrowser()" class="md-fab md-primary" aria-label="Add Media">
             <md-icon class="material-icons">add</md-icon>
             <md-tooltip>
-                Add Media
+                {{ 'ADDMEDIA' | translate }}
             </md-tooltip>
         </md-button>
     </div>
-	<h3>Added media</h3>
+	<h3>{{ 'ADDEDMEDIA' | translate }}</h3>
 	<div>
 		<div class="media-added__filter">
-			
-            <md-checkbox ng-model="visibilities.V"><label>Show videos</label></md-checkbox>
-            <md-checkbox ng-model="visibilities.I"><label> Show images</label></md-checkbox>
-            <md-checkbox ng-model="visibilities.W"><label> Show web pages</label></md-checkbox>
+
+            <md-checkbox ng-model="visibilities.V"><label> {{ 'SHOWVIDEOS' | translate }}</label></md-checkbox>
+            <md-checkbox ng-model="visibilities.I"><label> {{ 'SHOWIMAGES' | translate }}</label></md-checkbox>
+            <md-checkbox ng-model="visibilities.W"><label> {{ 'SHOWWEB' | translate }}</label></md-checkbox>
 		</div>
         <div>
             <md-input-container style="width: 100%">
                 <span class="media-added__filter-text">
-                    <label>Filter media</label>
+                    <label>{{ 'FILTERMEDIA' | translate }}</label>
                     <input ng-model="filterParam" type="text" placeholder="Filter media">
                 </span>
             </md-input-container>
@@ -48,11 +48,11 @@
 		<table md-table>
 			<thead md-head>
                 <tr md-row>
-                    <th md-column>Name</th>
-                    <th md-column>Description</th>
-                    <th md-column>URL</th>
-                    <th md-column>Type</th>
-                    <th md-column>Actions</th>
+                    <th md-column>{{ 'NAME' | translate }}</th>
+                    <th md-column>{{ 'DESCRIPTION' | translate }}</th>
+                    <th md-column>{{ 'URL' | translate }}</th>
+                    <th md-column>{{ 'TYPE' | translate }}</th>
+                    <th md-column>{{ 'ACTIONS' | translate }}</th>
                 </tr>
 			</thead>
 
@@ -64,7 +64,7 @@
                     <td md-cell>{{mediaTypes.labelFor(media.media_type)}}</td>
                     <td md-cell>
                         <md-button class="md-warn" ng-click="removeMedia(media)">
-                            <md-icon class="md-icons">clear</md-icon>Remove
+                            <md-icon class="md-icons">clear</md-icon>{{ 'REMOVE' | translate }}
                         </md-button></td>
                 </tr>
 			</tbody>
@@ -73,26 +73,26 @@
 	</div>
 
 	<div>
-        <h3>Add external media</h3>
+        <h3>{{ 'ADDEXTERNAL' | translate }}</h3>
         <form layout="column" layout-align="start start">
             <md-input-container>
-                <label>Name:</label>
+                <label>{{ 'NAME' | translate }}:</label>
                 <input type="text" ng-model="externalMedia.name"/>
             </md-input-container>
             <md-input-container>
-                <label>Description:</label>
+                <label>{{ 'DESCRIPTION' | translate }}:</label>
                 <input type="text" ng-model="externalMedia.description"/>
             </md-input-container>
             <md-input-container>
-                <label>URL:</label>
+                <label>{{ 'URL' | translate }}:</label>
                 <input type="text" ng-model="externalMedia.url"/>
             </md-input-container>
-            <label>Type:</label>
+            <label>{{ 'TYPE' | translate }}:</label>
             <md-select ng-model="externalMedia.media_type" flex layout-align="start center">
-                <md-option disabled>Select Type</md-option>
+                <md-option disabled>{{ 'SELECTTYPE' | translate }}</md-option>
                 <md-option ng-repeat="option in mediaTypes.types" value="{{option.fieldName}}">{{option.label}}</md-option>
             </md-select>
-            <md-button class="md-raised md-primary" type="submit" ng-click="addExternalMedia(externalMedia)">Add media</md-button>
+            <md-button class="md-raised md-primary" type="submit" ng-click="addExternalMedia(externalMedia)">{{ 'ADDMEDIA' | translate }}</md-button>
         </form>
 	</div>
     <div class="success-message" ng-show="notifier.isSuccessVisible()">

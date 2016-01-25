@@ -1,12 +1,12 @@
 <div layout-padding>
-  <h3>Playlists</h3>
+  <h3>{{ 'PLAYLISTS' | translate}}</h3>
   <md-table-container>
     <table md-table>
         <thead md-head>
             <tr md-row>
-                <th md-column>Name</th>
-                <th md-column>Description</th>
-                <th md-column>Items</th>
+                <th md-column>{{ 'NAME' | translate }}</th>
+                <th md-column>{{ 'DESCRIPTION' | translate }}</th>
+                <th md-column>{{ 'ITEMS' | translate }}</th>
                 <th md-column></th>
             </tr>
         </thead>
@@ -15,10 +15,10 @@
                 <td md-cell>{{playlist.name}}</td>
                 <td md-cell>{{playlist.description}}</td>
                 <td md-cell>{{playlist.media_schedule.length}}</td>
-                <td md-cell><md-button class="md-primary" ng-click="editPlaylist(playlist)">Details</md-button></td>
+                <td md-cell><md-button class="md-primary" ng-click="editPlaylist(playlist)">{{ 'DETAILS' | translate }}</md-button></td>
             </tr>
         </tbody>
    </table>
    </md-table-container>
-   <md-button class="md-primary md-raised" ng-click="createNewPlaylist()">New playlist</md-button>
+   <md-button class="md-primary md-raised" ng-click="createNewPlaylist()">{{ 'NEWPLAYLIST' | translate }}</md-button>
 </div>

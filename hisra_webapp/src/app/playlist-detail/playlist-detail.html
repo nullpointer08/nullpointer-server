@@ -1,23 +1,23 @@
 <div layout-padding>
-    <h3>Playlist details</h3>
+    <h3>{{ 'PLAYLISTDETAIL' | translate }}</h3>
     <div layout="column">
         <md-input-container>
-            <label>Name:</label><input type="text" ng-model="playlist.name" size='60'>
+            <label>{{ 'NAME' | translate }}:</label><input type="text" ng-model="playlist.name" size='60'>
         </md-input-container>
         <md-input-container>
-            <label>Description:</label><input type="text" ng-model="playlist.description" size='60'>
+            <label>{{ 'DESCRIPTION' | translate}}:</label><input type="text" ng-model="playlist.description" size='60'>
         </md-input-container>
-        <label>Schedule: (drag and drop to change order)</label>
+        <label>{{ 'SCHEDULEHINT' | translate }}</label>
     </div>
     <md-table-container>
         <table md-table>
             <thead md-head>
                 <tr md-row>
-                    <th md-column>Name</th>
-                    <th md-column>Description</th>
-                    <th md-column>URL</th>
-                    <th md-column>Type</th>
-                    <th md-column>Display time</th>
+                    <th md-column>{{ 'NAME' | translate }}</th>
+                    <th md-column>{{ 'DESCRIPTION' | translate}}</th>
+                    <th md-column>{{ 'URL' | translate }}</th>
+                    <th md-column>{{ 'TYPE' | translate }}</th>
+                    <th md-column>{{ 'DISPTIME' | translate }}</th>
                     <th md-column></th>
                 </tr>
             </thead>
@@ -31,7 +31,7 @@
                     <td md-cell>
                         <md-button class="md-warn" ng-click="removeMedia(media)">
                             <md-icon class="md-icons">clear</md-icon>
-                            Remove
+                            {{ 'REMOVE' | translate }}
                         </md-button>
                     </td>
                 </tr>
@@ -41,7 +41,7 @@
 </div>
 
 <div>
-    <h3>Available media</h3>
+    <h3>{{ 'AVAILABLEMEDIA' | translate }}</h3>
     <md-table-container>
         <table md-table>
             <thead md-head>
@@ -62,7 +62,7 @@
                     <td md-cell>
                         <md-button class="md-primary" ng-click="addToPlaylist(media)">
                             <md-icon class="md-icons">add</md-icon>
-                            Add to playlist
+                            {{ 'ADDTOPLAYLIST' | translate}}
                         </md-button>
                     </td>
                 </tr>
@@ -71,8 +71,8 @@
    </md-table-container>
 </div><br>
 
-<md-button class="md-primary md-raised" ng-click="savePlaylist()">Save changes</md-button>
-<md-button class="md-warn md-raised" ng-click="deletePlaylist()">Delete playlist</md-button>
+<md-button class="md-primary md-raised" ng-click="savePlaylist()"> {{ 'SAVECHANGES' | translate }}</md-button>
+<md-button class="md-warn md-raised" ng-click="deletePlaylist()">{{ 'DELETEPLAYLIST' | translate }}</md-button>
 
 <div class="success-message" ng-show="notifier.isSuccessVisible()">
         <button type="button" class="close" data-ng-click="notifier.hideSuccess()">×</button> <strong>{{notifier.getSuccessMessage()}}</strong></div>

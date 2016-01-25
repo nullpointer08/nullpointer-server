@@ -1,16 +1,16 @@
 
 
 <div id="login-page" layout="column" layout-padding layout-align="center center">
-    <h2 class="md-display-3">Login</h2>
+    <h2 class="md-display-3">{{ 'LOGIN' | translate }}</h2>
     <md-content layout="column">
         <md-input-container>
-            <label>Username</label>
+            <label>{{ 'USERNAME' | translate }}</label>
             <input type="text" ng-model="user.username" autofocus/>
         </md-input-container>
         <md-input-container>
-            <label>Password</label>
+            <label>{{ 'PASSWORD' | translate }}</label>
             <input type="password" ng-model="user.password"/>
         </md-input-container>
-    	<md-button layout="row" flex style="width: 100%" layout-align="start center" class="md-primary md-raised" ng-click="login.login(user)">Login</md-button>
+    	<md-button layout="row" flex style="width: 100%" layout-align="start center" class="md-primary md-raised" ng-click="login.login(user)">{{ 'LOGIN' | translate }}</md-button>
     </md-content>
 </div>
