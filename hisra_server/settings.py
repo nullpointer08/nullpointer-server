@@ -149,7 +149,7 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 MEDIA_URL = 'http://localhost:8000/media/'
 
-ALLOWED_ORIGIN = '*'
+ALLOWED_ORIGIN = 'http://localhost/'
 
 # CHUNKED UPLOAD SETTINGS
 CHUNKED_UPLOAD_EXPIRATION_DELTA = datetime.timedelta(days=30)

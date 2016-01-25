@@ -72,7 +72,7 @@ nano hisra_server/settings.py
 	MEDIA_ROOT = '/home/user/nullpointer-server/media'
 	MEDIA_URL = 'http://localhost:8000/media/'
 	DEBUG = False or True depending if you are in development or deployment
-	ALLOWED_ORIGIN = '*' # Allows every origin, fine for testing
+	ALLOWED_ORIGIN = 'http://localhost/'
     
 	NOTE: if you used the default project_folder/nullpointer-server/static and media you don't need to replace these two.
 	
