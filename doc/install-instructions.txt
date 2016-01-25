@@ -1,7 +1,9 @@
-First startup of a fresh install of Linux Mint 17.3:
+Tested on a fresh install of Linux Mint 17.3 and Ubuntu Server 14.04.3:
 
 # APT package installation 
-sudo apt-get install -y git postgresql postgresql-client postgresql-contrib postgresql-server-dev-9.3 python-dev libpq-dev libffi-dev nginx
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install -y git python-pip postgresql postgresql-client postgresql-contrib postgresql-server-dev-9.3 python-dev libpq-dev libffi-dev nginx
 
 # Clone project from github
 navigate to folder where you want to place the project( cloning creates a subfolder nullpointer-server )
@@ -57,6 +59,9 @@ nano hisra_server_nginx.conf
 
 # Create a symlink to nginx sites_enabled, so nginx uses this config file
 sudo ln -s /home/dano/work/hisra/nullpointer-server/hisra_server_nginx.conf /etc/nginx/sites-enabled/
+# remove default web server config
+sudo rm /etc/nginx/sites-enabled/default
+
 
 # Configure django
 nano hisra_server/settings.py
@@ -80,15 +85,14 @@ python manage.py collectstatic
 #       If you used the default folders and only replaced your username you can add www-data to your username's group
 sudo gpasswd -a www-data username
 
+# Create an admin user for django and some test data
+python manage.py createsuperuser
+
 # Start serving the API with nginx
 sudo service nginx restart # Reads the new config
 ./nginx_start.sh &
-Test to see if there is any activity, e.g.
-with your browser go to http://localhost:8000/admin
 
-# Create an admin user for django and some test data
-python manage.py createsuperuser
-Open your browser and got to http://localhost:8000/admin
+# Open your browser and go to http://localhost:8000/admin
 Use the UI to create devices and users
 
 # Install Node.js (needed for the webapp)
@@ -121,7 +125,7 @@ gulp
 (Optional) Copy nullpointer-server/hisra_webapp/dist to a directory you would like to share it from
 Return to hisra_server_nginx.conf file and set the path to webapp dist folder e.g.
 root /home/user/nullpointer-server/hisra_webapp/dist;
-sudo nginx service restart
+sudo service nginx restart
 ./nginx_start.sh &
 NOTE: if you ran this command earlier you should kill the old process from background first.
 
