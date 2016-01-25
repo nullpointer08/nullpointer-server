@@ -1,5 +1,7 @@
 # HISRA Web Application README
 
+For deployment insctuctions, see the documentation in the root of the repository that describe the whole server.
+
 1. Run
 ```npm install && bower install``` to install dependencies
 
