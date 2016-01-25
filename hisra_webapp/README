@@ -14,6 +14,9 @@
 [1]: https://docs.google.com/document/d/1XXMvReO8-Awi1EZXAXS4PzDzdNvV6pGcuaF4Q9821Es/pub
 [2]: https://github.com/johnpapa/angular-styleguide
 
+# Editing #
+
+Our folder structure follows the following convention: Under `src/app`, you will find several folders. `services`, `templates` and `components` are special. `services` contains all the angular services that are common to views and contain business logic. `templates` contains simple partial templates and `components` contains 3rd party modules. The rest of the folders contain all files for each view separately.
 
 # Translations #
 
